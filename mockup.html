@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class=" js inlinesvg"><head>
+  <!--CSS Style Sheets-->
+  <link rel="stylesheet" type="text/css" href="mockup_files/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="mockup_files/bootstrap-theme.css">
+  <link rel="stylesheet" type="text/css" href="mockup_files/custom.css">
+  <link rel="stylesheet" type="text/css" href="mockup_files/glyphicons.css">
+  <link rel="stylesheet" type="text/css" href="mockup_files/style_004.css">
+  <!-- End CSS Style Sheets -->
+  
+  <!--Injected CSS Style Sheets-->
+  <link href="https://mcdb-dev.l-3.com/includes/plugins/mcdb-contacts/css/style.css" type="text/css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="mockup_files/style.css">
+<link rel="stylesheet" type="text/css" href="mockup_files/style_003.css"><link rel="stylesheet" type="text/css" href="mockup_files/select2.css">
+<link rel="stylesheet" type="text/css" href="mockup_files/style_002.css">  <!--End Injected CSS Style Sheets-->
+
+  <!-- Standard Javascript / jQuery -->
+  <script type="text/javascript" src="mockup_files/jquery_002.js"></script>
+  <script type="text/javascript" src="mockup_files/bootstrap.js"></script>
+  <script type="text/javascript" src="mockup_files/modernizr.js"></script>
+  <!-- End Standard Javascript / jQuery -->
+
+<!-- Injected Javascript / jQuery NOTE: Most javascript should go in footer_js_inject. Use this for page variables!-->
+<script>
+var company_id = 24969;
+var company_id = 24969;
+</script>
+<!-- End Javascript / jQuery -->
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>MCDB 2.0</title></head><body>\
+
+
+<!--[if lt IE 9]> 
+<div id="unsupportedBrowser">
+  <div class="alert alert-warning text-center">It looks like you're using an old browser, which may not fully function on this site. <a href="https://bugzy.highpoweredhelp.com/docs/security/supported-browsers/">Click here to find out how to fix this for free</a>. </div>
+<div class="container">
+<![endif]-->
+<!--[if gt IE 8]>\
+<div id="unsupportedBrowser">
+  <div class="alert alert-warning text-center">It looks like you're using an old browser, which may not fully function on this site. <a href="https://bugzy.highpoweredhelp.com/docs/security/supported-browsers/">Click here to find out how to fix this for free</a>. </div>
+<div class="container">
+<! [endif] -->
+<div id="unsupportedBrowser" style="display:none">
+  <div class="alert alert-warning text-center visible-md">It looks like you're using an old browser, which may not fully function on this site. <a href="http://browsehappy.com/">Click here to find out how to fix this for free</a>. </div>
+</div>
+<div class="container">
+<script>
+//Browser support check.
+$(document).ready(function(e) {    
+  var sBrowser, sUsrAg = navigator.userAgent;
+  var unsupported = false;
+
+  if(sUsrAg.indexOf("Chrome") > -1) {
+    var i = sUsrAg.indexOf("Chrome");
+    i = i + 7;
+    var v = sUsrAg.substr(i,2);
+    if(v<30)
+    {
+      unsupported = false;
+    }
+  } else if (sUsrAg.indexOf("Safari") > -1) {
+    sBrowser = "Apple Safari";
+    i = sUsrAg.indexOf("Safari");
+    //subtract out the first space.
+    i = i -6;
+    v = sUsrAg.substr(i,1);
+    if(v < 6)
+    {
+      unsupported = true;
+    }
+    
+  } else if (sUsrAg.indexOf("Opera") > -1) {
+    alert(sUsrAg);
+  } else if (sUsrAg.indexOf("Firefox") > -1) {
+    var i = sUsrAg.indexOf("Firefox");
+    i = i + 7; //Skip over "Firefox"
+    i++; //Skip the /
+    //Grab the next two numbers as a version
+    var v = navigator.userAgent.substr(i,2);
+    if(v < 25)
+    {
+      unsupported = true;
+    }
+  } else if (sUsrAg.indexOf("MSIE") > -1) {
+    //Done with HTML
+  }
+  
+  if(unsupported)
+  {
+    $("#unsupportedBrowser").slideDown(400);
+  }
+});
+
+</script>
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://mcdb-dev.l-3.com/dashboard/">MCDB</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="https://mcdb-dev.l-3.com/company/">Company</a></li>
+        <li><a href="https://mcdb-dev.l-3.com/contacts/">Contacts</a></li>
+        <li><a href="https://mcdb-dev.l-3.com/quotes/">Quotes</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sales <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="https://mcdb-dev.l-3.com/reports/">Reports</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="https://mcdb-dev.l-3.com/uploader/">Uploader</a></li>
+            <!-- <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li><a href="#">One more separated link</a></li> -->
+          </ul>
+        </li>
+      </ul>
+      <form class="navbar-form navbar-left nav-search" role="search">
+        <select aria-hidden="true" tabindex="-1" class="wonderSearch select2-hidden-accessible" id="wonderSearchBox" name="wonderSearch" placeholder="Search"></select><span style="width: 66%;" dir="ltr" class="select2 select2-container select2-container--default"><span class="selection"><span aria-labelledby="select2-wonderSearchBox-container" tabindex="0" class="select2-selection select2-selection--single" role="combobox" aria-autocomplete="list" aria-haspopup="true" aria-expanded="false"><span id="select2-wonderSearchBox-container" class="select2-selection__rendered"></span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span>
+        <button type="submit" class="btn btn-default wonderButton" id="wonderButton">Submit</button>
+      </form>
+      <ul class="nav navbar-nav navbar-right">
+        <!-- <li><a href="#">Link</a></li> -->
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Michael <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="https://mcdb-dev.l-3.com/account/">My Account</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="https://mcdb-dev.l-3.com/logout.php">Logout</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+    <!-- Breadcrubs -->
+
+<ol class="breadcrumb">
+  <li><a href="#">Dashboard</a></li>
+  <li>Company</li>
+  
+    
+  <li class="active">High Powered Help</li>
+  
+  
+</ol>
+
+<!-- /Breadcrubs -->
+
+<div class="paper">
+  
+  <h1>High Powered Help</h1>
+  <!-- Labels -->
+
+  <div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      <div class="company labels">
+        <span class="label label-primary">John Levine</span>
+        <span class="label label-primary">Type: O</span>
+        <span class="label label-primary">Unknown!</span>
+              </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+      <div class="company contact-information">
+        <h2>Contact Information</h2>
+        <div class="row">
+
+          <!-- The address block -->
+          <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+            748 Parkside Dr <br> Woodstock GA 30188          </div>
+          <!-- The address block -->
+            
+          <!-- The Phone Block -->
+          <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+            <table class="company-phones">
+              
+              <tbody><tr>
+                <td>Main:</td>
+                <td>(678) 905-8569</td>
+              </tr>
+                          </tbody></table>
+          </div>        
+          <!-- The Phone Block -->
+        </div>        
+
+          <!-- The Map -->
+          <div class="companyMap">
+              <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <button type="button" class="btn btn-default btn-block">Zoom Out</button>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <button type="button" class="btn btn-default btn-block">Zoom In</button>
+                </div>                
+              </div>
+            <!-- <p align="center"> <img  id="staticMap" src="/local/img/throbber.gif"></p> -->
+            <p align="center"> <img id="staticMap" src="mockup_files/staticmap.png" width="100%"></p>
+          </div>
+
+          <!-- Show the map controls and filters -->
+          <div class="text-center">
+            <div class="btn-group text-center" role="group" aria-label="...">
+                <button type="button" class="btn btn-default">Open Quotes</button>
+                <button type="button" class="btn btn-default">SPA / NPA</button>
+                <button type="button" class="btn btn-default">Reactivate</button>
+                <button type="button" class="btn btn-default">All results</button>
+            </div>          
+          </div>          
+          <!-- /Show the map controls and filters -->
+
+          <!-- Show the companies on the map, in order as they are displayed above.  -->
+          <div class="companiesShown">
+            <ul class="list-group">
+              <li class="list-group-item"><a href="https://mcdb-dev.l-3.com/company/24969">A. High Powered Help</a></li><li class="list-group-item"><a href="https://mcdb-dev.l-3.com/company/23866">B. Solutions Plus Network</a></li><li class="list-group-item"><a href="https://mcdb-dev.l-3.com/company/23502">C. Machine Design International, Inc.</a></li><li class="list-group-item"><a href="https://mcdb-dev.l-3.com/company/23007">D. Crist Company/STS-Sure Tack Systems</a></li><li class="list-group-item"><a href="https://mcdb-dev.l-3.com/company/22659">E. Amerex</a></li><li class="list-group-item"><a href="https://mcdb-dev.l-3.com/company/24981">F. Roytec Industries</a></li><li class="list-group-item"><a href="https://mcdb-dev.l-3.com/company/23967">G. TEC Automation,Inc.</a></li><li class="list-group-item"><a href="https://mcdb-dev.l-3.com/company/23452">H. Kirk Rudy</a></li><li class="list-group-item"><a href="https://mcdb-dev.l-3.com/company/24201">I. A and E Conveyor Systems</a></li><li class="list-group-item"><a href="https://mcdb-dev.l-3.com/company/24747">J. Beyond Components</a></li>            </ul>          
+          </div>
+
+        </div>
+      </div>
+    <!--  Column 2 Starts - Contact information -->
+    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+      <h2>Contacts</h2>
+      
+      <!-- Start contact card -->
+      <div class="contact-card">
+        <!-- The entire contact row -->
+        <div class="row">
+          <!-- Image column -->
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+            <img src="/includes/plugins/mcdb-contacts/img/no-avatar-image.gif" />
+          </div>
+          <!-- ./Image column -->
+
+          <!-- Contact information column -->
+          <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+            <div class="row">
+              <a class="glyphicons dislikes followup"> </a>
+              <h1>Dr. Joy Mazumdar</h1>
+              <h2>Business Manager (Mining Haul Trucks)</h2>
+              Email: <a href="mailto:michael@highpoweredhelp.com">michael@highpoweredhelp.com</a>
+
+            <table class="contact-phones">
+              
+              <tbody>
+                <tr>
+                  <td>Main:</td>
+                  <td><a href="tel:6789058569">(678) 905-8569</a></td>
+                </tr>
+                                <tr>
+                  <td>Main:</td>
+                  <td>(678) 905-8569</td>
+                </tr>
+                                <tr>
+                  <td>Main:</td>
+                  <td>(678) 905-8569</td>
+                </tr>
+                                <tr>
+                  <td>Main:</td>
+                  <td>(678) 905-8569</td>
+                </tr>
+
+              </tbody>
+            </table>
+
+            </div>
+          </div>
+          <!-- Contact information column -->
+
+        <!-- End contact row. -->
+        </div>
+      </div>
+      <!-- End contact card. -->
+
+    </div>
+    <!-- ./Column 2 - Contact Information -->
+    
+  </div>
+    </div>
+    
+
+
+
+  <!-- /Labels -->
+
+  </div> <!-- End Paper -->
+<!-- End Container -->
+<footer>
+
+<div id="system-version">
+MCDB Interface Version: 48</div>
+
+
+
+</footer>
+
+
+
+
+<script src="mockup_files/wondersearch.js" type="text/javascript"></script>
+<script src="mockup_files/jquery.js"></script>
+<script src="mockup_files/select2.js"></script>
+<!-- End Javascript / jQuery -->
+
+
+
+</body><!-- Injected Javascript / jQuery --></html>

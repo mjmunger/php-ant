@@ -1,0 +1,14 @@
+To Do:
+
+1. Emails need to be logged in the email_log. All emails are sent to users, so
+   later we may have to give non-usable accounts (Role = External (E)?) to those
+   people so we can mail them without them having to register in the system.
+
+2. Need a config table so we can store configs in the database. This means
+   that we have to have a berkley DB style set of entries with family / key /
+   value tuples. Four column table should suffice. (ID, family, key, value).
+   We'll store the general ("global") configs in the 'app' family. This also
+   allows us to use a Config class to deal with an individual config.
+
+3. Add a hook for when an email is sent.
+
