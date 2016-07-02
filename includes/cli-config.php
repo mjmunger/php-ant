@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * Determines whether or not the current script is running in a command line environment or not.
+ * Example:
+ *
+ * <code>
+ * if(inCLI()) {
+ *   dosomething();
+ * }
+ * </code>
+ *
+ * @param None.
+ * @return boolean. True if we are in the CLI, and false if we are running via Apache.
+ * @author Michael Munger <michael@highpoweredhelp.com>
+ **/
+
+function inCLI()
+{
+	if(php_sapi_name() != 'cli')
+	{
+	 return false;
+	} else {
+	 return true;
+	}
+}
+
+/**
+ * Gets current list of variables for the command line that parallel the ones in the $_SERVER array under Apache
+ * Example:
+ *
+ * <code>
+ * $vars = getCLIVars();
+ * echo $vars['http_host'];
+ * echo $vars['document_root'];
+ * </code>
+ *
+ * @return mixed. an array containing the http_host and document_root of the current site.
+ * @param None
+ * @author Michael Munger <michael@highpoweredhelp.com>
+ **/
+
+function getCLIVars()
+{
+  $who = trim(`whoami`);
+	$vars = array('http_host' => 'https://mcdb-dev.l-3.com/',
+					'document_root' => "/home/$who/www");
+	return $vars;
+}
+?>

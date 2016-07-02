@@ -1,0 +1,248 @@
+---------------------------------------------------------------------
+READ THIS FIRST: http://drdamnit.com/php/php-code-generator-for-mysql
+---------------------------------------------------------------------
+
+This directory contains sampels of how a user table may be manipulated.
+
+The bash script, setupClass, can be run from the command line with the following syntax:
+
+setupClass [database] [table] [childclass]
+
+So, for example, to work with a table "users" that is in the database "testdb", you would do the following:
+
+setupClass testdb users user 
+
+This command will log onto the MySQL server, select the testdb, read the structure of the users table, and then create a parent class: users.class.parent.php, and finally place it in the parents/ directory. Next, the script will echo the shell / template of the child class into user.class.parent.php, so that its contents look like this:
+
+<?php
+class user extends users
+{
+	//TBA
+}
+?>
+
+
+-----------------------------------------------
+CODE REQUIREMENTS AND DEPENDENCIES
+-----------------------------------------------
+1. Since db2class v5, the parent generated classes use pure MySQLi, and therefore require PHP 5.5 and above!
+2. The database table must have an id that is primary and autoincrement. It should follow this nomenclature:
+
+	user_id
+	person_id
+	address_id
+	widget_id
+	foo_id
+	bar_id 
+
+-----------------------------------------------
+WORKING WITH DATABASES - MySQLi Implementation
+-----------------------------------------------
+
+
+Each parent class contains a property called db, which is loaded and set as a mysqli object.
+
+If you are using db2class with wordpress as part of the epicincludes plugin, the parent class will check to see if the following options are present:
+
+epicdbUser
+epicdbPass
+epicdb
+
+If those options are present and available with the get_option() function, the class will automatically use them to connect to the databse to manipulate data. 
+
+If you are not using this in a WordPress environment, you'll need to manually call the setupDB() method and pass the database credentials to the class. Like this:
+ 
+	$f = new fakeuser();
+	$f->setupDB($dbServer,$dbUser,$dbPass,$dbDatabase);
+
+TODO: In future versions of db2class, the parent class will check to see if a global variable has been set to avoid having to do this everytime you instantiate a class.
+
+-----------------------------------------------
+BEST PRACTICES - the db2Class Cookbook
+-----------------------------------------------
+
+-----------------------------------------------
+BEST PRACTICE #1 - The application_top.php file
+-----------------------------------------------
+
+Throughout the examples, you'll notice that the database is setup by using some variables:
+
+$dbUser 
+$dbPass 
+$dbServer 
+
+These are set in the application_top.php file. The purpose of the application_top.php file is to do all the "prep" work needed so all the classes you need to access can be available on all pages. typically, I would put this code at the top of every page:
+
+<?php include('includes/application_top.php'); ?>
+
+In this way, if I add a class to the system, it is automatically loaded by the loader in application top. Additionally, I can setup the database connection variables so they are available as well.
+
+See: application_top-example.php
+
+-----------------------------------------------
+BEST PRACTICE #2 - Displaying Rows of Data.
+-----------------------------------------------
+
+When you are displaying a row of information (such as with a table) it is best to create a printRow() function in the class that actually deals with that data. This way, the table row is self contained. This example can be seen in the fakeusers.class.parent and fakeuser.class.php pair included in the example. These classes control the data in the fake user accounts for testuseraccounts.com.
+
+The printRow() function begins on line 36 in the attached example. First, we set the HTML for the table row as $format. Next, some CSS information is stored, which determines on whether or not a class should be applied to the row. Finally, we use sprintf() to insert the data into it's proper places. Each variable is put on its own line to allow us to change the HTML easily to add or remove data or how it is displayed. When the sprintf() variables are on their own lines, it makes it easier to add and remove data when we change $format.
+
+printRow() should always return the HTML to the calling script, never print it directly.
+
+Here is how the code is executed on testuseraccounts.com in the dashboard:
+
+*EXCERPT BEGINS*
+
+	      <table width="900" border="0" id="fakeusers">
+		<tr class="topRow">
+		  <td width="22">&nbsp;</td>
+		  <td width="99">First Name</td>
+		  <td width="109">Last Name</td>
+		  <td width="184">Address</td>
+		  <td width="100">Username</td>
+		  <td width="100">Password</td>
+		  <td width="126">Email</td>
+		  <td width="126">Check Mail</td>
+		</tr>
+
+	<?php
+		$sql = sprintf("SELECT `fakeusers_id` FROM `fakeusers` WHERE `fakeusers_owner` = '%s'",$u->users_email);
+		$m = new mysqli($dbServer,$dbUser,$dbPass,$dbDatabase);
+		if($m->connect_error)
+			die('Connect Error: ('.$m->connect_errno.') '.$m->connect_error);
+		$r = $m->query($sql);
+
+		if($r->num_rows > 0)
+		{
+			while($row = mysqli_fetch_assoc($r))
+			{
+				$f = new fakeuser();
+				$f->setupDB($dbServer,$dbUser,$dbPass,$dbDatabase);
+				$f->fakeusers_id = $row['fakeusers_id'];
+				$f->load_me();
+				$f->load_attributes();
+				echo $f->printRow();
+			}
+		} else {
+			echo "<h3>Click the <em>Create User</em> button to create a new test user account.</h3>";
+		}
+	?>
+	      </table>
+ 
+*EXCERPT ENDS*
+
+EXPLANATION:
+First, the table HTML code is written to the page, then, we write the header (since this is not dynamic data). Then, we open up PHP, and query out the data to be displayed in the rows, and finally, the fakeuser() class is used to display the table rows.
+
+Because we used the code in this manner, later on when we created the developer view, we were able to re-use the class to show the developer view and handle searches easily:
+
+*EXCERPT BEGINS*
+
+	<table width="900" border="0" id="fakeusers">
+		<tr class="topRow">
+		  <td width="22">&nbsp;</td>
+		  <td width="99">First Name</td>
+		  <td width="109">Last Name</td>
+		  <td width="184">Address</td>
+		  <td width="100">Username</td>
+		  <td width="100">Password</td>
+		  <td width="126">Email</td>
+		  <td width="126">Check Mail</td>
+		</tr>
+	<?php
+	if(isset($_REQUEST['lookup']))
+	{
+		$q = $_REQUEST['lookup'];
+
+		$sql = "SELECT `fakeusers_id` FROM `fakeusers` WHERE `fakeusers_first` LIKE '%$q%' OR `fakeusers_last` LIKE '%$q%'";
+
+		$f = new fakeuser();
+		$f->setupDB($dbServer,$dbUser,$dbPass,$dbDatabase);
+		$result = $f->db->query($sql);
+		while($row = $result->fetch_assoc())
+		{
+			$f->fakeusers_id = $row['fakeusers_id'];
+			$f->load_me();
+			echo $f->printRow();
+		}
+	}
+	?>
+	</table>
+
+*EXCERPT ENDS*
+
+-----------------------------------------------
+BEST PRACTICE #3 - Reuse a Database Object
+-----------------------------------------------
+
+You will frequently find yourself having to make SQL calls to the database that really don't have much to do with any of the db2class generated classes. In this case, you can use any db2class generated class that has an existing database connection to run SQL queries.
+
+<?php
+	$f = new fakeuser();
+	$f->setupDB($dbServer,$dbUser,$dbPass,$dbDatabase);
+	$sql = sprintf("SELECT somethingelse FROM differentTable WHERE x="%s",$someOtherValue);
+	$result = $f->db->query($sql);
+
+	//process result as normal.
+?>
+
+---------------------------------------------------------------------------------------
+BEST PRACTICE #4 - When appropriate, use a db2class generated class as a class property
+---------------------------------------------------------------------------------------
+
+If you are dealing with people who have addresses in a relational database, you'll likely be generating four classes to deal with the data. One parent and one child for the database table "persons" and one parent and one child for the table addresses.
+
+The resulting parent classes will be:
+
+persons.class.parent.php 
+addresses.class.parent.php
+
+The resulting child classes will be:
+
+person.class.php
+address.class.php
+
+Because a person HAS an address, it makes sense to add in the address class to the person class:
+
+<?php
+class person extends persons
+{
+	var $address = '';
+	
+}
+?>
+
+Of course, when you load the user, you probably won't have the address information available yet, becuase the address is tied to the users. So, you'd want to accomodate that with a special function in the person (child) class:
+
+
+<?php
+class person extends persons
+{
+	var $address = '';
+
+	function loadMyAddress()
+	{
+		$sql = sprintf("SELECT `addresses_id` FROM `addresses` WHERE `persons_id` = %s",$this->persons_id);
+		$result = $this->db->queryi($sql);
+		$row = $result->fetch_assoc();
+		$this->address = new address();
+		$this->address->addresses_id = $row['addresses_id'];
+		$this->address->load_me();
+	}
+	
+}
+?>
+
+This would be called from another script (index.php, for example) like this:
+
+<?php
+	$p = new person();
+	$p->persons_id = 27;
+	$p->load_me();
+	$p->loadMyAddress();
+?>
+-----------------------------------------------
+BEST PRACTICE #5 - Leverage CSS
+-----------------------------------------------
+
+This may fall into a general PHP coding best practice, but when writing code in your child classes to generate HTML output, focus on creating and writing clean HTML code in divs that can be easily styles with CSS. Filling up your child class with styles and formatting make the classes hard to read and even harder to modify. db2class was built and designed to speed the debugging process, increase the amount of code you can reuse, and make "large" changes easily, quickly, and cost effectively. Adding in too much CSS defeats that purpose. Use a stylesheet instead.
