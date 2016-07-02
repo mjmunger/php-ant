@@ -1,5 +1,7 @@
 <?php
-/*use PHPUnit\Framework\TestCase;
+include('tests/test_top.php');
+
+use PHPUnit\Framework\TestCase;
 
 class AppManagerTest extends TestCase
 {
@@ -8,14 +10,5 @@ class AppManagerTest extends TestCase
 		$this->assertSame('App Manager', $a->pluginName);
 		$this->assertSame(false, $a->canReload);
 
-	}*/
-
-   	/**
-     * @depends testConstructor
-     */
-
-/*	function testLoadAppManager() {
-		$a = new PHPAnt\Core\AppManager();
-		$path = '../includes/apps/ant-app-default/plugin.php';
 	}
-}*/
+}

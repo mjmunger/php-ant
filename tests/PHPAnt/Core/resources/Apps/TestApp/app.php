@@ -1,6 +1,6 @@
 <?php
 
-Namespace PHPAnt\Apps;
+namespace PHPAnt\Apps;
 
 /**
  * App Name: Test Ant App
@@ -81,8 +81,10 @@ class TestAntApp extends \PHPAnt\Core\AntApp implements \PHPAnt\Core\AppInterfac
     function processCommand($args) {
         $cmd = $args['command'];
 
-        if($cmd->startsWith('show debug')) {
-            $this->doDebug($args);
+        if($cmd->startsWith('test app')) {
+            $return = [ 'success' => true
+                      , 'test-value' => 17
+                      ];
         }
 
         return ['success' => true];

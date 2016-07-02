@@ -4,29 +4,8 @@ use PHPUnit\Framework\TestCase;
 class AppEngineTest extends TestCase
 {
 
-	private function getMyConfigs() {
-		//Setup test.
-		$vars = getMockVars();
-		$pdo = gimmiePDO();
-		$C = new PHPAnt\Core\ConfigCLI($pdo, $vars);
-		return $C;
-	}
-	private function getMyAppEngine($appPath = 'includes/apps/') {
-		$C = $this->getMyConfigs();
-
-		$PM = new PHPAnt\Core\PermissionManager();
-
-		$options = ['safeMode' 		 => false
-				   ,'permissionManager' => $PM
-				   ,'verbosity'         => 0
-				   ];
-
-		$A = new PHPAnt\Core\AppEngine($C,$options,$appPath);
-		return $A;		
-	}
-
 	function testConstructor() {
-		$A = $this->getMyAppEngine();
+		$A = getMyAppEngine();
 
 		$this->assertInstanceOf('\PDO',$A->Configs->pdo);
 		$this->assertInstanceOf('\PHPAnt\Core\ConfigCLI', $A->Configs);
@@ -37,7 +16,7 @@ class AppEngineTest extends TestCase
 	 **/
 	function testAppParser() {
 		
-		$A = $this->getMyAppEngine();
+		$A = getMyAppEngine();
 
 		$appPath = 'tests/PHPAnt/Core/resources/Apps/TestApp/app.php';
 		$name = $A->getAppMeta($appPath,'name');
@@ -51,7 +30,7 @@ class AppEngineTest extends TestCase
 	}
 
 	function testAppEnableDisable() {
-		$A = $this->getMyAppEngine();
+		$A = getMyAppEngine();
 
 		//Enable the test app from this test suite.
 		$appPath = $A->Configs->document_root . '/tests/PHPAnt/Core/resources/Apps/TestApp/app.php';
@@ -94,7 +73,7 @@ class AppEngineTest extends TestCase
 	 **/
 
 	function testVerbosity() {
-		$A = $this->getMyAppEngine();
+		$A = getMyAppEngine();
 		$A->setVerbosity(10);
 
 		$this->assertSame($A->verbosity,10);
@@ -110,10 +89,10 @@ class AppEngineTest extends TestCase
 	 **/
 	
 	function testLoadApps() {
-		$C = $this->getMyConfigs();
+		$C = getMyConfigs();
 		//Get an instance of the AppEngine
 		$appRoot = $C->document_root . '/tests/PHPAnt/Core/resources/Apps/';
-		$A = $this->getMyAppEngine($appRoot);
+		$A = getMyAppEngine($appRoot);
 		
 		//Make sure we set the app root to the test directories.
 		$this->assertSame($A->appRoot,$appRoot);
@@ -143,11 +122,11 @@ class AppEngineTest extends TestCase
 	 **/
 	function testAppHooks() {
 		//Get the configs by themselves.
-		$C = $this->getMyConfigs();
+		$C = getMyConfigs();
 
 		//Get an instance of the AppEngine
 		$appRoot = $C->document_root . '/tests/PHPAnt/Core/resources/Apps/';
-		$A = $this->getMyAppEngine($appRoot);
+		$A = getMyAppEngine($appRoot);
 
 
 		//Enable the test app.
@@ -181,5 +160,43 @@ class AppEngineTest extends TestCase
 
 		$result = $A->disableApp($name,$appPath);
 		$this->assertTrue($result);
+	}
+
+	function testTestLinker() {
+		//Get the configs by themselves.
+		$C = getMyConfigs();
+		$testsDir = $C->document_root . '/tests/';
+
+		//Get an instance of the AppEngine
+		$appRoot = $C->document_root . '/tests/PHPAnt/Core/resources/Apps/';
+		$A = getMyAppEngine($appRoot);
+		
+		//Enable the test app.
+		$appPath = $appRoot . 'TestApp/app.php';
+		$name = $A->getAppMeta($appPath,'name');
+		$result = $A->enableApp($name,$appPath);
+		$this->assertTrue($result);
+
+		$A->linkAppTests();
+
+		//Parse the namespace of the test file.
+		$regex = '#(namespace) (.*);#';
+		$namespace = $A->getAppMeta($appPath,'custom',$regex);
+
+		$this->assertSame('PHPAnt\Apps', $namespace);
+
+		$buffer = explode('\\', $namespace);
+
+		//Make sure that the directory structure corresponding to the name space exists under document_root/tests.
+		$targetPath = $testsDir;
+		
+		foreach($buffer as $directory) {
+			$targetPath .= $directory;
+			$targetPath .= '/';
+			$this->assertFileExists($targetPath);
+		}
+
+		//Make sure there is a symbolic link to the tests folder under that directory structure.
+
 	}
 }
