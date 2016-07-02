@@ -5,7 +5,8 @@ class AppEngineTest extends TestCase
 {
 
 	function testConstructor() {
-		$A = getMyAppEngine();
+		$options = getDefaultOptions();
+		$A = getMyAppEngine($options);
 
 		$this->assertInstanceOf('\PDO',$A->Configs->pdo);
 		$this->assertInstanceOf('\PHPAnt\Core\ConfigCLI', $A->Configs);
@@ -15,8 +16,8 @@ class AppEngineTest extends TestCase
 	 * @covers AppEngine::getAppMeta
 	 **/
 	function testAppParser() {
-		
-		$A = getMyAppEngine();
+		$options = getDefaultOptions();
+		$A = getMyAppEngine($options);
 
 		$appPath = 'tests/PHPAnt/Core/resources/Apps/TestApp/app.php';
 		$name = $A->getAppMeta($appPath,'name');
@@ -30,7 +31,8 @@ class AppEngineTest extends TestCase
 	}
 
 	function testAppEnableDisable() {
-		$A = getMyAppEngine();
+		$options = getDefaultOptions();
+		$A = getMyAppEngine($options);
 
 		//Enable the test app from this test suite.
 		$appPath = $A->Configs->document_root . '/tests/PHPAnt/Core/resources/Apps/TestApp/app.php';
@@ -73,7 +75,8 @@ class AppEngineTest extends TestCase
 	 **/
 
 	function testVerbosity() {
-		$A = getMyAppEngine();
+		$options = getDefaultOptions();
+		$A = getMyAppEngine($options);
 		$A->setVerbosity(10);
 
 		$this->assertSame($A->verbosity,10);
@@ -92,7 +95,10 @@ class AppEngineTest extends TestCase
 		$C = getMyConfigs();
 		//Get an instance of the AppEngine
 		$appRoot = $C->document_root . '/tests/PHPAnt/Core/resources/Apps/';
-		$A = getMyAppEngine($appRoot);
+
+		$options = getDefaultOptions();
+		$options['appRoot'] = $appRoot;
+		$A = getMyAppEngine($options);
 		
 		//Make sure we set the app root to the test directories.
 		$this->assertSame($A->appRoot,$appRoot);
@@ -126,7 +132,10 @@ class AppEngineTest extends TestCase
 
 		//Get an instance of the AppEngine
 		$appRoot = $C->document_root . '/tests/PHPAnt/Core/resources/Apps/';
-		$A = getMyAppEngine($appRoot);
+
+		$options = getDefaultOptions();
+		$options['appRoot'] = $appRoot;
+		$A = getMyAppEngine($options);		
 
 
 		//Enable the test app.
@@ -169,7 +178,10 @@ class AppEngineTest extends TestCase
 
 		//Get an instance of the AppEngine
 		$appRoot = $C->document_root . '/tests/PHPAnt/Core/resources/Apps/';
-		$A = getMyAppEngine($appRoot);
+		
+		$options = getDefaultOptions();
+		$options['appRoot'] = $appRoot;
+		$A = getMyAppEngine($options);
 		
 		//Enable the test app.
 		$appPath = $appRoot . 'TestApp/app.php';
@@ -197,6 +209,29 @@ class AppEngineTest extends TestCase
 		}
 
 		//Make sure there is a symbolic link to the tests folder under that directory structure.
+		//0. Parse the app directory name.
+		$appDirName = dirname($appPath);
+		//1. Determine where the linked directory should be (as $appTestDirLink)
+		$appTestDir = $appDirName . '/tests';
+		$this->assertFileExists($appTestDir);
+
+		//2. Create a test file in that directory
+		$testFilePath = $appTestDir . '/testfile.txt';
+		$fh = fopen($testFilePath,'w');
+		fwrite($fh,'Test file');
+		fclose($fh);
+
+		$this->assertFileExists($testFilePath);
+
+		//3. Assert the file exists over the LINKED directory.
+		//3.a. Parse the name of the directory we should be using from the path
+		$buffer = explode('/',dirname($appPath));
+		$appNakedDirName = end($buffer);
+		$targetFileViaSymlink = $targetPath . '/' . $appNakedDirName . '/testfile.txt';
+		$this->assertFileExists($targetFileViaSymlink);
+
+		$result = unlink($targetFileViaSymlink);
+		$this->assertTrue($result);
 
 	}
 }

@@ -28,6 +28,21 @@ function getMyConfigs() {
 	return $C;
 }
 
+function getDefaultOptions() {
+
+	$PM = new PHPAnt\Core\PermissionManager();
+
+	$vars = getMockVars();
+
+	$options = ['safeMode' 		    => false
+			   ,'permissionManager' => $PM
+			   ,'verbosity'         => 0
+			   ,'appRoot'           => $vars['document_root'] . '/includes/apps/'
+			   ];
+
+	return $options;
+}
+
 /**
  * Returns an AppEngine instance for testing.
  * Example:
@@ -41,16 +56,9 @@ function getMyConfigs() {
  * @author Michael Munger <michael@highpoweredhelp.com>
  **/
 
-function getMyAppEngine($appPath = 'includes/apps/') {
+function getMyAppEngine($options) {
 	$C = getMyConfigs();
 
-	$PM = new PHPAnt\Core\PermissionManager();
-
-	$options = ['safeMode' 		 => false
-			   ,'permissionManager' => $PM
-			   ,'verbosity'         => 0
-			   ];
-
-	$A = new PHPAnt\Core\AppEngine($C,$options,$appPath);
+	$A = new PHPAnt\Core\AppEngine($C,$options);
 	return $A;		
 }

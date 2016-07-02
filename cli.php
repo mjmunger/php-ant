@@ -1,8 +1,9 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
+use PHPAnt\Core;
+
 /* Get command line options */
 $options = getopt('v::d::s::');
-var_dump($options);
 
 /*Default options*/
 $loader_debug = false;
@@ -40,16 +41,16 @@ if(sizeof($options) > 0) {
 /* Include the application top... and everything else. */
 include('includes/bootstrap.php');
 
-$c = new cli($Engine);
+$C = new PHPAnt\Core\Cli($Engine);
 if(sizeof($options) > 0) {
     /* Set debug mode if -d is specified. Also sets verbosity to 10, but may be overridden with the -v command. */
     if(array_key_exists('d',$options)) {
-        $c->setDebugMode();
+        $C->setDebugMode();
     }
     /* Sets verbosity. Overrides what was set by -d */
     if(array_key_exists('v', $options)) {
         $level = 1 + strlen($options['v']);
-        $c->setVerbosity($level);
+        $C->setVerbosity($level);
     }
 }
-$c->run();
+$C->run();

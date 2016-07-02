@@ -8,7 +8,7 @@ class CLITest extends TestCase
 	private function getMyCLI() {
 		$C = getMyConfigs();
 		$appRoot = $C->document_root;
-		$A = getMyAppEngine($appRoot);
+		$A = getMyAppEngine(getDefaultOptions());
 		
 		$this->assertInstanceOf('PHPAnt\Core\AppEngine', $A);
 
