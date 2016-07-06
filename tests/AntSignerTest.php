@@ -8,14 +8,14 @@ class PHPAntSignerTest extends TestCase
 {
 	function testGenKeys() {
 
-		$publicKeyPath  = 'tests/PHPAnt/Core/resources/Apps/TestApp/public.key';
-		$privateKeyPath = 'tests/PHPAnt/Core/resources/Apps/TestApp/private.key';
+		$publicKeyPath  = 'includes/apps/TestApp/public.key';
+		$privateKeyPath = 'includes/apps/TestApp/private.key';
 		
 		$who = exec('whoami');
 		$privateKeyStoragePath = "/home/$who/private.key";
 
 
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$S->genKeys();
@@ -27,7 +27,7 @@ class PHPAntSignerTest extends TestCase
 	}
 
 	function testSetApp() {
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$result = $S->setApp('TestApp');
 		$this->assertTrue($result);
@@ -39,10 +39,10 @@ class PHPAntSignerTest extends TestCase
 	 **/
 
 	function testGenerateManifestFile() {
-		$manifestFilePath = 'tests/PHPAnt/Core/resources/Apps/TestApp/manifest.xml';
+		$manifestFilePath = 'includes/apps/TestApp/manifest.xml';
 		if(file_exists($manifestFilePath)) unlink($manifestFilePath);
 
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$S->generateManifestFile();
@@ -52,7 +52,7 @@ class PHPAntSignerTest extends TestCase
 			$this->assertInstanceOf('\PHPAnt\Core\PHPAntSignerFile', $file);
 		}
 
-		$manifestFilePath = 'tests/PHPAnt/Core/resources/Apps/TestApp/manifest.xml';
+		$manifestFilePath = 'includes/apps/TestApp/manifest.xml';
 		$this->assertFileExists($manifestFilePath);
 
 		$app = simplexml_load_file($manifestFilePath);
@@ -74,9 +74,9 @@ class PHPAntSignerTest extends TestCase
 		$hook             = 'cli-init';
 		$function         = 'declareMySelf';
 		$signature        = $hook.$function.'50';
-		$manifestFilePath = 'tests/PHPAnt/Core/resources/Apps/TestApp/manifest.xml';
+		$manifestFilePath = 'includes/apps/TestApp/manifest.xml';
 
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$S->registerHook($hook,$function);
@@ -112,9 +112,9 @@ class PHPAntSignerTest extends TestCase
 		$hook             = 'cli-init';
 		$function         = 'declareMySelf';
 		$signature        = $hook.$function.'50';
-		$manifestFilePath = 'tests/PHPAnt/Core/resources/Apps/TestApp/manifest.xml';
+		$manifestFilePath = 'includes/apps/TestApp/manifest.xml';
 
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 
@@ -147,9 +147,9 @@ class PHPAntSignerTest extends TestCase
 
 	function testSignApp() {
 
-		$publicKeyPath         = 'tests/PHPAnt/Core/resources/Apps/TestApp/public.key';
-		$manifestFileSignature = 'tests/PHPAnt/Core/resources/Apps/TestApp/manifest.sig';
-		$privateKeyFailurePath = 'tests/PHPAnt/Core/resources/Apps/TestApp/private.key';
+		$publicKeyPath         = 'includes/apps/TestApp/public.key';
+		$manifestFileSignature = 'includes/apps/TestApp/manifest.sig';
+		$privateKeyFailurePath = 'includes/apps/TestApp/private.key';
 
 		//Undo the file we made earlier.
 		unlink($privateKeyFailurePath);
@@ -158,7 +158,7 @@ class PHPAntSignerTest extends TestCase
 		$who = exec('whoami');
 		$privateKeyPath = "/home/$who/private.key";
 		
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$this->assertFileExists($privateKeyPath);
@@ -172,14 +172,14 @@ class PHPAntSignerTest extends TestCase
 	  **/
 
 	function testPrivateKeyMissingException() {
-		$publicKeyPath         = 'tests/PHPAnt/Core/resources/Apps/TestApp/public.key';
-		$privateKeyFailurePath = 'tests/PHPAnt/Core/resources/Apps/TestApp/private.key';
-		$manifestFileSignature = 'tests/PHPAnt/Core/resources/Apps/TestApp/manifest.sig';
+		$publicKeyPath         = 'includes/apps/TestApp/public.key';
+		$privateKeyFailurePath = 'includes/apps/TestApp/private.key';
+		$manifestFileSignature = 'includes/apps/TestApp/manifest.sig';
 
 		$who = exec('whoami');
 		$privateKeyPath = "/home/$who/private.key.wrong";
 		
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 
@@ -194,14 +194,14 @@ class PHPAntSignerTest extends TestCase
 	 **/
 
 	function testPrivateKeyInAppException() {
-		$publicKeyPath         = 'tests/PHPAnt/Core/resources/Apps/TestApp/public.key';
-		$privateKeyFailurePath = 'tests/PHPAnt/Core/resources/Apps/TestApp/private.key';
-		$manifestFileSignature = 'tests/PHPAnt/Core/resources/Apps/TestApp/manifest.sig';
+		$publicKeyPath         = 'includes/apps/TestApp/public.key';
+		$privateKeyFailurePath = 'includes/apps/TestApp/private.key';
+		$manifestFileSignature = 'includes/apps/TestApp/manifest.sig';
 
 		$who = exec('whoami');
 		$privateKeyPath = "/home/$who/private.key";
 		
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 
@@ -222,11 +222,11 @@ class PHPAntSignerTest extends TestCase
 	function testVerifyApp() {
 		$who = exec('whoami');
 
-		$publicKeyPath  = 'tests/PHPAnt/Core/resources/Apps/TestApp/public.key';
-		$privateKeyPath = 'tests/PHPAnt/Core/resources/Apps/TestApp/private.key';
+		$publicKeyPath  = 'includes/apps/TestApp/public.key';
+		$privateKeyPath = 'includes/apps/TestApp/private.key';
 		$privateKeyStoragePath = "/home/$who/private.key";
 
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$S->genKeys();
@@ -235,7 +235,7 @@ class PHPAntSignerTest extends TestCase
 
 		$S->signApp($privateKeyStoragePath);
 
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$result = $S->verifySignature();		
@@ -245,20 +245,20 @@ class PHPAntSignerTest extends TestCase
 	function testUpdatePublicKey() {
 		$who = exec('whoami');
 
-		$manifestPath   = 'tests/PHPAnt/Core/resources/Apps/TestApp/manifest.xml';
+		$manifestPath   = 'includes/apps/TestApp/manifest.xml';
 
-		$publicKeyPath  = 'tests/PHPAnt/Core/resources/Apps/TestApp/public.key';
+		$publicKeyPath  = 'includes/apps/TestApp/public.key';
 		if(file_exists($publicKeyPath)) unlink($publicKeyPath);
 		$this->assertFalse(file_exists($publicKeyPath));
 
-		$privateKeyPath = 'tests/PHPAnt/Core/resources/Apps/TestApp/private.key';
+		$privateKeyPath = 'includes/apps/TestApp/private.key';
 		if(file_exists($privateKeyPath)) unlink($privateKeyPath);
 		$this->assertFalse(file_exists($privateKeyPath));
 
 		$privateKeyStoragePath = "/home/$who/private.key";
 		$this->assertTrue(file_exists($privateKeyStoragePath));
 
-		$options['appRoot'] = 'tests/PHPAnt/Core/resources/Apps/';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 
 		$S->setApp('TestApp');
@@ -280,12 +280,29 @@ class PHPAntSignerTest extends TestCase
 		}
 	}
 
-	function testDisableThisApp() {
+	function testAddHook() {
+		$manifestPath   = 'includes/apps/TestApp/manifest.xml';
+		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$S = new \PHPAnt\Core\PHPAntSigner($options);
+
+		$S->setApp('TestApp');
+		$hook = 'app-hook-test';
+		$callback = 'doAppHookTest';
+		$priority = 50;
+		$hash = sha1($hook.$callback.$priority);
+		$signature = $S->registerHook($hook,$callback,$priority);
+
+		$this->assertSame($hash, $signature);
+		$app = simplexml_load_file($manifestPath);
+		$this->assertEquals(1, count($app->action));
+	}
+
+/*	function testDisableThisApp() {
 		$AM = new \PHPAnt\Core\AppManager();
         $options = getDefaultOptions();
         $options['disableApps'] = true;
         $AE = getMyAppEngine($options);
-        $result = $AE->disableApp('TestAntApp','tests/PHPAnt/Core/resources/Apps/TestApp/app.php');
+        $result = $AE->disableApp('TestAntApp','includes/apps/TestApp/app.php');
         $this->assertTrue($result);
-	}
+	}*/
 }

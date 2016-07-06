@@ -27,6 +27,9 @@ php-ant-signer [options] [/path/to/private/key]
   -m                        Generate a new manifest for the specified app.
                             
   -s [/path/to/private/key] Generates a manfest file and signs it with your private key.
+
+  -u [/path/to/private/key] Update the public.key file with a newly derived version 
+                            derived from the private key
                              
   -v                        Verifies an app's manifest file, and the files listed
                             in it to ensure their authenticity.

@@ -303,7 +303,7 @@ class PHPAntSigner
         if (\Sodium\crypto_sign_verify_detached($signature, $message, $publicKey )) {
             return true;
         } else {
-            throw new Exception("Invalid signature detected! ($manifestSignaturePath)");
+            echo "Invalid signature detected! ($manifestSignaturePath)" . PHP_EOL;
             return false;
         }
     }
@@ -418,7 +418,7 @@ class PHPAntSigner
             }
         }
 
-        $dom->preserveWhiteSpace = false;
+        $dom->preserveWhiteSpace = true;
         $dom->formatOutput = true;
         $dom->save($this->manifestPath);        
     }
