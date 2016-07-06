@@ -226,9 +226,14 @@ class Command {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function leftStrip($strip) {
+    function leftStrip($strip,$useRaw = false) {
       $strip   = explode(" ", $strip);
-  		$command = explode(' ',$this->full_command);
+      if($useRaw) {
+        $command = explode(' ',$this->raw_command);
+      } else {
+        $command = explode(' ',$this->full_command);
+      }
+  		
       $buffer  = array_diff($command, $strip);
       $return  = implode(' ', $buffer);
 

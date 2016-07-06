@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<app name="TestAntApp" namespace="PHPAnt\Apps">
+  <file>
+    <name>tests/PHPAnt/Core/resources/Apps/TestApp/tests</name>
+    <hash>da39a3ee5e6b4b0d3255bfef95601890afd80709</hash>
+  </file>
+  <file>
+    <name>tests/PHPAnt/Core/resources/Apps/TestApp/app.php</name>
+    <hash>8a4a046dd29f8e6592d24978691beda2cd100997</hash>
+  </file>
+  
+  
+<file><name>tests/PHPAnt/Core/resources/Apps/TestApp/public.key</name><hash>f920b5b1b6f1290d7db0ac97d3cabe376ec851e1</hash></file></app>

@@ -99,10 +99,10 @@ class TestAntApp extends \PHPAnt\Core\AntApp implements \PHPAnt\Core\AppInterfac
 
 }
 
-$appTestAntApp = new TestAntApp();
+/*$appTestAntApp = new TestAntApp();
 $appTestAntApp->addHook('app-hook-test','doAppHookTest');
 $appTestAntApp->addHook('cli-load-grammar','loadTestAntApp');
 $appTestAntApp->addHook('cli-init','declareMySelf');
 $appTestAntApp->addHook('cli-command','processCommand');
 
-array_push($this->apps,$appTestAntApp);
+array_push($this->apps,$appTestAntApp);*/

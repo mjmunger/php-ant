@@ -139,6 +139,14 @@ class AppEngine {
     function getEnabledApps() {
         $enabled = $this->Configs->getConfigs(['enabledAppsList']);
         if(count($enabled) > 0) $this->enabledApps = json_decode($enabled['enabledAppsList'],true);
+
+        foreach($this->availableApps as $name => $path) {
+            /* If the app name starts with a "+" we need to add it to the list of auto-enabled plugins. */
+            if($name[0] == "+" && !$this->disableApps) {
+                $status = 'Auto';
+                if(!$this->enableApp($name,$path)) throw new Exception("Could not enable app $name in $path", 1);
+            }        
+        }
     }
 
     /**
@@ -396,11 +404,6 @@ class AppEngine {
 
                 $this->availableApps[$name] = $file->getRealPath();
 
-                /* If the app name starts with a "+" we need to add it to the list of auto-enabled plugins. */
-                if($name[0] == "+" && !$this->disableApps) {
-                    $status = 'Auto';
-                    $this->enableApp($name,$file->getRealPath());
-                }
                 $TL->addRow([$name,$status,$file->getRealPath()]);
             }
         }
@@ -419,44 +422,68 @@ class AppEngine {
      * @tested testAppHooks
      **/
     function activateApps() {
+        //If the .blacklist file exists, that app needs ot be disabled. Something failed.
+        if(file_exists('.blacklist')) {
+            $buffer = json_decode(trim(file_get_contents('.blacklist')));
+            $this->disableApp($buffer->name,$buffer->path);
+            unlink('.blacklist');
+        }        
+
         //Reset activated apps.
         $this->activatedApps = [];
 
         /* We need this list of paths to determine if we should load things (easily) */
         $paths = array_values($this->enabledApps);
 
-        /* Cycle through available plugins to decide if each plugin's path is in the $paths array and the availableApps list. */
-        foreach($this->availableApps as $name => $path) {
+        /* Cycle through available plugins to decide if each plugin's path is
+           in the $paths array and the availableApps list. */
+
+        foreach($this->enabledApps as $name => $path) {
 
             if(in_array($path, $paths)) {
 
                 if($this->verbosity > 9) printf("Activating plugin: %s" . PHP_EOL, $name);
 
+                //Put this on the blacklist for next time unless we succeed.
+                $blacklist = ['name' => $name, 'path' =>$path];
+                $fh = fopen('.blacklist','w');
+                fwrite($fh,json_encode($blacklist));
+                fclose($fh);
+
                 $manifestPath = dirname($path) . '/manifest.xml';
                 if(!file_exists($manifestPath)) {
-                    throw new \Exception("All apps must have a manifest file! I couldn't find one here: $manifestPath.", 1);
-                    continue;
+                    $this->disableApp($name,$path);
+                    throw new \Exception("All apps must have a manifest file! I couldn't find one here: $manifestPath. This app has been disabled.", 1);
                 }
 
                 //Read the XML file in that app directory so we know what hooks to create.
                 $xml = simplexml_load_file($manifestPath);
                 $className = $xml['name'];
                 $nameSpace = $xml['namespace'];
-                $appClass = $nameSpace . $className;
+                $appClass = $nameSpace . '\\' . $className;
 
                 //Instantiate a new class of the app.
-                $app = new $appClass();
+                try {
+                    $app = new $appClass();
+                } catch (Exception $e) {
+                    echo "Tried to instantiate a new class of $appClass". PHP_EOL;
+                    echo $e->getMessage();
+                }
 
+                if(count($xml->action) === 0) throw new \Exception("The app $name ($path) has NO actions. It will not do anything.", 1);
+                
                 //Create all the hooks referenced in the manifest file.
                 foreach($xml->action as $action){
                     $hook             = (string)$action->hook;
-                    $callbackFunction = (string)$action->callback;
+                    $callbackFunction = (string)$action->function;
                     $app->addHook($hook,$callbackFunction);
                 }
 
                 array_push($this->apps,$app);
                 $this->activatedApps[$path]= $name;
 
+                unlink('.blacklist');
+                if(file_exists('.blacklist')) die(__FILE__ . ':' . __LINE__);
             }
         }
     }

@@ -121,7 +121,7 @@ try {
 //Do not require authentication for the CLI
 switch ($Authenticator->authType) {
     case BFWAuth::CLI:
-        print "CLI Access is for administrators only. God like permissions are present. Caveat emptor" . PHP_EOL;
+        //print "CLI Access is for administrators only. God like permissions are present. Caveat emptor" . PHP_EOL;
         break;
     case BFWAuth::WEB || BFWAuth::MOBILE:
         $Authenticator->checkCookies();
