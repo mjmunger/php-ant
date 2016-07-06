@@ -180,6 +180,9 @@ class AppEngine {
 
         /* Go through the apps and collect all the ones that will fire for this action. */
         foreach($this->apps as $app) {
+            /*Skip non-enabled apps*/
+            if(!$app->enabled) continue;
+
             /* Add them to the requested hook array as a way of queing them to execute. */
             if($app->usesHook($requested_hook)) array_push($appsWithRequestedHook, $app);
         }
@@ -429,6 +432,9 @@ class AppEngine {
             unlink('.blacklist');
         }        
 
+        //Reset apps
+        $this->apps = [];
+
         //Reset activated apps.
         $this->activatedApps = [];
 
@@ -478,6 +484,9 @@ class AppEngine {
                     $callbackFunction = (string)$action->function;
                     $app->addHook($hook,$callbackFunction);
                 }
+
+                //Enable it in the app itself!
+                $app->enabled = true;
 
                 array_push($this->apps,$app);
                 $this->activatedApps[$path]= $name;
