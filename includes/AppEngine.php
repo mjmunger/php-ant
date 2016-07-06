@@ -369,6 +369,37 @@ class AppEngine {
     }
 
     /**
+     * Retrieves app actions, hooks, and priorities from the app file.
+     * Example:
+     *
+     * <code>
+     * $actions = $AE->getAppActions('/path/to/app.php')
+     * </code>
+     *
+     * @return mixed Associative array of actions, their callbacks, and priorities.
+     * @param string $path the full path to the app to be parsed.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function getAppActions($path) {
+        $matches = NULL;
+        $regex = '/(App Action:) (.*) -> (.*) @ ([0-9]{1,2})/';
+        $buffer = file_get_contents($path);
+        $results = [];
+
+        preg_match_all($regex, $buffer, $matches, PREG_SET_ORDER);
+
+        foreach($matches as $match) {
+            $hook = trim($match[2]);
+            $callback = trim($match[3]);
+            $priority = trim($match[4]);
+            $results[$hook] = [$callback => $priority];
+        }
+
+        return $results;
+    }
+
+    /**
      * Loads all the plugins from the plugins/ directory.
      *
      * A plugin must have the following two components:

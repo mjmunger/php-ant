@@ -23,7 +23,8 @@ class PHPAntSigner
     var $app          = NULL;
     var $appPath      = NULL;
     var $appRoot      = NULL;
-    Var $manifestPath = NULL;
+    var $appName      = NULL;
+    var $manifestPath = NULL;
     var $files        = [];
     
     function __construct($options) {
@@ -34,7 +35,8 @@ class PHPAntSigner
     }
 
     function setApp($appName) {
-        $this->appPath      = $this->appRoot . $appName;
+        $this->appName      = $appName;
+        $this->appPath      = $this->appRoot . $this->appName;
         $this->manifestPath = $this->appPath .'/manifest.xml';
         $filePath           = $this->appPath .'/app.php';
 
@@ -287,6 +289,8 @@ class PHPAntSigner
         $fh = fopen($manifestSignaturePath,'w');
         fwrite($fh,base64_encode($signed_msg));
         fclose($fh);
+
+        return file_exists($manifestSignaturePath);
     }
 
     function verifySignature() {
@@ -373,14 +377,19 @@ class PHPAntSigner
         }
     }
 
-    function updatePublicKey($privateKeyPath) {
+    private function saveDerivedPublicKey($privateKeyPath) {
         //Get the public key.
         $publicKey = $this->derivePublicKey($privateKeyPath);
         //Save it to the public.key file.
         $fh = fopen($this->appPath . '/public.key','w');
         fwrite($fh,base64_encode($publicKey));
         fclose($fh);
-        $publicKeyPath = $this->appPath . '/public.key';
+        $publicKeyPath = $this->appPath . '/public.key';        
+        return $publicKeyPath;
+    }
+
+    function updatePublicKey($privateKeyPath) {
+        $publicKeyPath = $this->saveDerivedPublicKey($privateKeyPath);
 
         $hash = sha1_file($publicKeyPath);
 
@@ -421,5 +430,81 @@ class PHPAntSigner
         $dom->preserveWhiteSpace = true;
         $dom->formatOutput = true;
         $dom->save($this->manifestPath);        
+    }
+
+
+    /**
+     * Cleans the app to prepare for publication by removing manifest.sig,
+     * manifest.xml, public.key, etc...
+     *
+     * Example:
+     *
+     * <code>
+     * $Signer = new PHPAnt\Core\PHPAntSigner([]);
+     * $Signer->setApp('some-app');
+     * $Signer->cleanAppCredentials();
+     * </code>
+     *
+     * @return return value
+     * @param param
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function cleanAppCredentials() {
+        $removeTheseFiles = [ 'manifest.xml'
+                            , 'manifest.sig'
+                            , 'public.key'
+                            ];
+        foreach($removeTheseFiles as $fileToDelete) {
+            $path = $this->appPath . '/' . $fileToDelete;
+            if(file_exists($path)) unlink($path);
+        }
+        return true;
+    }
+
+    /**
+     * Runs all the necessary functions to generate a manifest, add actions,
+     * sign, and verify an app for publication and use.
+     *
+     * Example:
+     *
+     * <code>
+     * $Signer->publish('/path/to/private.key');
+     * </code>
+     *
+     * @return boolean True if the process was successful and the app was
+     *         signed and verified. False otherwise.
+     * @param string $privateKey The fully qualified path to the private key used for signing this app.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function publish($args) {
+        $AE             = $args['AE'];
+        $privateKeyPath = $args['privateKeyPath'];
+
+        $return = [];
+
+        $return['setApp'] = $this->setApp($args['appName']);
+
+        //1. Remove files related to publication.
+        $return['cleanAppCredentials'] = $this->cleanAppCredentials();
+
+        //2. Derive public key from private key and add to app.
+        $return['saveDerivePublicKey'] = $this->saveDerivedPublicKey($privateKeyPath);
+
+        //3. Generate manifest
+        $return['generateManifestFile'] = $this->generateManifestFile();
+               
+        //4. Add actions.
+        $actions = $AE->getAppActions($this->appPath . '/app.php');
+        $return['appActions'] = json_encode($actions);
+
+        //5. Sign app
+        $return['signApp'] = $this->signApp($privateKeyPath);
+
+        //6. Verify app.
+        $return['verifyApp'] = $this->verifyApp();
+
+        return $return;
     }
 }

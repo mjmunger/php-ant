@@ -232,6 +232,24 @@ class AppEngineTest extends TestCase
 
 		//$result = unlink($targetFileViaSymlink);
 		//$this->assertTrue($result);
+	}
 
+	function testGetAppActions() {
+		//Get the configs by themselves.
+		$C = getMyConfigs();
+
+		//Get an instance of the AppEngine
+		$appRoot = $C->document_root . '/includes/apps/';
+
+		$options = getDefaultOptions();
+		$options['appRoot'] = $appRoot;
+		$A = getMyAppEngine($options);		
+
+
+		//Enable the test app.
+		$appPath = $appRoot . 'TestApp/app.php';
+		$results = $A->getAppActions($appPath);
+
+		$this->assertCount(3, $results);
 	}
 }
