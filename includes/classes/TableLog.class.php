@@ -22,6 +22,7 @@ Class TableLog
 	var $rows       = [];
 	var $columnSize = [];
 	var $sortColumn = 0;
+	var $tableWidth = 0;
 
 	function __construct() {
 		//TBD
@@ -72,6 +73,12 @@ Class TableLog
 			$columnSize[$c] = $max + 1;
 		}
 
+		//Calculate the width
+		$width = 0;
+		foreach($columnSize as $c) {
+			$width += $c;
+		}
+		$this->tableWidth = $width;
 		$this->columnSize = $columnSize;
 	}
 
@@ -79,11 +86,18 @@ Class TableLog
 
 		$this->sortRows();
 		$this->calculateColumnSize();
+		
+		echo PHP_EOL;
 
 		//Print the header
+		echo str_pad('', $this->tableWidth,'-');
+		echo PHP_EOL;
+		
 		for($c=0;$c<count($this->headers); $c++) {
 			echo str_pad($this->headers[$c], $this->columnSize[$c]);
 		}
+		echo PHP_EOL;
+		echo str_pad('', $this->tableWidth,'-');
 		echo PHP_EOL;
 
 		//Print all the lines.
@@ -95,5 +109,6 @@ Class TableLog
 			//button up the line.
 			echo PHP_EOL;
 		}
+		echo PHP_EOL;
 	}
 }

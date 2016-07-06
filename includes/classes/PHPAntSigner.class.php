@@ -307,29 +307,38 @@ class PHPAntSigner
         if (\Sodium\crypto_sign_verify_detached($signature, $message, $publicKey )) {
             return true;
         } else {
-            echo "Invalid signature detected! ($manifestSignaturePath)" . PHP_EOL;
+            //echo "Invalid signature detected! ($manifestSignaturePath)" . PHP_EOL;
             return false;
         }
     }
 
     function verifyApp() {
         //1. Verify the signature on the manifest.xml file before we can trust it.
-        if(!$this->verifySignature()) return false;
+        $results = [];
 
         //2. Verify the files all have matching hashes.
         $integrityOK = true;
+        
+        if(!$this->verifySignature()) {
+            $integrityOK = false;
+            $results[$this->appPath . '/manifest.xml'] = "INVALID SIGNATURE";
+        }
 
         $app = simplexml_load_file($this->appPath . '/manifest.xml');
         foreach($app->file as $file) {
-            //printf ('%s = %s' . PHP_EOL,sha1_file($file->name),(string)$file->hash);
+            $filename = (string)$file->name;
             if(sha1_file($file->name) !== (string)$file->hash) {
-                print "There was a problem with $file->name. Hashes do not match the manifest." . PHP_EOL;
+                $results[$filename] = "HASH FAILURE";
+                //print "There was a problem with $file->name. Hashes do not match the manifest." . PHP_EOL;
                 $integrityOK = false;
-                break;
+            } else {
+                $results[$filename] = "OK";
             }
         }
 
-        return $integrityOK;
+        
+        $results['integrityOK'] = $integrityOK;
+        return $results;
     }
 
     /**
@@ -498,6 +507,13 @@ class PHPAntSigner
         //4. Add actions.
         $actions = $AE->getAppActions($this->appPath . '/app.php');
         $return['appActions'] = json_encode($actions);
+
+        //Add the actions to the manifest file!
+        foreach($actions as $hook => $data) {
+            foreach($data as $callback => $priority) {
+                $this->registerHook($hook,$callback,$priority);
+            }
+        }
 
         //5. Sign app
         $return['signApp'] = $this->signApp($privateKeyPath);
