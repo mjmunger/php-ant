@@ -83,32 +83,39 @@ Class TableLog
 	}
 
 	function showTable() {
+		echo $this->makeTable();
+	}
+
+	function makeTable() {
+		$buffer = '';
 
 		$this->sortRows();
 		$this->calculateColumnSize();
 		
-		echo PHP_EOL;
+		$buffer .= PHP_EOL;
 
 		//Print the header
-		echo str_pad('', $this->tableWidth,'-');
-		echo PHP_EOL;
+		$buffer .= str_pad('', $this->tableWidth,'-');
+		$buffer .= PHP_EOL;
 		
 		for($c=0;$c<count($this->headers); $c++) {
-			echo str_pad($this->headers[$c], $this->columnSize[$c]);
+			$buffer .= str_pad($this->headers[$c], $this->columnSize[$c]);
 		}
-		echo PHP_EOL;
-		echo str_pad('', $this->tableWidth,'-');
-		echo PHP_EOL;
+		$buffer .= PHP_EOL;
+		$buffer .= str_pad('', $this->tableWidth,'-');
+		$buffer .= PHP_EOL;
 
 		//Print all the lines.
 		foreach($this->rows as $row) {
 			//Print the columns for this line.
 			for($c=0;$c<count($this->headers); $c++) {
-				echo str_pad($row[$c], $this->columnSize[$c]);
+				$buffer .= str_pad($row[$c], $this->columnSize[$c]);
 			}
 			//button up the line.
-			echo PHP_EOL;
+			$buffer .= PHP_EOL;
 		}
-		echo PHP_EOL;
+		$buffer .= PHP_EOL;
+
+		return $buffer;
 	}
 }

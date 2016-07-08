@@ -663,7 +663,7 @@ Caveat Emptor. Proceed with caution. Use at your own risk. You have been warned.
                 }
 
         /* Allow plugins to process commands */
-        $this->Engine->runActions('cli-command',array('command'=>$cmd));
+        return $this->Engine->runActions('cli-command',array('command'=>$cmd));
 
         /* Something should have returned a value by now. If we get here, the command is invalid. */
         return ['success' => false];
@@ -750,7 +750,19 @@ Use of this CLI may void your warranty. Type: 'show warranty' for details.
             if($this->verbosity > 5) {
                 printf("Running command: %s\n",$cmd->full_command);
             }
-            $this->processCommand($cmd);
+            $result = $this->processCommand($cmd);
+
+            if(isset($result['cli-command'])) {
+                switch ($result['cli-command']) {
+                    case 'reload-grammar':
+                        $this->loadGrammar();
+                        break;
+                    
+                    default:
+                        // code...
+                        break;
+                }
+            }
         }
         if($this->debugMode) {
             print_r(readline_info());

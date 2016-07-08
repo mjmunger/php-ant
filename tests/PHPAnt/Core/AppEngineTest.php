@@ -39,8 +39,7 @@ class AppEngineTest extends TestCase
 		$name = $A->getAppMeta($appPath,'name');
 
 		$result = $A->enableApp($name,$appPath);
-
-		$this->assertTrue($result);
+		$this->assertTrue($result['success']);
 
 		//Make sure this now exists in the database.
 		$query = "SELECT settings_value FROM mcdb2.settings where settings_key = ? LIMIT 1";
@@ -116,7 +115,7 @@ class AppEngineTest extends TestCase
 		$appPath = $appRoot . 'TestApp/app.php';
 		$name = $A->getAppMeta($appPath,'name');
 		$result = $A->enableApp($name,$appPath);
-		$this->assertTrue($result);
+		$this->assertTrue($result['success']);
 
 
 	}
@@ -142,7 +141,7 @@ class AppEngineTest extends TestCase
 		$appPath = $appRoot . 'TestApp/app.php';
 		$name = $A->getAppMeta($appPath,'name');
 		$result = $A->enableApp($name,$appPath);
-		$this->assertTrue($result);
+		$this->assertTrue($result['success']);
 
 		$A->activateApps();
 		$this->assertArrayHasKey($appPath, $A->activatedApps);
@@ -187,7 +186,7 @@ class AppEngineTest extends TestCase
 		$appPath = $appRoot . 'TestApp/app.php';
 		$name = $A->getAppMeta($appPath,'name');
 		$result = $A->enableApp($name,$appPath);
-		$this->assertTrue($result);
+		$this->assertTrue($result['success']);
 
 		$A->linkAppTests();
 
@@ -251,5 +250,35 @@ class AppEngineTest extends TestCase
 		$results = $A->getAppActions($appPath);
 
 		$this->assertCount(3, $results);
+	}
+
+	/**
+	 * @covers AppEngine::enableApp
+	 * @depends testAppEnableDisable
+	 */
+	
+	public function testDisallowAppWithoutManifest()
+	{
+
+		$options = getDefaultOptions();
+		$A = getMyAppEngine($options);
+
+		//Enable the test app from this test suite.
+		$appPath            = $A->Configs->document_root . '/includes/apps/TestApp/app.php';
+		$manifestPath       = $A->Configs->document_root . '/includes/apps/TestApp/manifest.xml';
+		$manifestPathBackup = $A->Configs->document_root . '/includes/apps/TestApp/manifest.xml.bak';
+
+		if(file_exists($manifestPath)) rename($manifestPath, $manifestPathBackup);
+		$this->assertFileNotExists($manifestPath);
+
+		$name = $A->getAppMeta($appPath,'name');
+
+		$result = $A->enableApp($name,$appPath);
+
+		$this->assertFalse($result['success']);
+	
+	    //put the manifest file back
+		if(file_exists($manifestPathBackup)) rename($manifestPathBackup, $manifestPath);
+		$this->assertFileExists($manifestPath);
 	}
 }

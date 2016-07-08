@@ -89,7 +89,7 @@ switch ($Engine->Configs->environment) {
 /* Load any libraries that are in the includes/libs/ directory. */
 $Engine->runActions('lib-loader');
 
-/* Load any spl-autoloaders that are contained in Plugins */
+/* Load any spl-autoloaders that are contained in Apps */
 $Engine->runActions('load_loaders');
 
 /* Run all actions for checking the database */

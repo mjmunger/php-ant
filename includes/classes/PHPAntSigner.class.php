@@ -164,7 +164,7 @@ class PHPAntSigner
 
         //Now that we have a list of files that are include with this app, let's generate the manifest.xml file.
 
-        $name      = $this->getAppMeta($this->appPath . '/app.php','custom','/(class) ([A-Za-z]*) /');
+        $name      = $this->getAppMeta($this->appPath . '/app.php','custom','/(class) ([a-zA-Z0-9_]*) {0,}(extends){0,1} [a-zA-Z0-9_-].*/');
         if(is_null($name)) throw new Exception("Could not parse class name from file $this->appPath to determine app name for manifest file.", 1);
         
         $namespace = $this->getAppMeta($this->appPath . '/app.php','custom','/(namespace) (.*);/');
@@ -297,6 +297,7 @@ class PHPAntSigner
         $manifestPath          = $this->appPath . '/manifest.xml';
         $manifestSignaturePath = $this->appPath . '/manifest.sig';
         $publicKeyPath         = $this->appPath . '/public.key';
+        if(!file_exists($publicKeyPath)) return false;
 
         //Get the signature of the manifest file
         $publicKey = base64_decode(file_get_contents($publicKeyPath));

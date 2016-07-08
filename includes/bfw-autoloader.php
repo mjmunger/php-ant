@@ -44,12 +44,12 @@ function bfw_autoloader($class) {
     $candidate_files = array();
     
     /* Attempt to load the parent class first. Child classes always extend parent classes. */
-    $candidate_path = sprintf('includes/parents/%s.class.parent.php',$class);
-    array_push($candidate_files, $candidate_path);
+    //$candidate_path = sprintf('includes/parents/%s.class.parent.php',$class);
+    //array_push($candidate_files, $candidate_path);
 
     /* Attempt to load the child class second after parent class dependencies have been satisfied. */
-    $candidate_path = sprintf('includes/children/%s.class.php',$class);
-    array_push($candidate_files, $candidate_path);
+    //$candidate_path = sprintf('includes/children/%s.class.php',$class);
+    //array_push($candidate_files, $candidate_path);
 
     /* If this is not a database abstraction, then it is located in the classes directory. Try that last. */
     $candidate_path = sprintf('includes/classes/%s.class.php',$class);

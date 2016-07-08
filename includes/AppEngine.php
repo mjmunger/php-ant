@@ -107,11 +107,14 @@ class AppEngine {
             return false;
         }
 
-        if(!file_exists($path)) return false;
+        $manifestPath = dirname($path) . '/manifest.xml';
+        if(!file_exists($manifestPath)) return ['success' => false,'message' => 'All apps must have a manifest file. Please generate a manifest file for this app before enabling it.'];
+
+        //Make sure this app has a manifest file.
 
         $this->enabledApps[$name] = $path;
         $this->Configs->setConfig('enabledAppsList',json_encode($this->enabledApps));
-        return true;
+        return ['success'=>true,'message'=>"App successfully enabled. Use apps reload to activate it"];
     }
 
     /**
@@ -561,5 +564,15 @@ class AppEngine {
             //Link the 'tests' directory as the target for the dirname if the symlink does not already exist.
             if(!file_exists($link)) symlink($testsDir, $link);
         }
+    }
+
+    function reload() {
+        //Reload and reactivate the apps.
+        $this->activateApps();
+        $this->runActions('cli-load-grammar');
+        /* Load any libraries that are in the includes/libs/ directory. */
+        $this->runActions('lib-loader');
+        /* Load any spl-autoloaders that are contained in Apps */
+        $this->runActions('load_loaders');        
     }
 }

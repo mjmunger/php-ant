@@ -29,8 +29,8 @@ class ConfigBase
 		return $this->document_root . '/includes/libs/';
 	}
 
-	function getPluginsDir() {
-		return $this->document_root . '/includes/plugins/';
+	function getAppsDir() {
+		return $this->document_root . '/includes/apps/';
 	}
 
 	function getAttachmentDir() {

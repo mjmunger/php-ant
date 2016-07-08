@@ -46,7 +46,7 @@ class PHPAntSignerTest extends TestCase
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$S->generateManifestFile();
-		$this->assertCount(3, $S->files);
+		$this->assertCount(5, $S->files);
 
 		foreach($S->files as $file) {
 			$this->assertInstanceOf('\PHPAnt\Core\PHPAntSignerFile', $file);

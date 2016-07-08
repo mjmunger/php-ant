@@ -17,7 +17,7 @@ class CLITest extends TestCase
         $name = $A->getAppMeta($appPath,'name');
 
         $result = $A->enableApp($name,$appPath);
-        $this->assertTrue($result);
+        $this->assertTrue($result['success']);
 
         $A->activateApps();
 
