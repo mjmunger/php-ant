@@ -21,7 +21,7 @@ class BFWAuth
     function checkCookies() {
         if(isset($_COOKIE['current_user'])) {
             $this->logger->log("Checking desktop cookie: ".print_r($_COOKIE['current_user'],true));
-            $current_user = new user($this->pdo,$this->logger);
+            $current_user = new Users($this->pdo,$this->logger);
             $current_user->users_token = $_COOKIE['current_user'];
             if($current_user->loadFromToken()) {
                 $this->logger->log("User has been successfully loaded from token.");
@@ -43,13 +43,13 @@ class BFWAuth
         return false;
     }
 
-    function authorize(PluginEngine $PE) {
+    function authorize(PHPAnt\Core\AppEngine $Engine) {
         //If we didn't try to authenticate, don't bother with the rest.
         if(!isset($_POST['user']) || !isset($_POST['password'])) {
             return false;
         }
 
-        $u = new user($this->pdo,$this->logger);
+        $u = new Users($this->pdo,$this->logger);
         $this->logger->log(sprintf("Authorizng user based on email address: %s",$_POST['user']));
         $u->users_email= $_POST['user'];
         if($u->loadFromEmail()) {
@@ -61,7 +61,7 @@ class BFWAuth
 
         /* Quit if they don't authenticate. */
         if(!$u->authenticate($_POST['password'])) {
-            $PE->Configs->divAlert("The password entered does not match our records. Please try again.",'warning');
+            $Engine->Configs->divAlert("The password entered does not match our records. Please try again.",'warning');
             return false;
         }
         
@@ -76,7 +76,7 @@ class BFWAuth
         }
 
         if($u->users_active == 'N') {
-            $PE->Configs->divAlert("Your account is not active. Please contact your administrator.");
+            $Engine->Configs->divAlert("Your account is not active. Please contact your administrator.");
             die();
         }
 

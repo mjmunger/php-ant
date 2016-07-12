@@ -252,6 +252,34 @@ class AppEngineTest extends TestCase
 		$this->assertCount(3, $results);
 	}
 
+	function testGetAppURIs() {
+		//Get the configs by themselves.
+		$C = getMyConfigs();
+
+		//Get an instance of the AppEngine
+		$appRoot = $C->document_root . '/includes/apps/';
+
+		$options = getDefaultOptions();
+		$options['appRoot'] = $appRoot;
+		$A = getMyAppEngine($options);		
+
+
+		//Enable the test app.
+		$appPath = $appRoot . 'TestApp/app.php';
+		$results = $A->getAppURIs($appPath);
+
+		$this->assertCount(3, $results);
+
+ 		$uris = ['#^\/uploader\/.*#'
+ 				,'#^\/history\/.*#'
+ 				,'#^\/test\/asdf\/.*#'
+ 				];
+
+ 		for($x=0;$x<count($uris); $x++) {
+ 			$this->assertSame($uris[$x], $results[$x]);
+ 		}
+	}
+
 	/**
 	 * @covers AppEngine::enableApp
 	 * @depends testAppEnableDisable

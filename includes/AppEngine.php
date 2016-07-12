@@ -239,16 +239,15 @@ class AppEngine {
         $appsWithRequestedHook = $this->getAppsWithRequestedHook($requested_hook);
 
         foreach($appsWithRequestedHook as $app) {
-            try {
-                if($this->verbosity > 14) {
-                    echo str_pad("Requested Hook: ",20);
-                    echo $requested_hook;
-                    echo PHP_EOL;
 
-                    echo str_pad("Triggering app:",20);
-                    echo $app->getName();
-                    echo PHP_EOL;
-                }                
+            //Ignore apps that have a set of URIs registered when the current
+            //URI does not match.
+            if($this->Configs->environment == ConfigBase::WEB) {
+                if(!$app->fireOnURI($this->Configs->Server->Request->uri)) continue;
+            }
+            
+
+            try {
                 $result = $app->trigger($requested_hook,$args);
             } catch (Exception $e) {
                 $this->Configs->divAlert($e->getMessage(),'danger');
@@ -403,6 +402,35 @@ class AppEngine {
     }
 
     /**
+     * Retrieves registered URIs from App description.
+     * Example:
+     *
+     * <code>
+     * $uriList = $AE->getAppURIs('/path/to/app.php')
+     * </code>
+     *
+     * @return array an array containing the list of regular expressions used
+     *         to match a URI for a given app.
+     * @param string $path the full path to the app to be parsed.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function getAppURIs($path) {
+        $matches = NULL;
+        $regex = '/(App URI:) *[\'"]{1}(.*)[\'"]{1}/';
+        $buffer = file_get_contents($path);
+        $results = [];
+
+        preg_match_all($regex, $buffer, $matches, PREG_SET_ORDER);
+
+        foreach($matches as $match) {
+            array_push($results, trim($match[2]));
+        }
+
+        return $results;
+    }
+
+    /**
      * Loads all the plugins from the plugins/ directory.
      *
      * A plugin must have the following two components:
@@ -463,6 +491,10 @@ class AppEngine {
         if(file_exists('.blacklist')) {
             $buffer = json_decode(trim(file_get_contents('.blacklist')));
             $this->disableApp($buffer->name,$buffer->path);
+            $message = sprintf("%s was disabled because it failed to load last time. File: %s" . PHP_EOL,$buffer->name,$buffer->path);
+            $fp = fopen('disabled.log','a+');
+            fwrite($fp,$message);
+            fclose($fp);
             unlink('.blacklist');
         }        
 
@@ -504,7 +536,7 @@ class AppEngine {
 
                 //Instantiate a new class of the app.
                 try {
-                    $app = new $appClass();
+                    $app = new $appClass($this);
                 } catch (Exception $e) {
                     echo "Tried to instantiate a new class of $appClass". PHP_EOL;
                     echo $e->getMessage();
@@ -521,6 +553,10 @@ class AppEngine {
 
                 //Enable it in the app itself!
                 $app->enabled = true;
+
+                //Register the declared URIs for the app.
+                $uriList = $this->getAppURIs($path);
+                $app->registerURI($uriList);
 
                 array_push($this->apps,$app);
                 $this->activatedApps[$path]= $name;
@@ -568,6 +604,7 @@ class AppEngine {
 
     function reload() {
         //Reload and reactivate the apps.
+        $this->getenabledApps();
         $this->activateApps();
         $this->runActions('cli-load-grammar');
         /* Load any libraries that are in the includes/libs/ directory. */

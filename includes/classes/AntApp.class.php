@@ -93,13 +93,64 @@ Class AntApp
     var $path             = NULL;
 
     
+    /**
+    * @var array $uriRegistry An array of regular expressions, which when
+    *      matched, allow this app to execute code on a hook / action.
+    **/
+
+    var $uriRegistry      = [];
+    
 
     function __construct() {
-        $cmd = "svn info | grep Revision | awk -F ':' '{ print $1 }'";
-        $this->version = trim(shell_exec($cmd));
         $this->path = __DIR__;
     }  
 
+    /**
+     * Registers a URI as a regular expression to this app.
+     * Example:
+     *
+     * <code>
+     * $myURIs = array ['#\/upload\/.*','\/'];
+     * $myapp->registerUri($myURIs);
+     * </code>
+     *
+     * @return boolean True upon successful addition of the URI. False otherwise.
+     * @param array An array of regular expressions or direct URLs upon which this app will execute.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function registerURI($uriList) {
+        $counter = 0;
+        foreach($uriList as $URI) {
+            $counter += array_push($this->uriRegistry, $URI);
+        }
+
+        return ($counter>0?true:false);
+    }
+
+    /**
+     * Examines a given URI and determines if this app should fire or not.
+     * Example:
+     *
+     * <code>
+     * $shouldFire = $app->fireOnURI($Engine->Configs->Request->uri);
+     * </code>
+     *
+     * @return boolean True if the app should fire when the requested URI is present OR no URIs have been listed. False otherwise.
+     * @param string The URI we are testing.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function fireOnURI($uri) {
+        //If no URIs have been registered for this app, always fire.
+        if(count($this->uriRegistry) == 0) return true;
+
+        foreach($this->uriRegistry as $regex) {
+            if(preg_match($regex, $uri)) return true;
+        }
+
+        return false;
+    }
 
     /**
      * Hooks this app to a hook in the system.

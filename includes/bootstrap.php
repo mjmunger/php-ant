@@ -18,6 +18,11 @@ require('includes/functions.php');
 check_schema();
 
 /* These are hard required because they are bootstrapping classes */
+require('includes/classes/ServerEnvironment.class.php');
+require('includes/classes/SSLEnvironment.class.php');
+require('includes/classes/HTTPEnvironment.class.php');
+require('includes/classes/Execution.class.php');
+require('includes/classes/WebRequest.class.php');
 require('includes/classes/ConfigBase.class.php');
 require('includes/classes/ConfigCLI.class.php');
 require('includes/classes/ConfigWeb.class.php');
@@ -32,9 +37,43 @@ require('includes/classes/ConfigFactory.class.php');
 $pdo = gimmiePDO();
 $antConfigs = PHPAnt\Core\ConfigFactory::getConfigs($pdo,$vars);
 
+//Provision the server variables if we have a ConfigWeb object.
+switch($antConfigs->environment) {
+    case PHPAnt\Core\ConfigBase::WEB:
+
+        //Abstract and objectify $_SERVER
+        $Server = new \PHPAnt\Core\ServerEnvironment();
+        $Server->setup($_SERVER);
+
+        //Setup the HTTP Environment
+        $HTTP = new \PHPAnt\Core\HTTPEnvironment();
+        $HTTP->setup($_SERVER);
+        $Server->HTTP = $HTTP;
+
+        //Setup SSL.
+        $SSL = new \PHPAnt\Core\SSLEnvironment();
+        $SSL->setup($_SERVER);
+        $Server->SSL = $SSL;
+
+        //Setup the Web Request
+        $WR = new \PHPAnt\Core\WebRequest();
+        $WR->setup($_SERVER);
+        $WR->parsePost($_POST);
+        $WR->parseGet($_GET);
+        $WR->mergeRequest();
+        $Server->Request = $WR;
+
+        //Setup script execution environment
+        $ScriptExecution = new \PHPAnt\Core\ScriptExecution();
+        $ScriptExecution->setup($_SERVER);
+        $Server->Execution = $ScriptExecution;
+
+        $antConfigs->Server = $Server;
+        break;
+}
+
 /* REGISTER THE AUTOLOADER! This has to be done first thing after we get the configs! */
 if(!spl_autoload_register([$antConfigs,'bfw_autoloader'])) die("Autoloader failed!");
-
 
 /** END LOAD CONFIGURATIONS **/
 
@@ -73,11 +112,9 @@ require('AppEngine.php');
 
 $Engine = new PHPAnt\Core\AppEngine($antConfigs,$options);
 
-/* If we are running the CLI with the -d switch, initialize the pluging engine as such. */
-
 switch ($Engine->Configs->environment) {
     case PHPAnt\Core\ConfigBase::WEB:
-        $Engine->Configs->checkWebVerbosity($Engine);
+        //$Engine->Configs->checkWebVerbosity($Engine);
         break;
     
     default:

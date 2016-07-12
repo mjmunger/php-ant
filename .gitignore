@@ -8,3 +8,4 @@ composer.phar
 docs
 t
 .blacklist
+disabled.log

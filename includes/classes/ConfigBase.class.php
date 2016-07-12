@@ -107,36 +107,6 @@ class ConfigBase
 	}	
 
 	/**
-	 * Gets the fully qualified domain name of the site including the protocol (http vs. https).
-	 * Example:
-	 *
-	 * <code>
-	 * $site = getHostFQDN();
-	 * </code>
-	 *
-	 * @return string The fully qualified domain name of the host.
-	 * @author Michael Munger <michael@highpoweredhelp.com>
-	 **/
-	
-	function getHostFQDN() {
-	    //returns the FQDN of the host. Ex: https://www.thedomain.com/
-	    
-	    $prefix = '';
-
-	    switch ($this->environment) {
-	    	case ConfigBase::WEB:
-			    $prefix = ($_SERVER['HTTPS']?'https://':'http://');
-			    return $prefix . $_SERVER['HTTP_HOST'] . '/';
-	    		break;
-	    	
-	    	case ConfigBase::CLI:
-	    		return $this->http_host . '/';
-	    		break;
-	    }
-	    
-	}	
-
-	/**
 	 * Converts a file system path to a web accessible URI.
 	 * Example:
 	 *
@@ -327,5 +297,21 @@ class ConfigBase
 	    $stmt = $this->pdo->prepare($query);
 	    $values = [$key];
 	    return $stmt->execute($values);
-	}	
+	}
+
+	/**
+	 * Gets the fully qualified domain name of the site including the protocol (http vs. https).
+	 * Example:
+	 *
+	 * <code>
+	 * $site = getHostFQDN();
+	 * </code>
+	 *
+	 * @return string The fully qualified domain name of the host.
+	 * @author Michael Munger <michael@highpoweredhelp.com>
+	 **/
+	
+	function getHostFQDN() {
+	    return $this->http_host . '/';
+	}		
 }

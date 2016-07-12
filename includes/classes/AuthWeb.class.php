@@ -10,7 +10,7 @@ class WebAuth extends BFWAuth
         $this->authType   = BFWAuth::WEB;
     }
 
-    function redirect($PE) {
+    function redirect($Engine) {
         /* Never redirect for any of these pages page */
         $noRedirect = ['/login.php'
                       ,'/reset.php'
@@ -38,7 +38,7 @@ class WebAuth extends BFWAuth
             case false:
                 /* Short circuit if we are on a page that does not require authentication */
                 if(!$shouldRedirect) return true;
-                $url = $PE->Configs->getHostFQDN()."login.php";
+                $url = $Engine->Configs->getHostFQDN()."login.php";
                 break;
         }
 

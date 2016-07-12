@@ -1,0 +1,12 @@
+#Force SSL
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+
+#Pretty Links - Just like in WP, we need to parse it at index.php, and include appropriately.
+Options +FollowSymLinks
+Options +Indexes
+#RewriteEngine On
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteRule .* index.php [L] 

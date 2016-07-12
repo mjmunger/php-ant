@@ -4,6 +4,8 @@ namespace PHPAnt\Core;
 
 class ConfigWeb extends ConfigBase
 {
+	var $Server = NULL;
+
 	function __construct(\PDO $pdo,$vars) {
 		//session_start();
 
@@ -111,4 +113,23 @@ class ConfigWeb extends ConfigBase
 		    $PE->setVerbosity($level);
 		}	
 	}
+
+	/**
+	 * Gets the fully qualified domain name of the site including the protocol (http vs. https).
+	 * Example:
+	 *
+	 * <code>
+	 * $site = getHostFQDN();
+	 * </code>
+	 *
+	 * @return string The fully qualified domain name of the host.
+	 * @author Michael Munger <michael@highpoweredhelp.com>
+	 **/
+	
+	function getHostFQDN() {
+	    //returns the FQDN of the host. Ex: https://www.thedomain.com/
+	    $prefix = ($this->Server->SSL->HTTPS?'https://':'http://');
+	    return $prefix . $this->Server->HTTP->host . '/';
+		break;
+	}	
 }

@@ -55,4 +55,21 @@ class ConfigCLI extends ConfigBase
 			echo $output;
 		}
 	}	
+
+	/**
+	 * Gets the fully qualified domain name of the site including the protocol (http vs. https).
+	 * Example:
+	 *
+	 * <code>
+	 * $site = getHostFQDN();
+	 * </code>
+	 *
+	 * @return string The fully qualified domain name of the host.
+	 * @author Michael Munger <michael@highpoweredhelp.com>
+	 **/
+	
+	function getHostFQDN() {
+	    return $this->http_host . '/';
+	}	
+
 }

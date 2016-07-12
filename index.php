@@ -28,7 +28,7 @@
 	
 	if(isset($current_user)) {
       $env = ['current_user' => $current_user];
-      $PE->runActions('show-dashboard', $env);
+      $Engine->runActions('show-dashboard', $env);
 	}
 
 if(file_exists('local/footer.php')) {

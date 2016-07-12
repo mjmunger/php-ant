@@ -20,11 +20,12 @@ include('functions/mockVars.php');
  * @author Michael Munger <michael@highpoweredhelp.com>
  **/
 
-function getMyConfigs() {
+function getMyConfigs($vars = false) {
+
 	//Setup test.
-	$vars = getMockVars();
+	$v = ($vars?$vars:getMockVars());
 	$pdo = gimmiePDO();
-	$C = new PHPAnt\Core\ConfigCLI($pdo, $vars);
+	$C = new PHPAnt\Core\ConfigCLI($pdo, $v);
 	return $C;
 }
 

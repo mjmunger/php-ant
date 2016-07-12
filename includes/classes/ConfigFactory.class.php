@@ -11,7 +11,7 @@ class ConfigFactory
 				break;
 			
 			default:
-				return new ConfigWeb($pdo);
+				return new ConfigWeb($pdo, $vars);
 				break;
 		}
 
