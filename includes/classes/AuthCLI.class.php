@@ -8,7 +8,7 @@ class CLIAuth extends AntAuth
         parent::__construct($pdo,$logger);
         $this->authorized = true;
         $this->logged_in  = true;
-        $this->authType   = BFWAuth::CLI;
+        $this->authType   = AntAuth::CLI;
         $this->db 		  = $pdo;
     }
 

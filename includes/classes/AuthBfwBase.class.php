@@ -45,7 +45,7 @@ class AntAuth
         return false;
     }
 
-    function authorize(PHPAnt\Core\AppEngine $Engine) {
+    function authorize(AppEngine $Engine) {
         //If we didn't try to authenticate, don't bother with the rest.
         if(!isset($_POST['user']) || !isset($_POST['password'])) {
             return false;
