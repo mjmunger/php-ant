@@ -1,13 +1,15 @@
 <?php
 
-class WebAuth extends BFWAuth
+namespace PHPAnt\Core;
+
+class WebAuth extends AntAuth
 {
-    function __construct(PDO $pdo, Logger $logger) {
+    function __construct(\PDO $pdo, \Logger $logger) {
         parent::__construct($pdo,$logger);
         $this->authorized = false;
         $this->logged_in  = false;
         $this->db         = $pdo;
-        $this->authType   = BFWAuth::WEB;
+        $this->authType   = AntAuth::WEB;
     }
 
     function redirect($Engine) {

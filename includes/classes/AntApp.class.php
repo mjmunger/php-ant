@@ -225,32 +225,45 @@ Class AntApp
         if($this->verbosity > 14) {
             echo "Triggering hooks for app: " . $this->appName . PHP_EOL;
             echo "AVAILABLE HOOKS:" . PHP_EOL;
-            $args['PE']->Configs->debug_print($this->hooks,$this->appName . " hooks",true);            
+            $args['AE']->Configs->debug_print($this->hooks,$this->appName . " hooks",true);            
         }
 
         foreach($this->hooks as $hook) {
 
             if($this->verbosity > 14) {
-                $args['PE']->Configs->debug_print($hook,"HOOK");
-                //$args['PE']->Configs->debug_compare($requested_hook, $hook['hook']);
+                $args['AE']->Configs->debug_print($hook,"HOOK");
+                //$args['AE']->Configs->debug_compare($requested_hook, $hook['hook']);
             }
 
             if($requested_hook == $hook['hook']) {
 
-                if($args) {
-                    $result    = call_user_func(array($this,$hook['callback']),$args);
-                } else {
-                    $result    = call_user_func(array($this,$hook['callback']));
+                try {
+
+                    $result    = call_user_func(array($this,$hook['callback']),($args?$args:false));
+                    
+                } catch (Exception $e) {
+                    //Disable this app on next load, and log the exception.
+                    $args['AE']->log($this->appName,$e->getMessage());
+                    $args['AE']->log($this->appName,"***DISABLING THIS APP***");
+                    $args['AE']->disableApp($this->appName,$args['AE']->availableApps[$this->appName]);
+                    $args['AE']->log($this->appName,"Reloading app engine...");
+                    $args['AE']->reload();
                 }
 
                 if($this->verbosity > 14) {
-                    $args['PE']->Configs->debug_print($result,"RESULT");
+                    $args['AE']->Configs->debug_print($result,"RESULT");
                 }
                 //We always return an array.
                 if(!is_array($result)) {
                     /*$this->showError(sprintf("Error! The app %s is not returning an array from the function %s. All app functions should return an array as a result: even if you are just returing array('success' => true) or array('success' => false) to indicate the success of your app acation." . PHP_EOL,$this->appName,$hook['callback']));*/
                     $error = sprintf("Error! The app %s is not returning an array from the function %s. All app functions should return an array as a result: even if you are just returing array('success' => true) or array('success' => false) to indicate the success of your app action." . PHP_EOL,$this->appName,$hook['callback']);
-                    throw new \Exception($error, 0, null);
+                    //throw new \Exception($error, 0, null);
+                    $args['AE']->log($this->appName,$error);
+                    $args['AE']->log($this->appName,"***DISABLING THIS APP***");
+                    $args['AE']->disableApp($this->appName,$args['AE']->availableApps[$this->appName]);
+                    $args['AE']->log($this->appName,"Reloading app engine...");
+                    $args['AE']->reload();                    
+
                 }
                 $return = array_merge($result,$return);
             }
@@ -263,7 +276,7 @@ Class AntApp
 
     function checkACL($feature,$args) {
 
-        $PE = $args['PE'];
+        $AE = $args['AE'];
 
         /*echo "<pre>"; print_r($args); echo "</pre>";*/
 
@@ -279,15 +292,15 @@ Class AntApp
         }        
 
         /* From this point forward, we need the user object to determine access. */
-        if(!isset($PE->current_user)) {
-            $PE->Configs->divAlert(sprintf("You are attempting to trigger a app via %s that has access control enabled without passing the current_user object as an argument. Either pass the current_user object for this hook and callback, or set hasACL to false",$feature),'danger');
-            $PE->Configs->divAlert('System shutdown to protect security.','danger');
+        if(!isset($AE->current_user)) {
+            $AE->Configs->divAlert(sprintf("You are attempting to trigger a app via %s that has access control enabled without passing the current_user object as an argument. Either pass the current_user object for this hook and callback, or set hasACL to false",$feature),'danger');
+            $AE->Configs->divAlert('System shutdown to protect security.','danger');
             die();
         }
 
         /* Administrators can do whatever they want. */
         
-        if($PE->current_user->role->users_roles_role == 'A') {
+        if($AE->current_user->role->users_roles_role == 'A') {
             return true;
         }
 

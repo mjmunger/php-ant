@@ -56,6 +56,26 @@ class AppEngine {
     var $activatedApps    = [];
     var $disableApps      = false;
 
+    /**
+     * Instantiates and sets up the App Engine.
+     * Example:
+     *
+     * <code>
+     * $AppEngine = new \PHPAnt\Core\AppEngine($configs,$options);
+     * </code>
+     *
+     * @return return value
+     * @param object $configs An instantiation of either COnfigCLI or ConfigWeb classes.
+     * @param array  $options An associative array of various options for
+     *        configuring the behavior of the AppEngine.
+     * <code>
+     *        $options = [ 'appRoot'     => (string)  The forced root where apps are stored / accessed. Optional. <br>
+     *                   , 'disableApps' => (boolean) When set to true, prevents AppEngine from loading any apps upon initialization. <br>
+     *                   ];
+     * </code>
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
     function __construct($configs, $options) {
         //Deal with defaults.
         if(!isset($options['appRoot']))     $options['appRoot']      = 'includes/apps/';
@@ -102,6 +122,7 @@ class AppEngine {
      * Tested with testAppEnableDisable()
      **/
     function enableApp($name,$path) {
+        $this->log('AppEngine',sprintf('Enabling %s (%s)',$name,$path));
         if($name === false) {
             divAlert("Could not enable app! It doesn't have a name. That's bad. Imagine going through life with out a name. Everyone would be like: 'Hey you!' all the time. You should name this plugin so we can enable it later.",'alert');
             return false;
@@ -128,6 +149,7 @@ class AppEngine {
      **/
 
     function disableApp($name, $path) {
+        $this->log('AppEngine',sprintf('Disabling %s (%s)',$name,$path));
         unset($this->enabledApps[$name]);
         return $this->Configs->setConfig('enabledAppsList',json_encode($this->enabledApps));
     }
@@ -145,7 +167,7 @@ class AppEngine {
 
         foreach($this->availableApps as $name => $path) {
             /* If the app name starts with a "+" we need to add it to the list of auto-enabled plugins. */
-            if($name[0] == "+" && !$this->disableApps) {
+            if($name[0] == "+" && !$this->disableApps && !in_array($path, $this->enabledApps)) {
                 $status = 'Auto';
                 if(!$this->enableApp($name,$path)) throw new Exception("Could not enable app $name in $path", 1);
             }        
@@ -243,7 +265,8 @@ class AppEngine {
             //Ignore apps that have a set of URIs registered when the current
             //URI does not match.
             if($this->Configs->environment == ConfigBase::WEB) {
-                if(!$app->fireOnURI($this->Configs->Server->Request->uri)) continue;
+                $shouldFire = $app->fireOnURI($this->Configs->Server->Request->uri);
+                if(!$shouldFire) continue;
             }
             
 
@@ -536,7 +559,16 @@ class AppEngine {
 
                 //Instantiate a new class of the app.
                 try {
+
                     $app = new $appClass($this);
+                    $appInitPath = dirname($path) . '/app.json';
+                    //Load init vars from the json init file if it exists.
+                    if(file_exists($appInitPath)) {
+                        $options = json_decode(file_get_contents($appInitPath), true );
+                        $app->init($options);
+                        //echo "Init() ran for $name" . PHP_EOL;
+                    }
+
                 } catch (Exception $e) {
                     echo "Tried to instantiate a new class of $appClass". PHP_EOL;
                     echo $e->getMessage();
@@ -603,6 +635,7 @@ class AppEngine {
     }
 
     function reload() {
+        $this->log('AppEngine','Reloading');
         //Reload and reactivate the apps.
         $this->getenabledApps();
         $this->activateApps();
@@ -611,5 +644,37 @@ class AppEngine {
         $this->runActions('lib-loader');
         /* Load any spl-autoloaders that are contained in Apps */
         $this->runActions('load_loaders');        
+        $this->log('AppEngine','Reload complete.');
+    }
+
+    /**
+     * Logs a message to the specified log file.
+     * Example:
+     *
+     * <code>
+     * $Engine->log("this is a message!");
+     * </code>
+     *
+     * @param string $component The app or component that we are logging about.
+     * @param string $message The message to be added to the log file.
+     * @param string $file Optional. The log file to be created (or appended)
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function log($component,$message,$file='AppEngine.log') {
+        if(!file_exists($this->Configs->getLogDir())) mkdir($this->Configs->getLogDir());
+
+        $logPath = $this->Configs->getLogDir() . $file;
+
+        $timestamp = date('M d H:i:s');
+        $buffer = '';
+        $buffer .= str_pad($timestamp, 16);
+        $buffer .= str_pad($component, 25);
+        $buffer .= $message;
+        $buffer .= PHP_EOL;
+
+        $fp = fopen($logPath,'a+');
+        fwrite($fp,$buffer);
+        fclose($fp);
     }
 }

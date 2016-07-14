@@ -285,8 +285,7 @@ class AppEngineTest extends TestCase
 	 * @depends testAppEnableDisable
 	 */
 	
-	public function testDisallowAppWithoutManifest()
-	{
+	public function testDisallowAppWithoutManifest() {
 
 		$options = getDefaultOptions();
 		$A = getMyAppEngine($options);
@@ -309,4 +308,28 @@ class AppEngineTest extends TestCase
 		if(file_exists($manifestPathBackup)) rename($manifestPathBackup, $manifestPath);
 		$this->assertFileExists($manifestPath);
 	}
+
+	/**
+	 * @covers AppEngine::log
+	 */
+	
+	public function testTestLog() {
+		$options = getDefaultOptions();
+		$A = getMyAppEngine($options);
+
+		$logfile = $A->Configs->getLogDir() . 'testlog.log';
+		$this->assertFileNotExists($logfile);
+
+		$A->log('test','test log message','testlog.log');
+		$this->assertFileExists($logfile);
+
+		$regex = '/[a-zA-Z]{3} [0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [a-zA-Z_-]{0,} .*/';
+		$buffer = file_get_contents($logfile);
+		$this->assertRegExp($regex, $buffer);
+
+		unlink($logfile);
+
+		$this->assertFileNotExists($logfile);
+	}
+	
 }

@@ -39,7 +39,12 @@ class ConfigBase
 
 	function getImagesDir() {
 		return $this->document_root . '/images/';
-	}	
+	}
+
+	function getLogDir() {
+		$homeDir = posix_getpwuid(posix_getuid());
+		return $homeDir['dir'] . '/log/';
+	}
 
 	/**
 	 * Autoloader for BFW Toolkit classes.

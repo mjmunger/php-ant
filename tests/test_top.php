@@ -8,6 +8,21 @@ include('functions/mockVars.php');
 
 /* Functions that will probably stay in the global scope for consistency go here until refactored into a file under functions/ */
 
+function getDefaultOptions() {
+
+	$PM = new PHPAnt\Core\PermissionManager();
+
+	$vars = getMockVars();
+
+	$options = ['safeMode' 		    => false
+			   ,'permissionManager' => $PM
+			   ,'verbosity'         => 0
+			   ,'appRoot'           => $vars['document_root'] . '/includes/apps/'
+			   ];
+
+	return $options;
+}
+
 /**
  * Returns an instance of PHPAnt\Core\CLIConfig
  * Example:
@@ -29,19 +44,25 @@ function getMyConfigs($vars = false) {
 	return $C;
 }
 
-function getDefaultOptions() {
+/**
+ * Returns an instance of PHPAnt\Core\ConfigWeb
+ * Example:
+ *
+ * <code>
+ * $C = getWebConfigs()
+ * </code>
+ *
+ * @return object An instance of PHPAnt\Core\Config
+ * @author Michael Munger <michael@highpoweredhelp.com>
+ **/
 
-	$PM = new PHPAnt\Core\PermissionManager();
+function getWebConfigs($vars = false) {
 
-	$vars = getMockVars();
-
-	$options = ['safeMode' 		    => false
-			   ,'permissionManager' => $PM
-			   ,'verbosity'         => 0
-			   ,'appRoot'           => $vars['document_root'] . '/includes/apps/'
-			   ];
-
-	return $options;
+	//Setup test.
+	$v = ($vars?$vars:getMockVars());
+	$pdo = gimmiePDO();
+	$W = new PHPAnt\Core\ConfigWeb($pdo, $v);
+	return $W;
 }
 
 /**
@@ -57,8 +78,9 @@ function getDefaultOptions() {
  * @author Michael Munger <michael@highpoweredhelp.com>
  **/
 
-function getMyAppEngine($options) {
-	$C = getMyConfigs();
+function getMyAppEngine($options, $C = false) {
+
+	$C = ($C?$C:getMyConfigs());
 
 	$A = new PHPAnt\Core\AppEngine($C,$options);
 	return $A;		

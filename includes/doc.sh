@@ -4,9 +4,10 @@ OUTPUTDIR=/home/`whoami`/www/rtfm/
 rm -fvr $OUTPUTDIR
 
 phpdoc \
--f application_top.php \
+-f bootstrap.php \
 -f application_local.php \
+-f AppEngine.php \
 -d classes \
--d children \
--d plugins \
+-d classes \
+-d apps \
 -t $OUTPUTDIR

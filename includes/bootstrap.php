@@ -1,5 +1,7 @@
 <?php
 
+namespace PHPAnt\Core;
+
 /* Set the default date and timezone, For a list of supported timezones, see: http://php.net/manual/en/timezones.php */
 date_default_timezone_set('America/New_York');
 
@@ -35,28 +37,28 @@ require('includes/classes/ConfigFactory.class.php');
 /** LOAD CONFIGURATIONS **/
 
 $pdo = gimmiePDO();
-$antConfigs = PHPAnt\Core\ConfigFactory::getConfigs($pdo,$vars);
+$antConfigs = ConfigFactory::getConfigs($pdo,$vars);
 
 //Provision the server variables if we have a ConfigWeb object.
 switch($antConfigs->environment) {
-    case PHPAnt\Core\ConfigBase::WEB:
+    case ConfigBase::WEB:
 
         //Abstract and objectify $_SERVER
-        $Server = new \PHPAnt\Core\ServerEnvironment();
+        $Server = new ServerEnvironment();
         $Server->setup($_SERVER);
 
         //Setup the HTTP Environment
-        $HTTP = new \PHPAnt\Core\HTTPEnvironment();
+        $HTTP = new HTTPEnvironment();
         $HTTP->setup($_SERVER);
         $Server->HTTP = $HTTP;
 
         //Setup SSL.
-        $SSL = new \PHPAnt\Core\SSLEnvironment();
+        $SSL = new SSLEnvironment();
         $SSL->setup($_SERVER);
         $Server->SSL = $SSL;
 
         //Setup the Web Request
-        $WR = new \PHPAnt\Core\WebRequest();
+        $WR = new WebRequest();
         $WR->setup($_SERVER);
         $WR->parsePost($_POST);
         $WR->parseGet($_GET);
@@ -64,7 +66,7 @@ switch($antConfigs->environment) {
         $Server->Request = $WR;
 
         //Setup script execution environment
-        $ScriptExecution = new \PHPAnt\Core\ScriptExecution();
+        $ScriptExecution = new ScriptExecution();
         $ScriptExecution->setup($_SERVER);
         $Server->Execution = $ScriptExecution;
 
@@ -78,7 +80,7 @@ if(!spl_autoload_register([$antConfigs,'bfw_autoloader'])) die("Autoloader faile
 /** END LOAD CONFIGURATIONS **/
 
 /** Setup Logger **/
-$logger = new logger('bootstrap');
+$logger = new \logger('bootstrap');
 $current_user = null;
 
 /**
@@ -106,14 +108,14 @@ if(isset($verbosity))     $options['verbosity']     = $verbosity;
 if(isset($loader_debug))  $options['loader_debug']  = $loader_debug;
 
 //Add classes
-$options['permissionManager']                       = new PHPAnt\Core\PermissionManager();
+$options['permissionManager']                       = new PermissionManager();
 
 require('AppEngine.php');
 
-$Engine = new PHPAnt\Core\AppEngine($antConfigs,$options);
+$Engine = new AppEngine($antConfigs,$options);
 
 switch ($Engine->Configs->environment) {
-    case PHPAnt\Core\ConfigBase::WEB:
+    case ConfigBase::WEB:
         //$Engine->Configs->checkWebVerbosity($Engine);
         break;
     
@@ -157,10 +159,10 @@ try {
 
 //Do not require authentication for the CLI
 switch ($Authenticator->authType) {
-    case BFWAuth::CLI:
+    case AntAuth::CLI:
         //print "CLI Access is for administrators only. God like permissions are present. Caveat emptor" . PHP_EOL;
         break;
-    case BFWAuth::WEB || BFWAuth::MOBILE:
+    case AntAuth::WEB || AntAuth::MOBILE:
         $Authenticator->checkCookies();
         
         if(!$Authenticator->authorized) {

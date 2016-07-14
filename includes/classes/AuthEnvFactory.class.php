@@ -1,8 +1,10 @@
 <?php
 
+namespace PHPAnt\Core;
+
 class AuthEnvFactory
 {
-    static function getAuthenticator(PDO $pdo, Logger $logger) {
+    static function getAuthenticator(\PDO $pdo, \Logger $logger) {
 
         switch (php_sapi_name()) {
             case 'cli':

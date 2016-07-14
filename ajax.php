@@ -1,5 +1,5 @@
 <?php
-include('includes/application_top.php');
+include('includes/bootstrap.php');
 
 /**
  * Handles access to all ajax functions.
@@ -26,14 +26,15 @@ foreach($_GET as $key => $value) {
 if($hook === false) {
     die("When creating an Ajax call, you must specify the hook to be run with the 'hook' variable. For example, you can use https://www.yourdomain.com/ajax.php?hook=executeMyPlugin?var1=foo&var2=bar. This will cause the plugin engine to run the executeMyPlugin action and pass the remaining values as an array of arguments to that function / method. Arguments are optional, of course, but the runActions varible is NOT. Please modify your code, and try again.");
 }
+
 /* 2. Get everything else, and package it into the $args array */
 foreach($_GET as $key => $value) {
     if($key != 'hook') {
         $args[$key] = $value;
     }
 }
-/* 3. Run the action. */
 
-$PE->runActions($hook,$args);
+/* 3. Run the action. */
+$Engine->runActions($hook,$args);
 
 /* 4. This page will return whatever the hook / plugin outputs. If it's an image, it should be the entirety of the HTML required to display it. If it's JSON, be sure to include the headers for the MIME type, etc... */

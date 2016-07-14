@@ -1,6 +1,8 @@
 <?php 
 
-class BFWAuth
+namespace PHPAnt\Core;
+
+class AntAuth
 {
     const CLI         = 0;
     const WEB         = 1;
@@ -13,7 +15,7 @@ class BFWAuth
     var $current_user = null;
     var $pdo          = null;
 
-    function __construct(PDO $pdo,Logger $logger) {
+    function __construct(\PDO $pdo, \Logger $logger) {
         $this->pdo = $pdo;
         $this->logger = $logger;
     }
@@ -26,7 +28,7 @@ class BFWAuth
             if($current_user->loadFromToken()) {
                 $this->logger->log("User has been successfully loaded from token.");
                 //Setup user logging.
-                $ulogger = new Logger('current_user',str_replace('@','.',$current_user->users_email).'.log');
+                $ulogger = new \Logger('current_user',str_replace('@','.',$current_user->users_email).'.log');
                 $current_user->logger = $ulogger;     
                 $this->logged_in  = true;
                 $this->authorized = true;

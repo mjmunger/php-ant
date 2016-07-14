@@ -1,8 +1,10 @@
 <?php
 
-class MobileAuth extends BFWAuth
+namespace PHPAnt\Core;
+
+class MobileAuth extends AntAuth
 {
-    function __construct(PDO $pdo, Logger $logger) {
+    function __construct(\PDO $pdo, \Logger $logger) {
         parent::__construct();
         $this->authorized = false;
         $this->logged_in  = false;
