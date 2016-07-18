@@ -518,7 +518,7 @@ class AppEngine {
             $fp = fopen('disabled.log','a+');
             fwrite($fp,$message);
             fclose($fp);
-            unlink('.blacklist');
+            if(file_exists('.blacklist')) unlink('.blacklist');
         }        
 
         //Reset apps
@@ -593,7 +593,7 @@ class AppEngine {
                 array_push($this->apps,$app);
                 $this->activatedApps[$path]= $name;
 
-                unlink('.blacklist');
+               if(file_exists('.blacklist')) unlink('.blacklist');
                 if(file_exists('.blacklist')) die(__FILE__ . ':' . __LINE__);
             }
         }
