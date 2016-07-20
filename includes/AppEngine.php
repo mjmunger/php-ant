@@ -647,7 +647,7 @@ class AppEngine {
                 array_push($this->apps,$app);
                 $this->activatedApps[$path]= $name;
 
-                unlink('.blacklist');
+               if(file_exists('.blacklist')) unlink('.blacklist');
                 if(file_exists('.blacklist')) die(__FILE__ . ':' . __LINE__);
             }
         }
@@ -734,7 +734,6 @@ class AppEngine {
         fwrite($fp,$buffer);
         fclose($fp);
     }
-
     /**
      * Error handler for the AppEngine
      * Example:
