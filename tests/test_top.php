@@ -11,6 +11,7 @@ include('functions/mockVars.php');
 function getDefaultOptions() {
 
 	$PM = new PHPAnt\Core\PermissionManager();
+	$BL = new PHPAnt\Core\AppBlacklist();
 
 	$vars = getMockVars();
 
@@ -18,6 +19,8 @@ function getDefaultOptions() {
 			   ,'permissionManager' => $PM
 			   ,'verbosity'         => 0
 			   ,'appRoot'           => $vars['document_root'] . '/includes/apps/'
+			   ,'AppBlacklist'      => $BL
+			   ,'verbosity'         => 0
 			   ];
 
 	return $options;

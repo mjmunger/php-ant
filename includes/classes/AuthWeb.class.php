@@ -21,7 +21,7 @@ class WebAuth extends AntAuth
 
         /* Remove any variables because they break this check. We only want the page. */
         if(stripos($_SERVER['REQUEST_URI'],'?')) {
-            $buffer = split("\?", $_SERVER['REQUEST_URI']);
+            $buffer = explode("\?", $_SERVER['REQUEST_URI']);
             $requestedPage = $buffer[0];
         } else {
             $requestedPage = $_SERVER['REQUEST_URI'];

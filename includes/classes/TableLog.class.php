@@ -82,10 +82,36 @@ Class TableLog
 		$this->columnSize = $columnSize;
 	}
 
+	/**
+	 * Shows the table directly in the CLI
+	 *
+	 * This is a helper function that first calls TableLog::makeTable(), and
+	 * then displays it immediately in the CLI.
+	 * Example:
+	 *
+	 * <code>
+	 * $TL->showTable();
+	 * </code>
+	 *
+	 * @return void
+	 * @author Michael Munger <michael@highpoweredhelp.com>
+	 **/
+
 	function showTable() {
 		echo $this->makeTable();
 	}
 
+	/**
+	 * Creates the table for the CLI
+	 * Example:
+	 *
+	 * <code>
+	 * $table = $TL->makeTable();
+	 * </code>
+	 *
+	 * @return string The table ready to display in the CLI.
+	 * @author Michael Munger <michael@highpoweredhelp.com>
+	 **/
 	function makeTable() {
 		$buffer = '';
 

@@ -1,4 +1,6 @@
 <?php
+require_once('includes/bootstrap.php');
+
 /**
  * Logs a user out of the system.
  *

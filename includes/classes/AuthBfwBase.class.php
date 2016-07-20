@@ -85,8 +85,8 @@ class AntAuth
         $this->logged_in  = true;
         $this->authorized = true;
 
-        if(isset($_POST['remember'])) {
-            setcookie("current_user",$u->users_token,time()+60*60*24*30,'','',true);
-        }
+        if(isset($_POST['remember'])) setcookie("current_user",$u->users_token,time()+60*60*24*30,'','',true);
+
+        $Engine->log($u->getFullName(),$u->getFullName() . ' logged in successfully');
     }
 }

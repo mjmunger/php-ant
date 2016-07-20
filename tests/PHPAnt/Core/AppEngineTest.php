@@ -6,6 +6,8 @@ class AppEngineTest extends TestCase
 
 	function testConstructor() {
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$A = getMyAppEngine($options);
 
 		$this->assertInstanceOf('\PDO',$A->Configs->pdo);
@@ -17,6 +19,8 @@ class AppEngineTest extends TestCase
 	 **/
 	function testAppParser() {
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$A = getMyAppEngine($options);
 
 		$appPath = 'includes/apps/TestApp/app.php';
@@ -32,6 +36,8 @@ class AppEngineTest extends TestCase
 
 	function testAppEnableDisable() {
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$A = getMyAppEngine($options);
 
 		//Enable the test app from this test suite.
@@ -75,6 +81,8 @@ class AppEngineTest extends TestCase
 
 	function testVerbosity() {
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$A = getMyAppEngine($options);
 		$A->setVerbosity(10);
 
@@ -96,6 +104,8 @@ class AppEngineTest extends TestCase
 		$appRoot = $C->document_root . '/includes/apps/';
 
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$options['appRoot'] = $appRoot;
 		$A = getMyAppEngine($options);
 		
@@ -133,6 +143,8 @@ class AppEngineTest extends TestCase
 		$appRoot = $C->document_root . '/includes/apps/';
 
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$options['appRoot'] = $appRoot;
 		$A = getMyAppEngine($options);		
 
@@ -179,6 +191,8 @@ class AppEngineTest extends TestCase
 		$appRoot = $C->document_root . '/includes/apps/';
 		
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$options['appRoot'] = $appRoot;
 		$A = getMyAppEngine($options);
 		
@@ -241,6 +255,8 @@ class AppEngineTest extends TestCase
 		$appRoot = $C->document_root . '/includes/apps/';
 
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$options['appRoot'] = $appRoot;
 		$A = getMyAppEngine($options);		
 
@@ -260,6 +276,8 @@ class AppEngineTest extends TestCase
 		$appRoot = $C->document_root . '/includes/apps/';
 
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$options['appRoot'] = $appRoot;
 		$A = getMyAppEngine($options);		
 
@@ -288,6 +306,8 @@ class AppEngineTest extends TestCase
 	public function testDisallowAppWithoutManifest() {
 
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$A = getMyAppEngine($options);
 
 		//Enable the test app from this test suite.
@@ -315,6 +335,8 @@ class AppEngineTest extends TestCase
 	
 	public function testTestLog() {
 		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
 		$A = getMyAppEngine($options);
 
 		$logfile = $A->Configs->getLogDir() . 'testlog.log';
@@ -331,5 +353,24 @@ class AppEngineTest extends TestCase
 
 		$this->assertFileNotExists($logfile);
 	}
-	
+
+	public function testBlacklist()	{
+
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options = getDefaultOptions();
+		$options['AppBlacklist'] = $BL;
+
+		$A = getMyAppEngine($options);
+
+		$path = tempnam('/tmp/', "test_");
+		
+		$A->AppBlacklist->addToBlacklist($path);
+
+		$this->assertTrue($A->AppBlacklist->isBlacklisted($path));
+
+		$A->AppBlacklist->removeFromBlacklist($path);
+
+		$this->assertFalse($A->AppBlacklist->isBlacklisted($path));
+	}
+			
 }

@@ -9,3 +9,5 @@ docs
 t
 .blacklist
 disabled.log
+.blacklist-load 
+rtfm

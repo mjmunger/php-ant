@@ -29,6 +29,7 @@ require('includes/classes/ConfigBase.class.php');
 require('includes/classes/ConfigCLI.class.php');
 require('includes/classes/ConfigWeb.class.php');
 require('includes/classes/ConfigFactory.class.php');
+require('includes/classes/AppBlacklist.class.php');
 
 
 /* Custom Error Handler */
@@ -38,6 +39,13 @@ require('includes/classes/ConfigFactory.class.php');
 
 $pdo = gimmiePDO();
 $antConfigs = ConfigFactory::getConfigs($pdo,$vars);
+
+//Set the EngineVerbosity as it was saved - this overrides the command line params. 
+$configs = $antConfigs->getConfigs(['EngineVerbosity']);
+if(isset($configs['EngineVerbosity'])) $dbVerbosity = $configs['EngineVerbosity'];
+
+//Keep the higher verbosity between the CLI and the DB.
+if(isset($verbosity)) $verbosity = max($verbosity,$dbVerbosity);
 
 //Provision the server variables if we have a ConfigWeb object.
 switch($antConfigs->environment) {
@@ -109,10 +117,14 @@ if(isset($loader_debug))  $options['loader_debug']  = $loader_debug;
 
 //Add classes
 $options['permissionManager']                       = new PermissionManager();
+$options['AppBlacklist']                            = new AppBlacklist();
 
 require('AppEngine.php');
 
 $Engine = new AppEngine($antConfigs,$options);
+
+//Set the error handler to the AppEngine::handleError() method.
+set_error_handler(array(&$Engine,'handleError'));
 
 switch ($Engine->Configs->environment) {
     case ConfigBase::WEB:
@@ -124,6 +136,11 @@ switch ($Engine->Configs->environment) {
         break;
 }
 
+/* Setup things based on the settings in the database. */
+
+//Enable / disable the AppBlacklist
+$configs = $Engine->Configs->getConfigs(['BlacklistDisabled','EngineVerbosity']);
+$Engine->AppBlacklist->disabled = (isset($configs['BlacklistDisabled'])?(bool)$configs['BlacklistDisabled']:false);
 
 /* Load any libraries that are in the includes/libs/ directory. */
 $Engine->runActions('lib-loader');
@@ -179,3 +196,4 @@ switch ($Authenticator->authType) {
 }
 
 $Engine->current_user = $current_user;
+if(!is_null($Engine->current_user)) $Engine->log($Engine->current_user->getFullName(),"Accessed: " . $Engine->Configs->Server->Request->uri);

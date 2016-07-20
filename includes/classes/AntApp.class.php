@@ -99,7 +99,23 @@ Class AntApp
     **/
 
     var $uriRegistry      = [];
+
+
+    /**
+    * @var array $getFilters An array of get request variables that must be a)
+    *      present and b) set to a certain value before the app engine will
+    *      trigger the actions contained in this app.
+    **/
+
+    var $getFilters      = [];
+
+    /**
+    * @var array $postFilters An array of POST variables that must be a)
+    *      present and b) set to a certain value before the app engine will
+    *      trigger the actions contained in this app.
+    **/        
     
+    var $postFilters    = [];
 
     function __construct() {
         $this->path = __DIR__;
@@ -462,5 +478,120 @@ Class AntApp
 
     public function Log($message,$minimumVerbosity = 10) {
         if($this->verbosity >= $minimumVerbosity) echo $message . PHP_EOL;
+    }
+
+    /**
+     * Sets the properties of this class with values from the $options array.
+     * Example:
+     *
+     * @return void
+     * @param array $options an associative array with the class properties and their initial values.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function init($options) {
+        $this->getFilters  = [];
+        $this->postFilters = [];
+
+        foreach($options as $key => $value) {
+            //treat request filters differently.
+            echo "Key: $key" . PHP_EOL;
+            if($key == 'requestFilter') $this->setRequestFilter($value);
+
+            //if(isset($this->$key)) $this->$key = $value;
+        }
+        //echo PHP_EOL . "*-----*";
+        //var_dump($this->getFilters);
+        //echo PHP_EOL . "*-----*";
+    }    
+
+    function setRequestFilter($filters) {
+        echo "Running request filter" . PHP_EOL;
+        echo PHP_EOL;
+        var_dump($filters);
+        echo PHP_EOL;
+        $validMethods = ['GET','POST'];
+
+        foreach($validMethods as $method) {
+
+            if(!isset($filters[0]->$method)) continue;
+
+            foreach($filters[0]->$method as $var => $value) {
+                if(isset($this->AE))
+                    $this->AE->log('AppEngine'
+                                  ,sprintf("For %s, parsing key => value: %s => %s",$method,$key,$value)
+                                  ,'AppEngine.log'
+                                  ,14);
+
+                switch($method) {
+                    case 'GET':
+                        $this->getFilters[$var] = $value;
+                        break;
+                    case 'POST':
+                        $this->postFilters[$var] = $value;
+                        break;
+                    default:
+                        // pass
+                        break;
+                }
+            }
+        }
+        echo "Count of getFilters: "  . count($this->getFilters)  . PHP_EOL;
+        echo "Count of postFilters: " . count($this->postFilters) . PHP_EOL;
+    }
+
+    /**
+     * Determine if an app should not run at all because of filtering requests.
+     *
+     * Request filtering is the action of restricting an app's execution. When
+     * get or post filters are present in the app, it will ONLY execute if
+     * those variables are set during a request. If not filters are set, the
+     * app will always execute (URI Routing excluded).
+     *
+     * @return boolean True if the app should execute. False otherwise.
+     * @param object $Server the server environment instance from the AppEngine instance.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function filterOnRequest(AppEngine $Engine) {
+
+        $Server = $Engine->Configs->Server;
+        //If there are no restrictions, then return true because there are no restrictions prohibiting execution
+        if(count($this->getFilters) == 0 && count($this->postFilters) == 0) return true;
+
+        //loop through the post vars, to ensure that at least one of them allows this app to operate.
+        
+        foreach($this->postFilters as $var => $value) {
+
+            //Soft Fail if it should be set, but it's not.
+            if(isset($Server->Request->post_vars[$var])) {
+                $Engine->log('AppEngine',sprintf("POST: %s = %s?" . PHP_EOL,$Server->Request->post_vars[$var], $value));
+                if($Server->Request->post_vars[$var] == $value) return true;
+            }
+
+        }
+
+        //loop through the post vars, to ensure that at least one of them allows this app to operate.
+        foreach($this->getFilters as $var => $value) {
+            if(isset($Server->Request->get_vars[$var])) {
+                $Engine->log('AppEngine',sprintf("GET: %s = %s?" . PHP_EOL,$Server->Request->get_vars[$var], $value));
+                if($Server->Request->get_vars[$var] == $value) return true;
+            }
+        }
+
+
+        //If we made it this far, there is no reason for this thing to execute.
+        return false;
+    }
+
+    function shouldRun(AppEngine $Engine) {
+        //If we are not allowed to run on this URI, return false
+        if(!$this->fireOnURI($Engine->Configs->Server->Request->uri)) return false;
+
+        //If there are filters in place to prevent this app from running, return false.
+        if(!$this->filterOnRequest($Engine)) return false;
+
+        //allow the app to run by default.
+        return true;
     }
 }

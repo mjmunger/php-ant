@@ -55,6 +55,7 @@ class AppEngine {
     var $appRoot          = NULL;
     var $activatedApps    = [];
     var $disableApps      = false;
+    var $AppBlacklist     = NULL;
 
     /**
      * Instantiates and sets up the App Engine.
@@ -79,14 +80,16 @@ class AppEngine {
     function __construct($configs, $options) {
         //Deal with defaults.
         if(!isset($options['appRoot']))     $options['appRoot']      = 'includes/apps/';
-        if(!isset($options['disableApps'])) $options['disableApps'] = false;
+        if(!isset($options['disableApps'])) $options['disableApps']  = false;
+//        if(!isset($options['verbosity']))   $options['verbosity']    = 0;
 
-        $this->Configs     = $configs;
+        $this->Configs      = $configs;
 
-        $this->appRoot     = $options['appRoot'];
-        $this->safeMode    = $options['safeMode'];
-        $this->PM          = $options['permissionManager'];
-        $this->disableApps = $options['disableApps'];
+        $this->appRoot      = $options['appRoot'];
+        $this->safeMode     = $options['safeMode'];
+        $this->PM           = $options['permissionManager'];
+        $this->AppBlacklist = $options['AppBlacklist'];
+        $this->disableApps  = $options['disableApps'];
 
         $this->setVerbosity($options['verbosity']);
 
@@ -190,7 +193,7 @@ class AppEngine {
     function setVerbosity($int) {
         $this->verbosity = $int;
         
-        //$this->Configs->Log(sprintf("Plugin Engine verbosity set to: %s " . PHP_EOL, $int));
+        $this->log('AppEngine',sprintf("AppEngine verbosity set to: %s",$this->verbosity),'AppEngine.log',1);
 
         foreach($this->apps as $app) {
             $app->verbosity = $this->verbosity;
@@ -255,6 +258,8 @@ class AppEngine {
     function runActions($requested_hook,$args=false) {
         $return = [];
 
+        $args['requested_hook'] = $requested_hook;
+        
         //Make sure we have an instance of AppEngine as $args['AE']
         if(!isset($args['AE'])) $args['AE'] = $this;
 
@@ -263,12 +268,10 @@ class AppEngine {
         foreach($appsWithRequestedHook as $app) {
 
             //Ignore apps that have a set of URIs registered when the current
-            //URI does not match.
-            if($this->Configs->environment == ConfigBase::WEB) {
-                $shouldFire = $app->fireOnURI($this->Configs->Server->Request->uri);
-                if(!$shouldFire) continue;
-            }
-            
+            //URI does not match. OR that have request filters, and that filter
+            //is not present. (Only when we have a web environment.)
+
+            if($this->Configs->environment == ConfigBase::WEB) if(!$app->shouldRun($args['AE'])) continue;
 
             try {
                 $result = $app->trigger($requested_hook,$args);
@@ -474,7 +477,7 @@ class AppEngine {
      **/
 
     function loadApps() { 
-
+        
         $counter = 0;
         $iterator = new \RecursiveDirectoryIterator($this->appRoot,\RecursiveDirectoryIterator::SKIP_DOTS);
         $TL = new TableLog();
@@ -483,7 +486,24 @@ class AppEngine {
         {
             $counter++;
             if($file->getBasename() == 'app.php') {
+
+                //Check the blacklist to see if this failed last time.
+                $path = $file->getRealPath();
+                
+                if($this->AppBlacklist->isBlacklisted($path)) {
+                    $this->log('AppEngine',sprintf("Not loading %s because it has been blacklisted. Remove it from .blacklist-load to re-enable.",$path));
+                    continue;
+                };
+
+
+                //Add this file to a black list in case it causes issues, we can skip it later.
+                $this->AppBlacklist->addToBlacklist($path);
+
                 require_once($file->getRealPath());
+
+                //Remove the file from the blacklist because there was not a fatal error.
+                $this->AppBlacklist->removeFromBlacklist($path);
+
                 $name = $this->getAppMeta($file->getRealPath(),'name');
 
                 if($name === false) throw new Exception(sprintf('You have an app without a name, so it is not available. Consider removing / fixing it to make this warning go away. (%s)',$file->getRealPath()), 1);
@@ -518,7 +538,7 @@ class AppEngine {
             $fp = fopen('disabled.log','a+');
             fwrite($fp,$message);
             fclose($fp);
-            unlink('.blacklist');
+            if(file_exists('.blacklist')) unlink('.blacklist');
         }        
 
         //Reset apps
@@ -561,12 +581,46 @@ class AppEngine {
                 try {
 
                     $app = new $appClass($this);
+
+                    $this->log( "AppEngine"
+                              , "Created an instance of " . get_class($app)
+                              ,'AppEngine.log'
+                              ,14
+                              );
+
                     $appInitPath = dirname($path) . '/app.json';
+                    $exists = file_exists($appInitPath);
+
+                    $this->log("AppEngine"
+                              ,sprintf("App init file path: %s [%s]", $appInitPath, ($exists?"EXISTS":"Does not exist"))
+                              ,'AppEngine.log'
+                              ,14);
+
                     //Load init vars from the json init file if it exists.
-                    if(file_exists($appInitPath)) {
+                    if($exists) {
                         $options = json_decode(file_get_contents($appInitPath), true );
-                        $app->init($options);
-                        //echo "Init() ran for $name" . PHP_EOL;
+                        $app->init($options,true);
+
+                        //Verbose message.
+                        $this->log('AppEngine',sprintf('Init ran for app: %s', $name),'AppEngine.log',9);
+
+                        //Debugging message.
+                        $this->log('AppEngine'
+                                  ,sprintf('Options from json file:' . PHP_EOL . print_r($options,true))
+                                  ,'AppEngine.log'
+                                  ,14);
+
+                        //Debugging message.
+                        $this->log('AppEngine'
+                                  ,sprintf('getFilters:' . PHP_EOL . print_r($app->getFilters,true))
+                                  ,'AppEngine.log'
+                                  ,14);
+
+                        //Debugging message.
+                        $this->log('AppEngine'
+                                  ,sprintf('postFilters:' . PHP_EOL . print_r($app->postFilters,true))
+                                  ,'AppEngine.log'
+                                  ,14);
                     }
 
                 } catch (Exception $e) {
@@ -661,7 +715,10 @@ class AppEngine {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function log($component,$message,$file='AppEngine.log') {
+    function log($component,$message,$file = 'AppEngine.log',$minimumVerbosity = 0) {
+
+        if($this->verbosity < $minimumVerbosity) return false;
+
         if(!file_exists($this->Configs->getLogDir())) mkdir($this->Configs->getLogDir());
 
         $logPath = $this->Configs->getLogDir() . $file;
@@ -677,4 +734,30 @@ class AppEngine {
         fwrite($fp,$buffer);
         fclose($fp);
     }
+
+    /**
+     * Error handler for the AppEngine
+     * Example:
+     *
+     * <code>
+     * Example Code
+     * </code>
+     *
+     * @return return value
+     * @param param
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    public function handleError($errno , $errstr, $errfile, $errline, $context ) {
+        $message = sprintf("ERROR (%s): %s triggered in %s:%s"
+                          ,$errno
+                          ,$errstr
+                          ,$errfile
+                          ,$errline);
+
+        $this->log('ERROR',$message);
+
+        //$message = sprintf("Error Context: %s", print_r($context,true));
+        //$this->log('ERROR',$message);
+    }    
 }

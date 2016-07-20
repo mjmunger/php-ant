@@ -1,0 +1,18 @@
+{
+    "dropDownValue": "gepaid",
+    "dropDownText": "GE Paid",
+    "hashColumns": {
+        "Customer Number": "tmp_gepaid_customernumber",
+        "Site Number": "tmp_gepaid_sitenumber"
+    },
+    "requestFilter": [
+        {
+            "GET": {
+                "processorType": "gepaid"
+            },
+            "POST": {
+                "processorType": "gepaid"
+            }
+        }
+    ]
+}

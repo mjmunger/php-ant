@@ -617,8 +617,9 @@ class Cli {
             /* verbosity */
                 /* Set CLI Verbosity */
                 if($cmd->startsWith('set verbosity')) {
-                    $this->verbosity = $cmd->getLastToken();
-                    printf("CLI verbosity set to %s\n",$this->verbosity);
+                    $this->setVerbosity($cmd->getLastToken());
+                    $this->Engine->Configs->setConfig('EngineVerbosity',$cmd->getLastToken());
+                    printf("Engine verbosity set to %s\n",$cmd->getLastToken());
                     return array('success' => true);
                 }
         /*show */
