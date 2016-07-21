@@ -1,7 +1,6 @@
 {
-    "dropDownValue": "gepaid",
-    "dropDownText": "GE Paid",
-    "hashColumns": {
+    "testProperty": "gepaid",
+    "testPropertyArray": {
         "Customer Number": "tmp_gepaid_customernumber",
         "Site Number": "tmp_gepaid_sitenumber"
     },
@@ -14,6 +13,6 @@
         }
     },
     "alwaysRun": {
-        "0": "\/uploader\/"
+        "0": "supplier-types"
     }
 }

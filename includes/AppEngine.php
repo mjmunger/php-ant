@@ -277,7 +277,7 @@ class AppEngine {
             //URI does not match. OR that have request filters, and that filter
             //is not present. (Only when we have a web environment.)
 
-            if($this->Configs->environment == ConfigBase::WEB) if(!$app->shouldRun($args['AE'])) continue;
+            if($this->Configs->environment == ConfigBase::WEB) if(!$app->shouldRun($args['AE'],$requested_hook)) continue;
 
             try {
                 //$this->log('AppEngine',"<!-- <hook=$requested_hook> -->",'AppEngine.log',14);
@@ -509,16 +509,6 @@ class AppEngine {
      * @tested testAppHooks
      **/
     function activateApps() {
-        //If the .blacklist file exists, that app needs ot be disabled. Something failed.
-        if(file_exists('.blacklist')) {
-            $buffer = json_decode(trim(file_get_contents('.blacklist')));
-            $this->disableApp($buffer->name,$buffer->path);
-            $message = sprintf("%s was disabled because it failed to load last time. File: %s" . PHP_EOL,$buffer->name,$buffer->path);
-            $fp = fopen('disabled.log','a+');
-            fwrite($fp,$message);
-            fclose($fp);
-            if(file_exists('.blacklist')) unlink('.blacklist');
-        }        
 
         //Reset apps
         $this->apps = [];
@@ -537,12 +527,6 @@ class AppEngine {
             if(in_array($path, $paths)) {
 
                 $this->log('AppEngine',sprintf("Activating plugin: %s" . PHP_EOL, $name),'AppEngine.log',9,1);
-
-                //Put this on the blacklist for next time unless we succeed.
-                $blacklist = ['name' => $name, 'path' =>$path];
-                $fh = fopen('.blacklist','w');
-                fwrite($fh,json_encode($blacklist));
-                fclose($fh);
 
                 $manifestPath = dirname($path) . '/manifest.xml';
                 if(!file_exists($manifestPath)) {
@@ -626,8 +610,6 @@ class AppEngine {
                 array_push($this->apps,$app);
                 $this->activatedApps[$path]= $name;
 
-               if(file_exists('.blacklist')) unlink('.blacklist');
-                if(file_exists('.blacklist')) die(__FILE__ . ':' . __LINE__);
             }
         }
     }

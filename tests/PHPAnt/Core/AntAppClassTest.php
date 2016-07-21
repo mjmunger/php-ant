@@ -46,9 +46,15 @@ class AntAppClassTest extends TestCase
 		$this->assertInstanceOf('stdClass', $appOptions);
 		$app->init($appOptions);
 
+		$hashColumns    = ['Customer Number'    => 'tmp_gepaid_customernumber'
+                  		  ,'Site Number'        => 'tmp_gepaid_sitenumber'
+                  		  ];
+
 		$this->assertCount(1, $app->getFilters);
 		$this->assertCount(1, $app->postFilters);
-		$this->assertCount(1, $app->uriWhitelist);
+		$this->assertCount(1, $app->actionWhitelist);
+		$this->assertSame('gepaid', $app->testProperty);
+		$this->assertEquals($hashColumns, $app->testPropertyArray);
 	}
 
 	/**
@@ -218,7 +224,7 @@ class AntAppClassTest extends TestCase
 	 * @dataProvider providerAlwaysRun
 	 */
 	
-	public function testAlwaysRun($uri,$expected)
+	public function testAlwaysRun($action,$expected)
 	{
 		$app = new \PHPAnt\Core\AntApp();
 		//Setup the app.
@@ -226,22 +232,33 @@ class AntAppClassTest extends TestCase
 		$appOptions = json_decode(file_get_contents($appInitPath));
 		$app->init($appOptions);
 
-		//Only add the ONE value to the whitelist.
-		if($expected) $this->assertGreaterThan(0, $app->whitelistURI($uri));
+		$EngineStub = $this->createMock('\PHPAnt\Core\AppEngine');
 
-		$this->assertSame($expected, $app->alwaysRun($uri));
+		//Only add the ONE value to the whitelist.
+		if($expected) $this->assertGreaterThan(0, $app->whitelistAction($action));
+
+		$this->assertSame($expected, $app->alwaysRun($EngineStub,$action));
 	}
 
 	public function providerAlwaysRun() {
-		$data = [[ '/'           , false ]
-				,[ '/uploader/'  , true  ]
-				,[ '/uploader/1' , false ]
-				,[ '/uploader/2' , false ]
-				,[ '/uploader/3' , false ]
-				,[ '/uploader/4' , false ]
-				,[ '/upload/4'   , false ]
-				,[ '/account'    , false ]
-				,[ '/account'    , false ]
+		$data = [ [ 'supplier-types'      , true  ]
+			    , [ 'db-check'            , false ]
+			    , [ 'aliassearch'         , false ]
+			    , [ 'drop-alias'          , false ]
+			    , [ 'header_js_inject'    , false ]
+			    , [ 'load_loaders'        , false ]
+			    , [ 'header_js_inject'    , false ]
+			    , [ 'parse-sprecher'      , false ]
+			    , [ 'match-sprecher'      , false ]
+			    , [ 'alias-sprecher'      , false ]
+			    , [ 'save-sprecher-alias' , false ]
+			    , [ 'commit-sprecher'     , false ]
+			    , [ 'footer_console_log'  , false ]
+			    , [ 'parse-gepaid'        , false ]
+			    , [ 'match-gepaid'        , false ]
+			    , [ 'alias-gepaid'        , false ]
+			    , [ 'save-gepaid-alias'   , false ]
+			    , [ 'commit-gepaid'       , false ]
 				];
 
 		return $data;		

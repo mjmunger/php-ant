@@ -10,14 +10,13 @@ $requestFilters = ['GET'   => ['processorType'  => 'gepaid']
 				  ,'POST'  => ['processorType'  => 'gepaid']
 				  ];
 
-//Whitelist certain URLs for this app to ALWAYS run:
-$alwaysRun      = ['/uploader/'];
+//Whitelist certain actions to ALWAYS run regardless of filters or URIs.
+$alwaysRun      = ['supplier-types'];
 
-$configs        = ['dropDownValue' => 'gepaid'
-                  ,'dropDownText'  => 'GE Paid'
-                  ,'hashColumns'   => $hashColumns
-                  ,'requestFilter' => $requestFilters
-                  ,'alwaysRun'	   => $alwaysRun
+$configs        = ['testProperty'       => 'gepaid'
+                  ,'testPropertyArray'  => $hashColumns
+                  ,'requestFilter'      => $requestFilters
+                  ,'alwaysRun'	        => $alwaysRun
                   ];
 
 

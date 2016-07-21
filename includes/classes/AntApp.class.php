@@ -119,16 +119,20 @@ Class AntApp
 
 
     /**
-    * @var array $uriWhitelist Holds a list of URIs where this app will ALWAYS
-    *      fire, regardless of filtering or the registry. Whitelisted URIs must be
+    * @var array $actionWhitelist Holds a list of actions where this app will ALWAYS
+    *      fire, regardless of filtering or the registry. Whitelisted actions must be
     *      EXACT MATCH. No regex is allowed. As a matter of good practice, you
     *      should limit the amount of whitelisting you do. This is really only to
     *      be used as a workaround to have an app fire in the first step of a
-    *      sequence. Consequential steps should use GET and POST variables to
+    *      sequence. Subsequent steps should use GET and POST variables to
     *      activate the getFilter and postFilter functionality.
     **/
     
-    public $uriWhitelist  = [];
+    public $actionWhitelist  = [];
+
+    //These two properties are stubs for use with phpunit. 
+    public $testProperty      = NULL;
+    public $testPropertyArray = [];
 
     function __construct() {
         $this->path = __DIR__;
@@ -259,10 +263,7 @@ Class AntApp
 
         foreach($this->hooks as $hook) {
 
-            if($this->verbosity > 14) {
-                $args['AE']->Configs->debug_print($hook,"HOOK");
-                //$args['AE']->Configs->debug_compare($requested_hook, $hook['hook']);
-            }
+            $args['AE']->log('AppEngine',"Hook: " . print_r($hook,true),'AppEngine.log',14,true);
 
             if($requested_hook == $hook['hook']) {
 
@@ -297,9 +298,7 @@ Class AntApp
                 $return = array_merge($result,$return);
             }
         }
-        if($this->verbosity > 14) {
-            //debug_print($return,"RETURN");
-        }
+
         return $return;
     }
 
@@ -454,13 +453,11 @@ Class AntApp
 
         /* Loop through all candidate files, and attempt to load them all in the correct order (FIFO) */
         foreach($candidate_files as $dependency) {
-            $this->log("Looking to load: ".$dependency,14);
+            $this->log("Looking to load: ".$dependency,9);
 
             if(file_exists($dependency)) {
                 if(is_readable($dependency)) {
-                    if($this->verbosity > 9) {
-                        $this->consoleLog("Including: %s", $dependency);
-                    }
+                    $this->log('appAutoloader',"Including: $dependency",'AppEngine.log',9,true);
                     include($dependency);
                 }
             }
@@ -508,17 +505,28 @@ Class AntApp
 
         if(isset($options->requestFilter)) $this->setRequestFilter($options->requestFilter);
 
-        if(isset($options->alwaysRun))     $this->importUriWhitelist($options->alwaysRun);
+        if(isset($options->alwaysRun))     $this->importActionWhitelist($options->alwaysRun);
 
         foreach($options as $key => $value) {
-            //treat request filters differently.
-            if($key == 'requestFilter' || $key = 'alwaysRun') continue;
 
-            if(isset($this->$key)) $this->$key = $value;
+            $filters = ['requestFilter','alwaysRun'];
+            if(in_array($key, $filters)) continue;
+
+            /*var_dump($key);
+            var_dump($value);*/
+
+            switch(gettype($value)) {
+                case 'array':
+                    $this->$key = $value;
+                    break;
+                case 'object':
+                    $this->$key = (array) $value;
+                    break;
+                default:
+                    $this->$key = $value;
+                    break;
+            }
         }
-
-//        var_dump($this);
-//        die(__FILE__  . ':' . __LINE__ );
     }    
 
     function setRequestFilter($filters) {
@@ -579,7 +587,7 @@ Class AntApp
 
             //Soft Fail if it should be set, but it's not.
             if(isset($Server->Request->post_vars[$var])) {
-                $Engine->log('AppEngine',sprintf("POST: %s = %s?" . PHP_EOL,$Server->Request->post_vars[$var], $value));
+                //$Engine->log('AppEngine',sprintf("POST: %s = %s?" . PHP_EOL,$Server->Request->post_vars[$var], $value));
                 if($Server->Request->post_vars[$var] == $value) return true;
             }
 
@@ -588,7 +596,7 @@ Class AntApp
         //loop through the post vars, to ensure that at least one of them allows this app to operate.
         foreach($this->getFilters as $var => $value) {
             if(isset($Server->Request->get_vars[$var])) {
-                $Engine->log('AppEngine',sprintf("GET: %s = %s?" . PHP_EOL,$Server->Request->get_vars[$var], $value));
+                //$Engine->log('AppEngine',sprintf("GET: %s = %s?" . PHP_EOL,$Server->Request->get_vars[$var], $value));
                 if($Server->Request->get_vars[$var] == $value) return true;
             }
         }
@@ -598,7 +606,10 @@ Class AntApp
         return false;
     }
 
-    function shouldRun(AppEngine $Engine) {
+    function shouldRun(AppEngine $Engine, $requested_hook) {
+        //If this URI is on the always run whitelist, return true without further processing.
+        if($this->alwaysRun($Engine, $requested_hook)) return true;
+
         //If we are not allowed to run on this URI, return false
         if(!$this->fireOnURI($Engine->Configs->Server->Request->uri)) return false;
 
@@ -609,18 +620,20 @@ Class AntApp
         return true;
     }
 
-    function importUriWhitelist($list) {
+    function importActionWhitelist($list) {
         foreach($list as $value) {
-            array_push($this->uriWhitelist, $value);
+            array_push($this->actionWhitelist, $value);
         }
     }
 
-    function whitelistURI($uri) {
-        if(!in_array($uri, $this->uriWhitelist)) array_push($this->uriWhitelist, $uri);
-        return count($this->uriWhitelist);
+    function whitelistAction($action) {
+        if(!in_array($action, $this->actionWhitelist)) array_push($this->actionWhitelist, $action);
+        return count($this->actionWhitelist);
     }
 
-    function alwaysRun($uri) {
-        return in_array($uri, $this->uriWhitelist);
+    function alwaysRun(AppEngine $Engine, $action) {
+        $run = in_array($action, $this->actionWhitelist);
+        if($run) $Engine->log('AppEngine',"$action was whitelisted for $this->appName",'AppEngine.log',9);
+        return $run;
     }
 }
