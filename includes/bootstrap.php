@@ -76,6 +76,7 @@ switch($antConfigs->environment) {
 }
 
 //Set the EngineVerbosity as it was saved - this overrides the command line params. 
+$dbVerbosity = false;
 $configs = $antConfigs->getConfigs(['EngineVerbosity']);
 if(isset($configs['EngineVerbosity'])) $dbVerbosity = $configs['EngineVerbosity'];
 

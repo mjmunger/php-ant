@@ -469,7 +469,7 @@ class AppEngine {
                 //Check the blacklist to see if this failed last time.
                 $path = $file->getRealPath();
                 
-                if($this->AppBlacklist->isBlacklisted($path)) {
+                if($this->AppBlacklist->isBlacklisted($path) && !$this->AppBlacklist->disabled) {
                     $this->log('AppEngine',sprintf("Not loading %s because it has been blacklisted. Remove it from .blacklist-load to re-enable.",$path));
                     continue;
                 };
