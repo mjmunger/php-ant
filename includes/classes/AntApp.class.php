@@ -117,6 +117,19 @@ Class AntApp
     
     public $postFilters    = [];
 
+
+    /**
+    * @var array $uriWhitelist Holds a list of URIs where this app will ALWAYS
+    *      fire, regardless of filtering or the registry. Whitelisted URIs must be
+    *      EXACT MATCH. No regex is allowed. As a matter of good practice, you
+    *      should limit the amount of whitelisting you do. This is really only to
+    *      be used as a workaround to have an app fire in the first step of a
+    *      sequence. Consequential steps should use GET and POST variables to
+    *      activate the getFilter and postFilter functionality.
+    **/
+    
+    public $uriWhitelist  = [];
+
     function __construct() {
         $this->path = __DIR__;
     }  
@@ -495,12 +508,17 @@ Class AntApp
 
         if(isset($options->requestFilter)) $this->setRequestFilter($options->requestFilter);
 
+        if(isset($options->alwaysRun))     $this->importUriWhitelist($options->alwaysRun);
+
         foreach($options as $key => $value) {
             //treat request filters differently.
-            if($key == 'requestFilter') continue;
+            if($key == 'requestFilter' || $key = 'alwaysRun') continue;
 
             if(isset($this->$key)) $this->$key = $value;
         }
+
+//        var_dump($this);
+//        die(__FILE__  . ':' . __LINE__ );
     }    
 
     function setRequestFilter($filters) {
@@ -589,5 +607,20 @@ Class AntApp
 
         //allow the app to run by default.
         return true;
+    }
+
+    function importUriWhitelist($list) {
+        foreach($list as $value) {
+            array_push($this->uriWhitelist, $value);
+        }
+    }
+
+    function whitelistURI($uri) {
+        if(!in_array($uri, $this->uriWhitelist)) array_push($this->uriWhitelist, $uri);
+        return count($this->uriWhitelist);
+    }
+
+    function alwaysRun($uri) {
+        return in_array($uri, $this->uriWhitelist);
     }
 }

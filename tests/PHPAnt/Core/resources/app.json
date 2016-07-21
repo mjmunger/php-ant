@@ -12,5 +12,8 @@
         "POST": {
             "processorType": "gepaid"
         }
+    },
+    "alwaysRun": {
+        "0": "\/uploader\/"
     }
 }

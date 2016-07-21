@@ -48,6 +48,7 @@ class AntAppClassTest extends TestCase
 
 		$this->assertCount(1, $app->getFilters);
 		$this->assertCount(1, $app->postFilters);
+		$this->assertCount(1, $app->uriWhitelist);
 	}
 
 	/**
@@ -210,4 +211,40 @@ class AntAppClassTest extends TestCase
 
 		return $data;
 	}
+
+	/**
+	 * @covers AntApp::alwaysRun
+	 * @depends testInit
+	 * @dataProvider providerAlwaysRun
+	 */
+	
+	public function testAlwaysRun($uri,$expected)
+	{
+		$app = new \PHPAnt\Core\AntApp();
+		//Setup the app.
+		$appInitPath = __DIR__ . '/resources/app.json';
+		$appOptions = json_decode(file_get_contents($appInitPath));
+		$app->init($appOptions);
+
+		//Only add the ONE value to the whitelist.
+		if($expected) $this->assertGreaterThan(0, $app->whitelistURI($uri));
+
+		$this->assertSame($expected, $app->alwaysRun($uri));
+	}
+
+	public function providerAlwaysRun() {
+		$data = [[ '/'           , false ]
+				,[ '/uploader/'  , true  ]
+				,[ '/uploader/1' , false ]
+				,[ '/uploader/2' , false ]
+				,[ '/uploader/3' , false ]
+				,[ '/uploader/4' , false ]
+				,[ '/upload/4'   , false ]
+				,[ '/account'    , false ]
+				,[ '/account'    , false ]
+				];
+
+		return $data;		
+	}
+	
 }
