@@ -40,13 +40,6 @@ require('includes/classes/AppBlacklist.class.php');
 $pdo = gimmiePDO();
 $antConfigs = ConfigFactory::getConfigs($pdo,$vars);
 
-//Set the EngineVerbosity as it was saved - this overrides the command line params. 
-$configs = $antConfigs->getConfigs(['EngineVerbosity']);
-if(isset($configs['EngineVerbosity'])) $dbVerbosity = $configs['EngineVerbosity'];
-
-//Keep the higher verbosity between the CLI and the DB.
-if(isset($verbosity)) $verbosity = max($verbosity,$dbVerbosity);
-
 //Provision the server variables if we have a ConfigWeb object.
 switch($antConfigs->environment) {
     case ConfigBase::WEB:
@@ -80,6 +73,17 @@ switch($antConfigs->environment) {
 
         $antConfigs->Server = $Server;
         break;
+}
+
+//Set the EngineVerbosity as it was saved - this overrides the command line params. 
+$configs = $antConfigs->getConfigs(['EngineVerbosity']);
+if(isset($configs['EngineVerbosity'])) $dbVerbosity = $configs['EngineVerbosity'];
+
+//Keep the higher verbosity between the CLI and the DB.
+if(isset($verbosity)) {
+    $verbosity = max($verbosity,$dbVerbosity);
+} else {
+        $verbosity = ($dbVerbosity?$dbVerbosity:0);
 }
 
 /* REGISTER THE AUTOLOADER! This has to be done first thing after we get the configs! */
@@ -122,6 +126,8 @@ $options['AppBlacklist']                            = new AppBlacklist();
 require('AppEngine.php');
 
 $Engine = new AppEngine($antConfigs,$options);
+
+$Engine->log('Bootstrap','Verbosity level: ' . $verbosity,'AppEngine.log',1);
 
 //Set the error handler to the AppEngine::handleError() method.
 set_error_handler(array(&$Engine,'handleError'));

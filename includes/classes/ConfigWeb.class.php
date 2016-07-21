@@ -4,7 +4,7 @@ namespace PHPAnt\Core;
 
 class ConfigWeb extends ConfigBase
 {
-	var $Server = NULL;
+	public $Server    = NULL;
 
 	function __construct(\PDO $pdo,$vars) {
 		//session_start();
@@ -80,12 +80,11 @@ class ConfigWeb extends ConfigBase
 	 * @return string|null The output string, or nothing if it prints it directly.
 	 **/
 	
-	function debug_print($msg, $return=false) {
-		if(is_object($msg) || is_array($msg)) {
-			$output = sprintf("<pre>%s</pre>", print_r($msg,true));
-		} else {
-			$output = sprintf("<div class=\"debug-print\"><pre>%s</pre></div>", print_r($msg,true));
-		}
+	function debug_print($msg, $return=false, $minimumVerbosity = 0) {
+
+		if($this->verbosity < $minimumVerbosity) return false;
+		
+		$output = sprintf(PHP_EOL . "<!-- %s -->" . PHP_EOL ,print_r($msg,true));
 
 		if($return) return $output;
 

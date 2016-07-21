@@ -45,7 +45,9 @@ class ConfigCLI extends ConfigBase
 	 * @return string|null The output string, or nothing if it prints it directly.
 	 **/
 	
-	function debug_print($msg, $return=false) {
+	function debug_print($msg, $return=false, $minimumVerbosity = 0) {
+
+		if($this->verbosity < $minimumVerbosity) return false;
 
 		$output = (is_object($msg) || is_array($msg))?print_r($msg,true):$msg;
 

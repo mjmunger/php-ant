@@ -24,73 +24,73 @@ Class AntApp
     * @var array $consoleMessages An array of messages that will be printed to the console. 
     **/
 
-    var $consoleMessages = [];
+    public $consoleMessages = [];
     
 
     /**
     * @var string $appName The name of the app as it will be displayed to users and admins. 
     **/
     
-    var  $appName    = 'OverrideMe';
+    public  $appName    = 'OverrideMe';
 
     /**
     * @var string $version The version number of this app. 
     **/
     
-    var  $version       = '1';
+    public  $version       = '1';
 
     /**
     * @var array $hooks The hooks upon which this app will operate. 
     **/
     
-    var  $hooks         = array();
+    public  $hooks         = array();
 
     /**
     * @var boolean $loaded A flag denoting whether or not this app is loaded.
     **/
     
-    var  $loaded        = false;
+    public  $loaded        = false;
 
 
     /**
     * @var boolean $enabled A flag denoting whether or not this app should be allowed to fire.
     **/
     
-    var  $enabled       = false;
+    public  $enabled       = false;
 
     /**
     * @var integer $verbosity The degree to which this app will print debugging information. This is usually inherited from the CLI object itself. 
     **/
     
-    var  $verbosity     = 0;
+    public  $verbosity     = 0;
 
 
     /**
     * @var array $errors Errors that are assocaited with this app for this session. This  should be cleared every time we restart or when we fix an error. 
     **/
 
-    var $errors         = array();
+    public $errors         = array();
 
 
     /**
     * @var boolean $hasACL Reports to the app engine whether or not we should check an access control list before we allow anything in the app to fire. 
     **/
     
-    var $hasACL         = false;
+    public $hasACL         = false;
 
 
     /**
     * @var array $features An array of features that submit themselves to access control. 
     **/
     
-    var $features       = array();
+    public $features       = array();
 
 
     /**
     * @var string path The full path to where this app is stored in the file system. 
     **/
     
-    var $path             = NULL;
+    public $path             = NULL;
 
     
     /**
@@ -98,7 +98,7 @@ Class AntApp
     *      matched, allow this app to execute code on a hook / action.
     **/
 
-    var $uriRegistry      = [];
+    public $uriRegistry      = [];
 
 
     /**
@@ -107,7 +107,7 @@ Class AntApp
     *      trigger the actions contained in this app.
     **/
 
-    var $getFilters      = [];
+    public $getFilters      = [];
 
     /**
     * @var array $postFilters An array of POST variables that must be a)
@@ -115,7 +115,7 @@ Class AntApp
     *      trigger the actions contained in this app.
     **/        
     
-    var $postFilters    = [];
+    public $postFilters    = [];
 
     function __construct() {
         $this->path = __DIR__;
@@ -493,42 +493,38 @@ Class AntApp
         $this->getFilters  = [];
         $this->postFilters = [];
 
+        if(isset($options->requestFilter)) $this->setRequestFilter($options->requestFilter);
+
         foreach($options as $key => $value) {
             //treat request filters differently.
-            echo "Key: $key" . PHP_EOL;
-            if($key == 'requestFilter') $this->setRequestFilter($value);
+            if($key == 'requestFilter') continue;
 
-            //if(isset($this->$key)) $this->$key = $value;
+            if(isset($this->$key)) $this->$key = $value;
         }
-        //echo PHP_EOL . "*-----*";
-        //var_dump($this->getFilters);
-        //echo PHP_EOL . "*-----*";
     }    
 
     function setRequestFilter($filters) {
-        echo "Running request filter" . PHP_EOL;
-        echo PHP_EOL;
-        var_dump($filters);
-        echo PHP_EOL;
+
         $validMethods = ['GET','POST'];
 
         foreach($validMethods as $method) {
+            if(!isset($filters->$method)) continue;
 
-            if(!isset($filters[0]->$method)) continue;
-
-            foreach($filters[0]->$method as $var => $value) {
+            foreach($filters->$method as $var => $value) {
                 if(isset($this->AE))
                     $this->AE->log('AppEngine'
-                                  ,sprintf("For %s, parsing key => value: %s => %s",$method,$key,$value)
+                                  ,sprintf("For %s, parsing key => value: %s => %s",$method,$var,$value)
                                   ,'AppEngine.log'
                                   ,14);
 
                 switch($method) {
                     case 'GET':
                         $this->getFilters[$var] = $value;
+                        //array_push($this->getFilters, [$var => $value]);
                         break;
                     case 'POST':
                         $this->postFilters[$var] = $value;
+                        //array_push($this->postFilters, [$var => $value]);
                         break;
                     default:
                         // pass
@@ -536,8 +532,8 @@ Class AntApp
                 }
             }
         }
-        echo "Count of getFilters: "  . count($this->getFilters)  . PHP_EOL;
-        echo "Count of postFilters: " . count($this->postFilters) . PHP_EOL;
+        //echo "Count of getFilters: "  . count($this->getFilters)  . PHP_EOL;
+        //echo "Count of postFilters: " . count($this->postFilters) . PHP_EOL;
     }
 
     /**

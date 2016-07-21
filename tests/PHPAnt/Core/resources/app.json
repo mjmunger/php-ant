@@ -5,14 +5,12 @@
         "Customer Number": "tmp_gepaid_customernumber",
         "Site Number": "tmp_gepaid_sitenumber"
     },
-    "requestFilter": [
-        {
-            "GET": {
-                "processorType": "gepaid"
-            },
-            "POST": {
-                "processorType": "gepaid"
-            }
+    "requestFilter": {
+        "GET": {
+            "processorType": "gepaid"
+        },
+        "POST": {
+            "processorType": "gepaid"
         }
-    ]
+    }
 }

@@ -195,6 +195,8 @@ class AppEngine {
         
         $this->log('AppEngine',sprintf("AppEngine verbosity set to: %s",$this->verbosity),'AppEngine.log',1);
 
+        $this->Configs->setVerbosity($int);
+
         foreach($this->apps as $app) {
             $app->verbosity = $this->verbosity;
         }
@@ -221,20 +223,24 @@ class AppEngine {
         /* Sort the apps based on the hooks priority so they execute in order */
         usort($appsWithRequestedHook, array('self','sortByHookPriority'));
 
-        if($this->verbosity > 9) {
-            print PHP_EOL;
-            printf("For hook: %s, app firing order is:" . PHP_EOL, $this->sortHook);
-            print PHP_EOL;
+        $this->log('AppEngine'
+                  ,sprintf("For hook: %s, app firing order is:" . PHP_EOL, $this->sortHook)
+                  ,'AppEngine.log'
+                  ,14
+                  ,true);
 
             foreach($appsWithRequestedHook as $app) {
                 $hash = $this->getHookKey($app,$this->sortHook);
                 $TL->addRow([$app->appName,$app->hooks[$hash]['priority']]);
             }
 
-        $TL->showTable();
-
-        }
         
+                $this->log('AppEngine'
+                  ,$TL->makeTable()
+                  ,'AppEngine.log'
+                  ,14
+                  ,true);
+
         return $appsWithRequestedHook;
     }
 
@@ -274,7 +280,9 @@ class AppEngine {
             if($this->Configs->environment == ConfigBase::WEB) if(!$app->shouldRun($args['AE'])) continue;
 
             try {
+                //$this->log('AppEngine',"<!-- <hook=$requested_hook> -->",'AppEngine.log',14);
                 $result = $app->trigger($requested_hook,$args);
+                //$this->log('AppEngine',"<!-- </hook=$requested_hook> -->",'AppEngine.log',14);
             } catch (Exception $e) {
                 $this->Configs->divAlert($e->getMessage(),'danger');
                 $error = "<pre>" . $e->getTraceAsString() . "</pre>";
@@ -316,35 +324,6 @@ class AppEngine {
         /* Find the array element that corresponds to this hook. */
         $hash1 = $this->getHookKey($a,$this->sortHook);
         $hash2 = $this->getHookKey($b,$this->sortHook);
-
-        if($this->verbosity > 11) {
-
-
-            print "A:" . PHP_EOL;
-            /*var_dump($a);*/
-
-            print str_pad("Hash", 15);
-            print $hash1 . PHP_EOL;
-
-            print str_pad("Hook",15);
-            print $hook . PHP_EOL;
-
-            print str_pad("Priority",15);
-            print $a->hooks[$hash1]['priority'] . PHP_EOL;
-            
-
-            print "B:" . PHP_EOL;
-            /*var_dump($b);*/
-
-            print str_pad("Hash", 15);
-            print $hash2 . PHP_EOL;
-
-            print str_pad("Hook",15);
-            print $hook . PHP_EOL;            
-
-            print str_pad("Priority",15);
-            print $b->hooks[$hash2]['priority'] . PHP_EOL;
-        }
 
         if($a->hooks[$hash1]['priority'] == $b->hooks[$hash2]['priority']) return 0;
 
@@ -515,7 +494,7 @@ class AppEngine {
                 $TL->addRow([$name,$status,$file->getRealPath()]);
             }
         }
-        if($this->verbosity > 9) $TL->showTable();
+        $this->log("AppEngine",$TL->makeTable(),'AppEngine.log',9,1);
     }
 
     /**
@@ -557,7 +536,7 @@ class AppEngine {
 
             if(in_array($path, $paths)) {
 
-                if($this->verbosity > 9) printf("Activating plugin: %s" . PHP_EOL, $name);
+                $this->log('AppEngine',sprintf("Activating plugin: %s" . PHP_EOL, $name),'AppEngine.log',9,1);
 
                 //Put this on the blacklist for next time unless we succeed.
                 $blacklist = ['name' => $name, 'path' =>$path];
@@ -598,7 +577,7 @@ class AppEngine {
 
                     //Load init vars from the json init file if it exists.
                     if($exists) {
-                        $options = json_decode(file_get_contents($appInitPath), true );
+                        $options = json_decode(file_get_contents($appInitPath));
                         $app->init($options,true);
 
                         //Verbose message.
@@ -715,9 +694,11 @@ class AppEngine {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function log($component,$message,$file = 'AppEngine.log',$minimumVerbosity = 0) {
+    function log($component,$message,$file = 'AppEngine.log',$minimumVerbosity = 0, $debugPrint = false) {
 
         if($this->verbosity < $minimumVerbosity) return false;
+
+        if($debugPrint) $this->Configs->debug_print($message);
 
         if(!file_exists($this->Configs->getLogDir())) mkdir($this->Configs->getLogDir());
 

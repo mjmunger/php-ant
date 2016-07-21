@@ -36,21 +36,24 @@ class AntAppClassTest extends TestCase
 		$appInitPath = __DIR__ . '/resources/app.json';
 		$this->assertFileExists($appInitPath);
 
-		$options = json_decode(file_get_contents($appInitPath),true);
 
 		$app = new \PHPAnt\Core\AntApp();
 
 		$this->assertCount(0, $app->getFilters);
 		$this->assertCount(0, $app->postFilters);
 
-		$app->init($options);
-
-		var_dump($app);
+		$appOptions = json_decode(file_get_contents($appInitPath));
+		$this->assertInstanceOf('stdClass', $appOptions);
+		$app->init($appOptions);
 
 		$this->assertCount(1, $app->getFilters);
 		$this->assertCount(1, $app->postFilters);
 	}
 
+	/**
+	 * @depends testInit
+	 **/
+	
 	function testFilterOnRequest() {
 		//Setup the app.
 		$appInitPath = __DIR__ . '/resources/app.json';

@@ -244,6 +244,7 @@ class Cli {
         }
         $this->verbosity = $level;
         $this->Engine->setVerbosity($this->verbosity);
+        $this->Engine->Configs->setConfig('EngineVerbosity',$this->verbosity);
     }
 
     /**
@@ -618,7 +619,8 @@ class Cli {
                 /* Set CLI Verbosity */
                 if($cmd->startsWith('set verbosity')) {
                     $this->setVerbosity($cmd->getLastToken());
-                    $this->Engine->Configs->setConfig('EngineVerbosity',$cmd->getLastToken());
+                    $this->setVerbosity($cmd->getLastToken());
+                    //$this->Engine->Configs->setConfig('EngineVerbosity',$cmd->getLastToken());
                     printf("Engine verbosity set to %s\n",$cmd->getLastToken());
                     return array('success' => true);
                 }
