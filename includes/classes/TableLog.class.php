@@ -33,22 +33,16 @@ Class TableLog
 	}
 
 	function addRow($row) {
-		if(count($this->rows) > 0) {
-			//Make sure that we are submitting a row with adequate / same columns.
-			if(count($row) != count($this->headers)) throw new Exception('You rows must have the same number of columns as the header.');
-		}
+		//Make sure that we are submitting a row with adequate / same columns.
+		if(count($row) != count($this->headers)) throw new \Exception('You rows must have the same number of columns as the header.');
+
 		array_push($this->rows, $row);
+
+		return count($this->rows);
 	}
 
 	function sortRows() {
-
-		$buffer = [];
-		foreach($this->rows as $row) {
-			$key = $row[$this->sortColumn];
-			$buffer[$key] = $row;
-		}
-		ksort($buffer);
-		$this->rows = $buffer;
+		return array_multisort($this->rows);
 	}
 
 	/**
@@ -101,6 +95,14 @@ Class TableLog
 		echo $this->makeTable();
 	}
 
+	function getTableWidth() {
+		$width = 0;
+		for($c=0;$c<count($this->headers); $c++) {
+			$width += $this->columnSize[$c] + 2;
+		}
+		return $width;
+	}
+
 	/**
 	 * Creates the table for the CLI
 	 * Example:
@@ -116,29 +118,25 @@ Class TableLog
 		$buffer = '';
 
 		$this->sortRows();
+		array_unshift($this->rows, $this->headers);
+
 		$this->calculateColumnSize();
 		
 		$buffer .= PHP_EOL;
 
-		//Print the header
-		$buffer .= str_pad('', $this->tableWidth,'-');
-		$buffer .= PHP_EOL;
-		
-		for($c=0;$c<count($this->headers); $c++) {
-			$buffer .= str_pad($this->headers[$c], $this->columnSize[$c]);
-		}
-		$buffer .= PHP_EOL;
-		$buffer .= str_pad('', $this->tableWidth,'-');
-		$buffer .= PHP_EOL;
-
 		//Print all the lines.
+		$counter = 0;
 		foreach($this->rows as $row) {
+			$counter++;
+			if($counter == 1) $buffer .= str_pad('', $this->getTableWidth(),'-') . PHP_EOL;
+
 			//Print the columns for this line.
 			for($c=0;$c<count($this->headers); $c++) {
-				$buffer .= str_pad($row[$c], $this->columnSize[$c]);
+				$buffer .= str_pad($row[$c], $this->columnSize[$c] +2);
 			}
 			//button up the line.
 			$buffer .= PHP_EOL;
+			if($counter == 1) $buffer .= str_pad('', $this->getTableWidth(),'-') . PHP_EOL;
 		}
 		$buffer .= PHP_EOL;
 

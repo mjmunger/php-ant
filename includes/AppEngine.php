@@ -125,6 +125,12 @@ class AppEngine {
      * Tested with testAppEnableDisable()
      **/
     function enableApp($name,$path) {
+
+        //Check to make sure it's not blacklisted.
+        if($this->AppBlacklist->isBlacklisted($path)) {
+            $this->log('AppEngine',"You cannot enable $name ($path) because it has been blacklisted. You must first remove it from the blacklist, and then try again.",'AppEngine.log',0,false,'warning');
+        }
+
         $this->log('AppEngine',sprintf('Enabling %s (%s)',$name,$path));
         if($name === false) {
             divAlert("Could not enable app! It doesn't have a name. That's bad. Imagine going through life with out a name. Everyone would be like: 'Hey you!' all the time. You should name this plugin so we can enable it later.",'alert');
@@ -263,6 +269,7 @@ class AppEngine {
 
     function runActions($requested_hook,$args=false) {
         $return = [];
+        $result = [];
 
         $args['requested_hook'] = $requested_hook;
         
@@ -271,26 +278,53 @@ class AppEngine {
 
         $appsWithRequestedHook = $this->getAppsWithRequestedHook($requested_hook);
 
+        $this->log('AppEngine'
+                  ,sprintf("There are %s apps who respond to $requested_hook.",count($appsWithRequestedHook))
+                  ,'AppEngine.log'
+                  ,9
+                  );
+
+        $TL = new TableLog();
+        $TL->setHeader(['Hook','App','Result']);
+
         foreach($appsWithRequestedHook as $app) {
 
             //Ignore apps that have a set of URIs registered when the current
             //URI does not match. OR that have request filters, and that filter
             //is not present. (Only when we have a web environment.)
 
-            if($this->Configs->environment == ConfigBase::WEB) if(!$app->shouldRun($args['AE'],$requested_hook)) continue;
+            $this->log('AppEngine',"Working with $app->appName...",'AppEngine.log',9);
 
-            try {
-                //$this->log('AppEngine',"<!-- <hook=$requested_hook> -->",'AppEngine.log',14);
-                $result = $app->trigger($requested_hook,$args);
-                //$this->log('AppEngine',"<!-- </hook=$requested_hook> -->",'AppEngine.log',14);
-            } catch (Exception $e) {
-                $this->Configs->divAlert($e->getMessage(),'danger');
-                $error = "<pre>" . $e->getTraceAsString() . "</pre>";
-                echo "<pre>" . $error . "</pre>";
+            if($this->Configs->environment == ConfigBase::WEB) {
+                if(!$app->shouldRun($args['AE'],$requested_hook)) {
+                    $row = [$requested_hook,$app->appName,'SKIPPED'];
+                    $TL->addRow($row);
+                    continue;
+                }
             }
+
+            $result['success'] = false;
+            try {
+                $this->log('AppEngine',"Triggering $app->appName...",'AppEngine.log',9);
+                $result = $app->trigger($requested_hook,$args);
+            } catch (Exception $e) {
+                $this->log('EXCEPTION',$e->getMessage());
+            }
+            $row = [$requested_hook,$app->appName,($result['success']?"OK":"FAILED")];
+            $TL->addRow($row);
             $return = array_merge($return,$result);
         }
+
+      if(count($TL->rows) > 1) {
+            $this->log('AppEngine'
+              ,"Triggering actions for $requested_hook" . PHP_EOL . $TL->makeTable()
+              ,'AppEngine.log'
+              ,9 //Min verbosity
+              );
+      }
+
         unset($app);
+        //$this->log("AppEngine",print_r($return,true),'AppEngine.log',9);
         return $return;
     }
 
@@ -466,6 +500,9 @@ class AppEngine {
             $counter++;
             if($file->getBasename() == 'app.php') {
 
+                $name = $this->getAppMeta($file->getRealPath(),'name');
+                $this->availableApps[$name] = $file->getRealPath();
+                
                 //Check the blacklist to see if this failed last time.
                 $path = $file->getRealPath();
                 
@@ -483,13 +520,11 @@ class AppEngine {
                 //Remove the file from the blacklist because there was not a fatal error.
                 $this->AppBlacklist->removeFromBlacklist($path);
 
-                $name = $this->getAppMeta($file->getRealPath(),'name');
 
                 if($name === false) throw new Exception(sprintf('You have an app without a name, so it is not available. Consider removing / fixing it to make this warning go away. (%s)',$file->getRealPath()), 1);
 
                 $status = ($name?'Available':'Missing');
 
-                $this->availableApps[$name] = $file->getRealPath();
 
                 $TL->addRow([$name,$status,$file->getRealPath()]);
             }
@@ -526,7 +561,7 @@ class AppEngine {
 
             if(in_array($path, $paths)) {
 
-                $this->log('AppEngine',sprintf("Activating plugin: %s" . PHP_EOL, $name),'AppEngine.log',9,1);
+                $this->log('AppEngine',sprintf("Activating app: %s", $name),'AppEngine.log',9,1);
 
                 $manifestPath = dirname($path) . '/manifest.xml';
                 if(!file_exists($manifestPath)) {
@@ -676,11 +711,13 @@ class AppEngine {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function log($component,$message,$file = 'AppEngine.log',$minimumVerbosity = 0, $debugPrint = false) {
+    function log($component,$message,$file = 'AppEngine.log',$minimumVerbosity = 0, $debugPrint = false, $divAlert= false) {
 
         if($this->verbosity < $minimumVerbosity) return false;
 
         if($debugPrint) $this->Configs->debug_print($message);
+
+        if($divAlert) $this->Configs->divalert($message,$divAlert);
 
         if(!file_exists($this->Configs->getLogDir())) mkdir($this->Configs->getLogDir());
 

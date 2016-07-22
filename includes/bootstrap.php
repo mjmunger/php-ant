@@ -149,6 +149,8 @@ switch ($Engine->Configs->environment) {
 $configs = $Engine->Configs->getConfigs(['BlacklistDisabled','EngineVerbosity']);
 $Engine->AppBlacklist->disabled = (isset($configs['BlacklistDisabled'])?(bool)$configs['BlacklistDisabled']:false);
 
+/* NOTE: YOU CANNOT DO LOGGING THAT DOES debug_print (the final option) UNILT AFTER YOU'VE AUTHENTICATED THE USER! */
+
 /* Load any libraries that are in the includes/libs/ directory. */
 $Engine->runActions('lib-loader');
 

@@ -26,10 +26,12 @@ class PHPAntSigner
     var $appName      = NULL;
     var $manifestPath = NULL;
     var $files        = [];
+    var $AE           = NULL;
     
     function __construct($options) {
 
         if(!isset($options['appRoot'])) $options['appRoot'] = 'includes/apps/';
+        $this->AE = $options['AE'];
 
         $this->appRoot = $options['appRoot'];
     }

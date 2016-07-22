@@ -24,7 +24,7 @@ class AppBlacklist
 	}
 
 	function isBlacklisted($path) {
-		if($this->disabled) return true;
+		if($this->disabled) return false;
 		return in_array($path, $this->blacklist);
 	}
 

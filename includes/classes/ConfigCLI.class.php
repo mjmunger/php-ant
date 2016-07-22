@@ -54,7 +54,7 @@ class ConfigCLI extends ConfigBase
 		if($return) {
 			return $output;
 		} else {
-			echo $output;
+			echo $output . PHP_EOL;
 		}
 	}	
 

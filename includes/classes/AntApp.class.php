@@ -263,7 +263,7 @@ Class AntApp
 
         foreach($this->hooks as $hook) {
 
-            $args['AE']->log('AppEngine',"Hook: " . print_r($hook,true),'AppEngine.log',14,true);
+            $args['AE']->log('AppEngine',"Hook: " . print_r($hook,true),'AppEngine.log',14);
 
             if($requested_hook == $hook['hook']) {
 
@@ -457,7 +457,7 @@ Class AntApp
 
             if(file_exists($dependency)) {
                 if(is_readable($dependency)) {
-                    $this->log('appAutoloader',"Including: $dependency",'AppEngine.log',9,true);
+                    $this->log('appAutoloader',"Including: $dependency",'AppEngine.log',9);
                     include($dependency);
                 }
             }
@@ -608,13 +608,22 @@ Class AntApp
 
     function shouldRun(AppEngine $Engine, $requested_hook) {
         //If this URI is on the always run whitelist, return true without further processing.
-        if($this->alwaysRun($Engine, $requested_hook)) return true;
+        if($this->alwaysRun($Engine, $requested_hook)) {
+            $Engine->log('AppEngine',"$this->appName will run for $requested_hook because it's whitelisted.");
+            return true;
+        }
 
         //If we are not allowed to run on this URI, return false
-        if(!$this->fireOnURI($Engine->Configs->Server->Request->uri)) return false;
+        if(!$this->fireOnURI($Engine->Configs->Server->Request->uri)) {
+            $Engine->log('AppEngine',"$this->appName will NOT run for $requested_hook because it's restricted to specific URIs.");
+            return false;
+        }
 
         //If there are filters in place to prevent this app from running, return false.
-        if(!$this->filterOnRequest($Engine)) return false;
+        if(!$this->filterOnRequest($Engine)) {
+            $Engine->log('AppEngine',"$this->appName will NOT run for $requested_hook because it's restricted by GET or POST filters.");
+            return false;
+        }
 
         //allow the app to run by default.
         return true;
