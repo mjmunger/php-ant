@@ -30,14 +30,22 @@ class WebRequest
 
 	function parsePost($post) {
 		foreach($post as $key => $value) {
+			$value = $this->normalizeUTF($value);
 			$this->post_vars[$key] = $value;
 		}
 	}
 
 	function parseGet($get) {
 		foreach($get as $key => $value) {
-			$this->post_vars[$key] = $value;
+			//Convert UTF-8 TO Latin-1 if required.
+			$value = $this->normalizeUTF($value);
+			$this->get_vars[$key] = $value;
 		}
+	}
+
+	function normalizeUTF($value) {
+		if(mb_check_encoding($value,'UTF-8')) $value = mb_convert_encoding($value, "ISO-8859-1", mb_detect_encoding($value, "UTF-8, ISO-8859-1, ISO-8859-15", true));
+		return $value;
 	}
 
 	function mergeRequest() {

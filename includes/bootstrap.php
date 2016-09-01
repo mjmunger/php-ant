@@ -1,6 +1,12 @@
 <?php
-
 namespace PHPAnt\Core;
+
+$homedir  = getenv("HOME");
+$logdir   = $homedir . '/log/';
+$errorlog = $logdir  . 'errors.log';
+
+\ini_set("log_errors", 1);
+\ini_set("error_log", $errorlog);
 
 /* Set the default date and timezone, For a list of supported timezones, see: http://php.net/manual/en/timezones.php */
 date_default_timezone_set('America/New_York');
@@ -175,34 +181,36 @@ include('includes/classes/AuthWeb.class.php');
 include("includes/classes/AuthEnvFactory.class.php");
 
 /**** </AUTHENTICATION CLASSES AND FACTORIES> *****/
-
-try {
-    $Authenticator = AuthEnvFactory::getAuthenticator($antConfigs->pdo,$logger);
-} catch (Exception $e) {
-    $antConfigs->divAlert($e->getMessage());
-    echo "<pre>"; echo $e->getTraceAsString(); echo "</pre>";
+/*@Todo: Refactor this to create a factory for bootstrap objects so we don't have to use this if switch. */
+if(!isset($NOAUTH)) {
+    try {
+        $Authenticator = AuthEnvFactory::getAuthenticator($antConfigs->pdo,$logger);
+    } catch (Exception $e) {
+        $antConfigs->divAlert($e->getMessage());
+        echo "<pre>"; echo $e->getTraceAsString(); echo "</pre>";
+    }
+    
+    //Do not require authentication for the CLI
+    switch ($Authenticator->authType) {
+        case AntAuth::CLI:
+            //print "CLI Access is for administrators only. God like permissions are present. Caveat emptor" . PHP_EOL;
+            break;
+        case AntAuth::WEB || AntAuth::MOBILE:
+            $Authenticator->checkCookies();
+            
+            if(!$Authenticator->authorized) {
+                $Authenticator->authorize($Engine);
+            }
+            
+            $Authenticator->redirect($Engine);
+    
+            $current_user = $Authenticator->current_user;
+            break;
+        default:
+            throw new Exception("Invalid Authenticator - could not determine if you are authentication from mobile, web, or CLI", 1);
+            break;
+    }
+    
+    $Engine->current_user = $current_user;
+    if(!is_null($Engine->current_user)) $Engine->log($Engine->current_user->getFullName(),"Accessed: " . $Engine->Configs->Server->Request->uri);
 }
-
-//Do not require authentication for the CLI
-switch ($Authenticator->authType) {
-    case AntAuth::CLI:
-        //print "CLI Access is for administrators only. God like permissions are present. Caveat emptor" . PHP_EOL;
-        break;
-    case AntAuth::WEB || AntAuth::MOBILE:
-        $Authenticator->checkCookies();
-        
-        if(!$Authenticator->authorized) {
-            $Authenticator->authorize($Engine);
-        }
-        
-        $Authenticator->redirect($Engine);
-
-        $current_user = $Authenticator->current_user;
-        break;
-    default:
-        throw new Exception("Invalid Authenticator - could not determine if you are authentication from mobile, web, or CLI", 1);
-        break;
-}
-
-$Engine->current_user = $current_user;
-if(!is_null($Engine->current_user)) $Engine->log($Engine->current_user->getFullName(),"Accessed: " . $Engine->Configs->Server->Request->uri);

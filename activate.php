@@ -16,11 +16,11 @@
  * @author       Michael Munger <michael@highpoweredhelp.com>
  */ 
 
-if(file_exists('local/header.php')) {
+/*if(file_exists('local/header.php')) {
   include ('local/header.php');
 } else {
   include('includes/header.php');
-}
+}*/
 
 if(file_exists('local/activate.php')) {
   include ('local/activate.php');

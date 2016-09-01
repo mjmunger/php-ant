@@ -11,19 +11,19 @@
  * @author       Michael Munger <michael@highpoweredhelp.com>
  */ 
 
-$PE->runActions('end-container');
+$Engine->runActions('end-container');
 
 ?>
 </div><!-- End Container -->
 <footer>
 
-<?php $PE->runActions('footer-open'); ?>
+<?php $Engine->runActions('footer-open'); ?>
 
-<?php $PE->runActions('footer-close'); ?>
+<?php $Engine->runActions('footer-close'); ?>
 
 </footer>
 
 
-<?php $PE->runActions('footer-js-inject'); ?>
+<?php $Engine->runActions('footer-js-inject'); ?>
 </body>
 </html>

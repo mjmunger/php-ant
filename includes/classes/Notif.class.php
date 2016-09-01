@@ -1,5 +1,7 @@
 <?php
 
+namespace PHPAnt\Core;
+
 /**
  * Represents an email notification
  **/
@@ -120,7 +122,7 @@ class Notif {
     function __construct($templateDir = NULL) {
 
         $this->templateDirectory = ($templateDir?$templateDir .'/emails/':getDocumentRoot() . '/emails/');
-        $d = new DateTime();
+        $d = new \DateTime();
         $this->addFindReplace('THISYEAR',$d->format("Y"));
     }
 

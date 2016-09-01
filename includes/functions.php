@@ -285,4 +285,17 @@ LIMIT 1";
     }
 }
 
+function get_json_error_msg($error) {
+
+    $errors = [ JSON_ERROR_NONE           => 'Maximum stack depth exceeded'
+              , JSON_ERROR_DEPTH          => 'Underflow or the modes mismatch'
+              , JSON_ERROR_STATE_MISMATCH => 'Unexpected control character found'
+              , JSON_ERROR_CTRL_CHAR      => 'Syntax error, malformed JSON'
+              , JSON_ERROR_SYNTAX         => 'Malformed UTF-8 characters, possibly incorrectly encoded'
+              , JSON_ERROR_UTF8           => 'Unknown error'
+    ];
+
+    return $errors[$error];
+}
+
 /** END FUNCTION LIBRARY **/

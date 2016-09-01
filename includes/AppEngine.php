@@ -507,18 +507,25 @@ class AppEngine {
                 $path = $file->getRealPath();
                 
                 if($this->AppBlacklist->isBlacklisted($path) && !$this->AppBlacklist->disabled) {
-                    $this->log('AppEngine',sprintf("Not loading %s because it has been blacklisted. Remove it from .blacklist-load to re-enable.",$path));
+                    $this->log('AppEngine',sprintf("Not loading %s because it has been blacklisted. It will be disabled because it had problems before.",$path));
+                    //disable the app
+                    $this->log('AppEngine',sprintf("Disabling the app since it was blacklisted.",$path));
+                    $this->disableApp($name,$path);
+                    //remove it from the blacklist.
+                    $this->AppBlacklist->removeFromBlacklist($path);
+                    $this->log('AppEngine',sprintf("App removed from blacklist because it was disabled.",$path));
+                    $this->reload();
                     continue;
                 };
 
 
                 //Add this file to a black list in case it causes issues, we can skip it later.
-                $this->AppBlacklist->addToBlacklist($path);
+                //$this->AppBlacklist->addToBlacklist($path);
 
                 require_once($file->getRealPath());
 
                 //Remove the file from the blacklist because there was not a fatal error.
-                $this->AppBlacklist->removeFromBlacklist($path);
+                //$this->AppBlacklist->removeFromBlacklist($path);
 
 
                 if($name === false) throw new Exception(sprintf('You have an app without a name, so it is not available. Consider removing / fixing it to make this warning go away. (%s)',$file->getRealPath()), 1);
@@ -562,6 +569,8 @@ class AppEngine {
             if(in_array($path, $paths)) {
 
                 $this->log('AppEngine',sprintf("Activating app: %s", $name),'AppEngine.log',9,1);
+                //Add this file to a black list in case it causes issues, we can skip it later.
+                //$this->AppBlacklist->addToBlacklist($path);
 
                 $manifestPath = dirname($path) . '/manifest.xml';
                 if(!file_exists($manifestPath)) {
@@ -573,6 +582,8 @@ class AppEngine {
                 $xml = simplexml_load_file($manifestPath);
                 $className = $xml['name'];
                 $nameSpace = $xml['namespace'];
+                if(!$nameSpace || $nameSpace == 'PHPAnt\\Core') $nameSpace = '\\PHPAnt\\Core';
+
                 $appClass = $nameSpace . '\\' . $className;
 
                 //Instantiate a new class of the app.
@@ -580,6 +591,9 @@ class AppEngine {
 
                     $app = new $appClass($this);
 
+                    //Remove the file from the blacklist because there was not a fatal error.
+                    $this->AppBlacklist->removeFromBlacklist($path);
+                    
                     $this->log( "AppEngine"
                               , "Created an instance of " . get_class($app)
                               ,'AppEngine.log'
@@ -715,9 +729,9 @@ class AppEngine {
 
         if($this->verbosity < $minimumVerbosity) return false;
 
-        if($debugPrint) $this->Configs->debug_print($message);
+        //if($debugPrint) $this->Configs->debug_print($message);
 
-        if($divAlert) $this->Configs->divalert($message,$divAlert);
+        //if($divAlert) $this->Configs->divalert($message,$divAlert);
 
         if(!file_exists($this->Configs->getLogDir())) mkdir($this->Configs->getLogDir());
 
