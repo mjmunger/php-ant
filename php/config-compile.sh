@@ -8,6 +8,28 @@
  # a note to michael@highpoweredhelp.com listing your distribution and the package that was
  # not included, but needed.
  #
+
+ function print_usage {
+ 	echo "SUMMARY:"
+ 	echo ""
+ 	echo "This script will install needed dependencies for a Debian based system,"
+ 	echo "then configure and install PHP. Once complete, it will notify you via"
+ 	echo "email that the configuration is complete."
+ 	echo ""
+ 	echo "USAGE:"
+ 	echo ""
+ 	echo "./config-compile.sh [youremail@yourdomain.com]"
+ 	echo ""
+
+ }
+
+ if [ "$#" == "0" ]; then
+     print_usage
+     exit 1
+fi
+
+echo "Compiling PHP for `hostname` and sending a notification to $1"
+
  apt-get install --assume-yes apache2-dev libxml2-dev libbz2-dev libreadline-dev libmcrypt-dev libssl-dev libcurl4-openssl-dev libfreetype6-dev
  # Sometimes, needed for Ubuntu
  apt-get install --assume-yes libjpeg8-dev libpng12-dev
@@ -45,4 +67,4 @@
  make tests
  make install
  
- cat body | mailx michael@highpoweredhelp.com -s 'MCDB PHP Compile done'
+ cat body | mailx $1 -s "`hostname` PHP Compile done"
