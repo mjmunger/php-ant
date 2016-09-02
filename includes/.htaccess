@@ -1,0 +1,4 @@
+#Protect credentials file
+<Files "mysql-credentials.php">
+	Require all denied
+</Files>
