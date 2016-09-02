@@ -94,12 +94,12 @@ if(isset($verbosity)) {
 }
 
 /* REGISTER THE AUTOLOADER! This has to be done first thing after we get the configs! */
-if(!spl_autoload_register([$antConfigs,'bfw_autoloader'])) die("Autoloader failed!");
+if(!spl_autoload_register([$antConfigs,'ant_autoloader'])) die("Autoloader failed!");
 
 /** END LOAD CONFIGURATIONS **/
 
 /** Setup Logger **/
-$logger = new \logger('bootstrap');
+$logger = new \Logger('bootstrap');
 $current_user = null;
 
 /**

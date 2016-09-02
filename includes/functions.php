@@ -60,16 +60,9 @@
 function gimmiePDO() {
     /* Check for the existence of mysql-credentials.php */
     $creds = 'includes/mysql-credentials.php';
-    if(file_exists($creds)){
-        $permissions = decoct(fileperms($creds) & 0777);
-        if(! ("600" === $permissions)) {
-            die("includes/mysql-credentials.php exists, but does not have the correct file permissions. Change the permissions of this file to 0600");
-            return false;
-        }
-    } else {
-        die("You must configure myql-credentials.php. See: <a href=\"https://php-ant.org/index.php/Database_Connection\">https://php-ant.org/index.php/Database_Connection</a>");
-        return false;
-    }
+
+    if(!file_exists($creds)) die("You must configure myql-credentials.php. See: <a href=\"https://php-ant.org/index.php/Database_Connection\">https://php-ant.org/index.php/Database_Connection</a>");
+
     require($creds);
 
     $dsn = "mysql:dbname=$dbDatabase;host=$dbHost";

@@ -1,3 +1,4 @@
 libs
 apps
 mysql-credentials.php
+cli-config.php

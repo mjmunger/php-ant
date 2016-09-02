@@ -91,7 +91,7 @@ class ConfigBase
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function bfw_autoloader($class) {
+    function ant_autoloader($class) {
         if(class_exists($class,false)) return true;
 
         $buffer = explode('\\', $class);
@@ -104,12 +104,12 @@ class ConfigBase
 
         /* Loop through all candidate files, and attempt to load them all in the correct order (FIFO) */
         foreach($candidate_files as $dependency) {
-            /*echo "<pre>"; echo "Looking for: $dependency"; echo "</pre>";*/
-            /*echo "Looking for: $dependency" . PHP_EOL;*/
+            echo "<pre>"; echo "Looking for: $dependency"; echo "</pre>";
+            echo "Looking for: $dependency" . PHP_EOL;
             if(file_exists($dependency)) {
                 if(is_readable($dependency)) {
-                    /*echo "<pre>"; echo "Found: $dependency"; echo "</pre>";*/
-                    /*echo "Found: $dependency" . PHP_EOL . PHP_EOL;*/
+                    echo "<pre>"; echo "Found: $dependency"; echo "</pre>";
+                    echo "Found: $dependency" . PHP_EOL . PHP_EOL;
                     return require_once($dependency);
                 }
             }

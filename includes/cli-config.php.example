@@ -15,14 +15,8 @@
  * @author Michael Munger <michael@highpoweredhelp.com>
  **/
 
-function inCLI()
-{
-	if(php_sapi_name() != 'cli')
-	{
-	 return false;
-	} else {
-	 return true;
-	}
+function inCLI() {
+	return php_sapi_name() != 'cli';
 }
 
 /**
@@ -40,11 +34,12 @@ function inCLI()
  * @author Michael Munger <michael@highpoweredhelp.com>
  **/
 
-function getCLIVars()
-{
-  $who = trim(`whoami`);
-	$vars = array('http_host' => 'https://mcdb-dev.l-3.com/',
-					'document_root' => "/home/$who/www");
+function getCLIVars() {
+	$who = trim(`whoami`);
+	$vars = ['http_host'     => 'https://yourdomain.com/'
+			,'document_root' => "/home/$who/www"
+			];
+
 	return $vars;
 }
 ?>
