@@ -10,3 +10,4 @@ t
 disabled.log
 .blacklist-load 
 rtfm
+config.php

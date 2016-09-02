@@ -67,7 +67,7 @@ function gimmiePDO() {
             return false;
         }
     } else {
-        die("You must configure myql-credentials.php. See: <a href=\"https://www.highpoweredhelp.com/codex/index.php/BFW_Toolkit#Database_Connection\">https://www.highpoweredhelp.com/codex/index.php/BFW_Toolkit#Database_Connection</a>");
+        die("You must configure myql-credentials.php. See: <a href=\"https://php-ant.org/index.php/Database_Connection\">https://php-ant.org/index.php/Database_Connection</a>");
         return false;
     }
     require($creds);
