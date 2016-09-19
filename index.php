@@ -21,6 +21,7 @@ namespace PHPAnt\Core;
 $start = microtime(true);
 
 include('includes/bootstrap.php');
+$env['Authenticator'] = $Authenticator;
 
 $Engine->runActions('include-header', $env);
 
@@ -31,7 +32,9 @@ if(isset($current_user)) {
         $Engine->runActions('show-dashboard', $env);
 }
 
+$Engine->runActions('include-navigation', $env);
 $Engine->runActions('show-dashboard', $env);
+$Engine->runActions('include-footer', $env);
 
 $end = microtime(true);
 $t = $end - $start;

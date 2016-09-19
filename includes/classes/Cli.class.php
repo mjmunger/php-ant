@@ -96,7 +96,8 @@ class Cli {
                 , 'verbosity' => $this->verbosity
                 ];
 
-        $this->grammar = $this->Engine->runActions('cli-load-grammar',$args);
+        $results = $this->Engine->runActions('cli-load-grammar',$args);
+        $this->grammar = $results['grammar'];
     }
 
     /**

@@ -182,7 +182,7 @@ include("includes/classes/AuthEnvFactory.class.php");
 
 /**** </AUTHENTICATION CLASSES AND FACTORIES> *****/
 /*@Todo: Refactor this to create a factory for bootstrap objects so we don't have to use this if switch. */
-if(!isset($NOAUTH)) {
+if(!isset($NOAUTH) || $NOAUTH===false) {
     try {
         $Authenticator = AuthEnvFactory::getAuthenticator($antConfigs->pdo,$logger);
     } catch (Exception $e) {
@@ -198,9 +198,7 @@ if(!isset($NOAUTH)) {
         case AntAuth::WEB || AntAuth::MOBILE:
             $Authenticator->checkCookies();
             
-            if(!$Authenticator->authorized) {
-                $Authenticator->authorize($Engine);
-            }
+            if(!$Authenticator->authorized) $Authenticator->authorize($Engine);
             
             $Authenticator->redirect($Engine);
     

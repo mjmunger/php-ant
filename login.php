@@ -1,28 +1,23 @@
-<?php
-/**
-* Prompts a user for login
-*
-* Login and authentication take place in application_top.php, which is included in includes/header.php.
-*
-* @package      BFW Toolkit
-* @subpackage   Core
-* @category     Pages
-* @author       Michael Munger <michael@highpoweredhelp.com>
-*/ 
+<?php 
+//If a username has not been submitted, dont' attempt to authorize this person. If it has, authorize them, which should redirect them to their dashboard.
+$NOAUTH=!isset($_POST['user']);
+//echo "<pre>"; var_dump($NOAUTH); echo "</pre>";
 
-if(file_exists('local/header.php')) {
-  include ('local/header.php');
-} else {
-  include('includes/header.php');
-}
+include('includes/bootstrap.php');
 
-if(isset($_GET['msg'])) {
-  $PE->Configs->divAlert($_GET['msg'],'error');
-}
-
-if(file_exists('local/signin.php')) {
-  include ('local/signin.php');
-} else {
-  include('includes/signin.php');
-}
+$Engine->runActions('include-header');
 ?>
+
+<div class="container">
+  <p class="text-center"><img src="<?php $Engine->runActions('get-site-logo'); ?>" /> </p>
+  <form class="form-signin" role="form" method="post">
+    <h2 class="form-signin-heading text-center">Please sign in</h2>
+    <input type="text" class="form-control" name="user" id="user" placeholder="Email address" required autofocus>
+    <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+    <label class="checkbox">
+      <input type="checkbox" value="remember-me" name="remember" id="remember" checked> Remember me
+    </label>
+    <button class="btn btn-lg btn-andretti btn-block" type="submit">Sign in</button>
+  </form>
+  <p align="center"><a href="reset.php">Forgot Your Password?</a></p>
+</div> <!-- /container -->
