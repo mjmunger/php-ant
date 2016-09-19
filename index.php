@@ -24,7 +24,7 @@ include('includes/bootstrap.php');
 
 $Engine->runActions('include-header', $env);
 
-$perfIndexLogger = new logger('performance-index');
+$perfIndexLogger = new \Logger('performance-index');
 
 if(isset($current_user)) {
         $env = ['current_user' => $current_user];

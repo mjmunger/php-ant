@@ -29,10 +29,11 @@ class PHPAntSigner
     var $AE           = NULL;
     
     function __construct($options) {
+        //Set a default.
+        if(!isset($options['appRoot'])) $options['appRoot'] = $options['AE']->Configs->getAppsDir();
 
-        if(!isset($options['appRoot'])) $options['appRoot'] = 'includes/apps/';
-        $this->AE = $options['AE'];
-
+        //Implement required options
+        $this->AE      = $options['AE'];
         $this->appRoot = $options['appRoot'];
     }
 
@@ -43,11 +44,12 @@ class PHPAntSigner
         $filePath           = $this->appPath .'/app.php';
 
         if(!file_exists($this->appPath)) {
-            throw new \Exception("Requested app ($appName) does not exist in $this->appRoot", 1);
+            throw new \Exception("Could not find $this->appPath! Requested app ($appName) does not exist in $this->appRoot", 1);
             return false;
         }
 
         if(!file_exists($filePath)) {
+            var_dump($this);
             throw new \Exception("The requested app ($appName) does not have an app.php file as is required for a properly structured app. Failed to find $filePath.", 1);
             return false;
             
@@ -481,7 +483,9 @@ class PHPAntSigner
      * Example:
      *
      * <code>
-     * $Signer->publish('/path/to/private.key');
+     * $args['AE']             = $AE;
+     * $args['privateKeyPath'] = '/path/to/key.rsa';
+     * $Signer->publish($args);
      * </code>
      *
      * @return boolean True if the process was successful and the app was

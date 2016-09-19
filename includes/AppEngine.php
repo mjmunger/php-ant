@@ -528,7 +528,7 @@ class AppEngine {
                 //$this->AppBlacklist->removeFromBlacklist($path);
 
 
-                if($name === false) throw new Exception(sprintf('You have an app without a name, so it is not available. Consider removing / fixing it to make this warning go away. (%s)',$file->getRealPath()), 1);
+                if($name === false) throw new \Exception(sprintf('You have an app without a name, so it is not available. Consider removing / fixing it to make this warning go away. (%s)',$file->getRealPath()), 1);
 
                 $status = ($name?'Available':'Missing');
 
@@ -571,6 +571,12 @@ class AppEngine {
                 $this->log('AppEngine',sprintf("Activating app: %s", $name),'AppEngine.log',9,1);
                 //Add this file to a black list in case it causes issues, we can skip it later.
                 //$this->AppBlacklist->addToBlacklist($path);
+
+                if($this->safeMode) {
+                    printf("Load %s? [Y/n]",$name);
+                    $answer = trim(fgets(STDIN));
+                    if($answer == "n") continue;
+                }
 
                 $manifestPath = dirname($path) . '/manifest.xml';
                 if(!file_exists($manifestPath)) {
@@ -679,7 +685,7 @@ class AppEngine {
             $appDirName = end($dirParts);
 
             $targetPath = $this->Configs->document_root . '/tests/' . $namespace;
-            if(!file_exists($targetPath)) mkdir($targetPath,0700,true);
+            if(!file_exists($targetPath)) mkdir($targetPath,0744,true);
 
             $link = $targetPath . '/' . $appDirName;
 
@@ -694,7 +700,9 @@ class AppEngine {
 
             //Determine where the tests directory is for the app.
             //Link the 'tests' directory as the target for the dirname if the symlink does not already exist.
-            if(!file_exists($link)) symlink($testsDir, $link);
+            if(!file_exists($link)) {
+                if(!symlink($testsDir, $link)) echo "Symlink $testsDir -> $link failed";
+            }
         }
     }
 
