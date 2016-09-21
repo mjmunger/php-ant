@@ -29,6 +29,8 @@ class PHPAntSigner
     var $AE           = NULL;
     
     function __construct($options) {
+        if(!isset($options['AE'])) throw new \Exception("You're trying to use the PHPAntSigner without passing an instance of the AppEngine as an option. See: https://php-ant.org/index.php/Class::PHPAntSigner", 1);
+        
         //Set a default.
         if(!isset($options['appRoot'])) $options['appRoot'] = $options['AE']->Configs->getAppsDir();
 
@@ -49,7 +51,6 @@ class PHPAntSigner
         }
 
         if(!file_exists($filePath)) {
-            var_dump($this);
             throw new \Exception("The requested app ($appName) does not have an app.php file as is required for a properly structured app. Failed to find $filePath.", 1);
             return false;
             
@@ -159,7 +160,7 @@ class PHPAntSigner
         //Get the files we need to work with.
 
         foreach( $files as $file) {
-            if ($file->getFilename()[0] === '.') continue;
+            //if ($file->getFilename()[0] === '.') continue;
             
             //hash the file
             $F = new PHPAntSignerFile($file);

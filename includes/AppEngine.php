@@ -133,7 +133,7 @@ class AppEngine {
 
         $this->log('AppEngine',sprintf('Enabling %s (%s)',$name,$path));
         if($name === false) {
-            divAlert("Could not enable app! It doesn't have a name. That's bad. Imagine going through life with out a name. Everyone would be like: 'Hey you!' all the time. You should name this plugin so we can enable it later.",'alert');
+            $this->Configs->divAlert("Could not enable app! It doesn't have a name. That's bad. Imagine going through life with out a name. Everyone would be like: 'Hey you!' all the time. You should name this plugin so we can enable it later.",'alert');
             return false;
         }
 
@@ -268,8 +268,9 @@ class AppEngine {
      **/
 
     function runActions($requested_hook,$args=false) {
-        $return = [];
-        $result = [];
+        $return  = [];
+        $result  = [];
+        $grammar = [];
 
         $args['requested_hook'] = $requested_hook;
         
@@ -312,7 +313,13 @@ class AppEngine {
             }
             $row = [$requested_hook,$app->appName,($result['success']?"OK":"FAILED")];
             $TL->addRow($row);
-            $return = array_merge($return,$result);
+
+            //Compile grammar if it is being returned.
+            if(isset($result['grammar'])) $grammar = array_merge($grammar,$result['grammar']);
+
+            //Merge other stuff.
+            $return            = array_merge($return,$result);
+            $return['success'] = $result['success'];
         }
 
       if(count($TL->rows) > 1) {
@@ -324,7 +331,8 @@ class AppEngine {
       }
 
         unset($app);
-        //$this->log("AppEngine",print_r($return,true),'AppEngine.log',9);
+
+        $return['grammar'] = $grammar;
         return $return;
     }
 
@@ -646,7 +654,7 @@ class AppEngine {
                     echo $e->getMessage();
                 }
 
-                if(count($xml->action) === 0) throw new \Exception("The app $name ($path) has NO actions. It will not do anything.", 1);
+                if(count($xml->action) === 0) $this->log('WARNING',"The app $name ($path) has NO actions. It will not do anything.");
                 
                 //Create all the hooks referenced in the manifest file.
                 foreach($xml->action as $action){

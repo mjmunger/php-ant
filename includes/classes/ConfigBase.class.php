@@ -18,7 +18,7 @@ class ConfigBase
         $this->pdo = $pdo;
         $this->http_host     = $vars['http_host'];
         $this->document_root = $vars['document_root'];
-        $this->document_root = $vars['verbosity'];
+        $this->verbosity     = $vars['verbosity'];
     }
 
     function setVerbosity($int) {

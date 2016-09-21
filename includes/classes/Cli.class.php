@@ -97,7 +97,7 @@ class Cli {
                 ];
 
         $results = $this->Engine->runActions('cli-load-grammar',$args);
-        $this->grammar = $results['grammar'];
+        $this->grammar = array_merge($results['grammar'],$this->grammar);
     }
 
     /**

@@ -6,7 +6,15 @@ use PHPUnit\Framework\TestCase;
 
 class PHPAntSignerTest extends TestCase
 {
+	function getAE() {
+		$options = getDefaultOptions();
+		$AE      = getMyAppEngine($options);
+		return $AE;		
+	}
+
 	function testGenKeys() {
+
+		$options['AE'] = $this->getAE();
 
 		$publicKeyPath  = 'includes/apps/TestApp/public.key';
 		$privateKeyPath = 'includes/apps/TestApp/private.key';
@@ -15,7 +23,6 @@ class PHPAntSignerTest extends TestCase
 		$privateKeyStoragePath = "/home/$who/private.key";
 
 
-		$options = []; //$options['appRoot'] = 'includes/apps/';
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$S->genKeys();
@@ -27,7 +34,7 @@ class PHPAntSignerTest extends TestCase
 	}
 
 	function testSetApp() {
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$result = $S->setApp('TestApp');
 		$this->assertTrue($result);
@@ -42,11 +49,10 @@ class PHPAntSignerTest extends TestCase
 		$manifestFilePath = 'includes/apps/TestApp/manifest.xml';
 		if(file_exists($manifestFilePath)) unlink($manifestFilePath);
 
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$S->generateManifestFile();
-		$this->assertCount(5, $S->files);
 
 		foreach($S->files as $file) {
 			$this->assertInstanceOf('\PHPAnt\Core\PHPAntSignerFile', $file);
@@ -76,7 +82,7 @@ class PHPAntSignerTest extends TestCase
 		$signature        = $hook.$function.'50';
 		$manifestFilePath = 'includes/apps/TestApp/manifest.xml';
 
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$S->registerHook($hook,$function);
@@ -114,7 +120,7 @@ class PHPAntSignerTest extends TestCase
 		$signature        = $hook.$function.'50';
 		$manifestFilePath = 'includes/apps/TestApp/manifest.xml';
 
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 
@@ -158,7 +164,7 @@ class PHPAntSignerTest extends TestCase
 		$who = exec('whoami');
 		$privateKeyPath = "/home/$who/private.key";
 		
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$this->assertFileExists($privateKeyPath);
@@ -179,7 +185,7 @@ class PHPAntSignerTest extends TestCase
 		$who = exec('whoami');
 		$privateKeyPath = "/home/$who/private.key.wrong";
 		
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 
@@ -201,7 +207,7 @@ class PHPAntSignerTest extends TestCase
 		$who = exec('whoami');
 		$privateKeyPath = "/home/$who/private.key";
 		
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 
@@ -226,7 +232,7 @@ class PHPAntSignerTest extends TestCase
 		$privateKeyPath = 'includes/apps/TestApp/private.key';
 		$privateKeyStoragePath = "/home/$who/private.key";
 
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$S->genKeys();
@@ -235,7 +241,7 @@ class PHPAntSignerTest extends TestCase
 
 		$S->signApp($privateKeyStoragePath);
 
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 		$S->setApp('TestApp');
 		$result = $S->verifySignature();		
@@ -258,7 +264,7 @@ class PHPAntSignerTest extends TestCase
 		$privateKeyStoragePath = "/home/$who/private.key";
 		$this->assertTrue(file_exists($privateKeyStoragePath));
 
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 
 		$S->setApp('TestApp');
@@ -282,7 +288,7 @@ class PHPAntSignerTest extends TestCase
 
 	function testAddHook() {
 		$manifestPath   = 'includes/apps/TestApp/manifest.xml';
-		$options = []; //$options['appRoot'] = 'includes/apps/';
+		$options['AE'] = $this->getAE();
 		$S = new \PHPAnt\Core\PHPAntSigner($options);
 
 		$S->setApp('TestApp');

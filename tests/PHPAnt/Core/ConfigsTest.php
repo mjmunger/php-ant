@@ -56,6 +56,7 @@ class AntConfigTest extends TestCase
     function testBaseConfig() {
         $vars = getMockVars();
         $pdo = new PDOMock();
+        $this->assertFileExists($vars['document_root']);
 
         $BC = new PHPAnt\Core\ConfigBase($pdo,$vars);
         $BC->environment = PHPAnt\Core\ConfigBase::CLI;

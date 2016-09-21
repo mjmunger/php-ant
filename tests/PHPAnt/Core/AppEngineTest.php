@@ -48,7 +48,7 @@ class AppEngineTest extends TestCase
 		$this->assertTrue($result['success']);
 
 		//Make sure this now exists in the database.
-		$query = "SELECT settings_value FROM mcdb2.settings where settings_key = ? LIMIT 1";
+		$query = "SELECT settings_value FROM settings where settings_key = ? LIMIT 1";
 		$stmt = $A->Configs->pdo->prepare($query);
 		$stmt->execute(['enabledAppsList']);
 		$row = $stmt->fetchObject();
@@ -151,6 +151,7 @@ class AppEngineTest extends TestCase
 
 		//Enable the test app.
 		$appPath = $appRoot . 'TestApp/app.php';
+		$this->assertFileExists($appPath);
 		$name = $A->getAppMeta($appPath,'name');
 		$result = $A->enableApp($name,$appPath);
 		$this->assertTrue($result['success']);
@@ -265,7 +266,7 @@ class AppEngineTest extends TestCase
 		$appPath = $appRoot . 'TestApp/app.php';
 		$results = $A->getAppActions($appPath);
 
-		$this->assertCount(3, $results);
+		$this->assertCount(2, $results);
 	}
 
 	function testGetAppURIs() {
