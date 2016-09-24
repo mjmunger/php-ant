@@ -266,7 +266,7 @@ class AppEngineTest extends TestCase
 		$appPath = $appRoot . 'TestApp/app.php';
 		$results = $A->getAppActions($appPath);
 
-		$this->assertCount(2, $results);
+		$this->assertCount(5, $results);
 	}
 
 	function testGetAppURIs() {
@@ -285,6 +285,9 @@ class AppEngineTest extends TestCase
 
 		//Enable the test app.
 		$appPath = $appRoot . 'TestApp/app.php';
+
+		//Test App URI parsing.
+
 		$results = $A->getAppURIs($appPath);
 
 		$this->assertCount(3, $results);
@@ -297,6 +300,11 @@ class AppEngineTest extends TestCase
  		for($x=0;$x<count($uris); $x++) {
  			$this->assertSame($uris[$x], $results[$x]);
  		}
+
+ 		//Test App Route parsing
+ 		$routes = $A->getAppRoutes($appPath);
+ 		$this->assertCount(3,$routes);
+
 	}
 
 	/**
@@ -373,5 +381,67 @@ class AppEngineTest extends TestCase
 
 		$this->assertFalse($A->AppBlacklist->isBlacklisted($path));
 	}
+
+	/**
+	 * Tests routed actions against a list of URIs.
+	 *
+	 * @depends testGetAppURIs
+	 * @dataProvider providerAppRoutes
+	 * @covers AppEngine::RunRoutedActions
+	 * @return void
+	 */
+
+	public function testAppEngineRunRoutedActions($uri,$expected) {
+		//Get the configs by themselves.
+		$C = getMyConfigs();
+		//Set the URI
+		$C->Server->Request->uri = $uri;
+
+		//Get an instance of the AppEngine
+		$appRoot = $C->document_root . '/includes/apps/';
+
+		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
+		$options['appRoot'] = $appRoot;
+		$A = getMyAppEngine($options);	
+		$A->Configs->Server->Request->uri = $uri;	
+
+
+		//Enable the test app.
+		$appPath = $appRoot . 'TestApp/app.php';
+		$A->enableApp($appPath);
+		$A->reload();
+
+		//Check to make sure the actions are registered for the Test app.
+		foreach($A->apps as $app) {
+			if($app->AppName == 'Test Ant App') {
+				$isPresent = false;
+				foreach($app->routedActions as $regex => $action) {
+					if($action == $expected) $isPresent = true;
+				}
+			}
+		}
+
+		$this->assertTrue($isPresent);
+
+		//Run the action
+		$result = $A->RunRoutedActions();
+		$this->assertSame($expected, $result['test-value']);
+
+	}
+	
+	/**
+	 * Data Provider for testAppEngineRunRoutedActions
+	 *
+	 * @return array
+	 */
+	public function providerAppRoutes() {
+	    return array(['/uploader/'       , 'uploader-uri-test']
+					,['/history/1234'    , 'history-uri-test' ]
+					,['/test/asdf/1234'  , 'testasdf-uri-test']
+	    			);
+	}
+
 			
 }

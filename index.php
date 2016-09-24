@@ -23,6 +23,11 @@ $start = microtime(true);
 include('includes/bootstrap.php');
 $env['Authenticator'] = $Authenticator;
 
+$results = $Engine->runRoutedActions();
+
+//If a (single) routed action demands we stop executing after we complete routed actions, then stop execution.
+if(isset($results['exit'])) die();
+
 $Engine->runActions('include-header', $env);
 
 $perfIndexLogger = new \Logger('performance-index');

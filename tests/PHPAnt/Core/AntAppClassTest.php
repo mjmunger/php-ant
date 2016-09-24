@@ -263,5 +263,45 @@ class AntAppClassTest extends TestCase
 
 		return $data;		
 	}
+
+	/**
+	 * Tests the routed actions for an app.
+	 *
+	 * @dataProvider providerRoutedActionURIs
+	 * @covers AntApp::getRoutedAction
+	 * @return void
+	 */
+	public function testAntAppgetRoutedAction($uri, $expected)
+	{
+		$app = new \PHPAnt\Core\AntApp();
+		$app->routedActions = ["#^\/uploader\/.*#"   => 'uploader-uri-test'
+							  ,"#^\/history\/.*#"    => 'history-uri-test'
+							  ,"#^\/test\/asdf\/.*#" => 'testasdf-uri-test'
+							  ];
+
+		$this->assertSame($expected, $app->getRoutedAction($uri));
+	}
+	
+	/**
+	 * Data Provider for testAntApp:getRoutedAction
+	 *
+	 * @return array
+	 */
+	public function providerRoutedActionURIs()
+	{
+	    return array(['/uploader'     ,false]
+	    			,['/uploader/'    ,'uploader-uri-test']
+	    			,['/uploader/1234','uploader-uri-test']
+	    			,['/upload/1234'  ,false]
+	    			,['/history/1234' ,'history-uri-test']
+	    			,['/history/'     ,'history-uri-test']
+	    			,['/historyx/'    ,false]
+	    			,['/test/asdf/'   ,'testasdf-uri-test']
+	    			,['/test/asdf/a'  ,'testasdf-uri-test']
+	    			,['/test/asdf/1'  ,'testasdf-uri-test']
+	    			,['/xtest/asdf/'  ,false]
+	    );
+	}
+	
 	
 }

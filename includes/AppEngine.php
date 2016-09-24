@@ -478,6 +478,37 @@ class AppEngine {
     }
 
     /**
+     * Parses and retrieves regular expressions from app meta to determine
+     * app URIs and their associated actions which will be run when the 
+     * URI satisfies the regular expression.
+     * Example:
+     *
+     * <code>
+     * $routes = $Engine->getAppRoutes('/path/to/some/app');
+     * </code>
+     *
+     * @return array An associative array of key value pairs in the form of $regex => $action
+     * @param string $path The full path to the app to be parsed.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function getAppRoutes($path) {
+        $pattern = '/(App URI:) *([\'"]{1}(.*)[\'"]{1}) *-> *([a-zA-Z-]*)/s';
+        $buffer  = file($path);
+        $matches = NULL;
+        $routes = [];
+
+        foreach($buffer as $line) {
+            $line = trim($line);
+            preg_match($pattern, $line,$matches);
+            if(count($matches) === 0) continue;
+
+            $routes[$matches[3]] = $matches[4];
+        }        
+        return $routes;
+    }    
+
+    /**
      * Loads all the plugins from the plugins/ directory.
      *
      * A plugin must have the following two components:
@@ -670,6 +701,10 @@ class AppEngine {
                 $uriList = $this->getAppURIs($path);
                 $app->registerURI($uriList);
 
+                //Register routes for this app.
+                $routes = $this->getAppRoutes($path);
+                $app->registerAppRoutes($routes);
+
                 array_push($this->apps,$app);
                 $this->activatedApps[$path]= $name;
 
@@ -788,5 +823,32 @@ class AppEngine {
 
         //$message = sprintf("Error Context: %s", print_r($context,true));
         //$this->log('ERROR',$message);
-    }    
+    }
+    
+    /**
+     * Executes events based on declared routes.
+     * Example:
+     *
+     * <code>
+     * Example Code
+     * </code>
+     *
+     * @return mixed Array of results from fired actions.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    public function runRoutedActions() {
+        $results = [];
+        foreach($this->apps as $app) {
+            //Find apps that respond to the current URI.
+            if($app->fireOnURI($this->Configs->Server->Request->uri)) {
+                //Loop through events that fire for this app on this URI.
+                $action = $app->getRoutedAction($this->Configs->Server->Request->uri);
+                $return = $this->runActions($action);
+                $results = array_merge($results,$return);
+            }
+        }
+        $results['success'] = true;
+        return $results;
+    }
 }

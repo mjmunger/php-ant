@@ -102,6 +102,14 @@ Class AntApp
 
 
     /**
+    * @var array $routedActions An associative array of regular expressions and actions,
+    *      which are compared to a given request URI, and when matched, the action
+    *      is fired in the App Engine.
+    **/
+    
+    public $routedActions   = [];
+
+    /**
     * @var array $getFilters An array of get request variables that must be a)
     *      present and b) set to a certain value before the app engine will
     *      trigger the actions contained in this app.
@@ -162,6 +170,30 @@ Class AntApp
     }
 
     /**
+     * Adds routes and actions to the AntApp::routedActions array. When these
+     * routes are present, the AppEngine can respond to URIs and route the
+     * requests to the actions designated in the app meta as appropriate.
+     * 
+     * Example:
+     *
+     * <code>
+     * $result = $app->registerAppRoutes($routes);
+     * </code>
+     *
+     * @return boolean True if the routedActions array increases in size.
+     * @param array $routes an associative array containing regular expression
+     *        strings as the key, and the action that should fire when a URI matches
+     *        that string as the value.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+    function registerAppRoutes($routes) {
+        $startSize = count($this->routedActions);
+        $this->routedActions = array_merge($this->routedActions,$routes);
+        return (count($this->routedActions) > $startSize);
+    }
+
+    /**
      * Examines a given URI and determines if this app should fire or not.
      * Example:
      *
@@ -184,6 +216,28 @@ Class AntApp
 
         return false;
     }
+
+    function getRoutedAction($uri) {
+        foreach($this->routedActions as $regex => $action) {
+            if(preg_match($regex,$uri)) return $action;
+        }
+
+        //no match
+        return false;
+    }
+
+    /**
+     * Retrieves the action, which should be run for routed URIs
+     * Example:
+     *
+     * <code>
+     * $action = $myapp->getRoutedAction();
+     * </code>
+     *
+     * @return return value
+     * @param param
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
 
     /**
      * Hooks this app to a hook in the system.
