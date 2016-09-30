@@ -27,23 +27,23 @@ class ConfigBase
     }
 
     function getIncludesDir() {
-        return $this->document_root . '/includes/';
+        return $this->document_root . 'includes/';
     }
 
     function getLibsDir() {
-        return $this->document_root . '/includes/libs/';
+        return $this->document_root . 'includes/libs/';
     }
 
     function getAppsDir() {
-        return $this->document_root . '/includes/apps/';
+        return $this->document_root . 'includes/apps/';
     }
 
     function getAttachmentDir() {
-        return $this->document_root . '/attachments/';
+        return $this->document_root . 'attachments/';
     }
 
     function getImagesDir() {
-        return $this->document_root . '/images/';
+        return $this->document_root . 'images/';
     }
 
     function getLogDir() {

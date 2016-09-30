@@ -124,7 +124,10 @@ class CLISetup {
 	}
 
 	function createDirs() {
-		$dirs = ['includes/apps'];
+		$dirs = ['includes/apps'
+				,'includes/libs'
+				,'attachments'
+				];
 		foreach($dirs as $dir) {
 			mkdir($dir);
 		}
@@ -136,6 +139,7 @@ class CLISetup {
 		$defaultRepos = [ 'git@git.highpoweredhelp.com:michael/ant-app-plugin-manager.git'
 					    , 'git@git.highpoweredhelp.com:michael/ant-app-default.git'
 					    , 'git@git.highpoweredhelp.com:michael/ant-app-configs.git'
+					    , 'https://github.com/mjmunger/php-ant-test-app.git'
 					    ];
 
 		foreach($defaultRepos as $repo) {

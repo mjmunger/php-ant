@@ -34,6 +34,7 @@ class PHPAntSigner
         //Set a default.
         if(!isset($options['appRoot'])) $options['appRoot'] = $options['AE']->Configs->getAppsDir();
 
+
         //Implement required options
         $this->AE      = $options['AE'];
         $this->appRoot = $options['appRoot'];
@@ -280,8 +281,9 @@ class PHPAntSigner
 
         if(!file_exists($privateKeyPath)) throw new \Exception('Private key ($privateKeyPath) does not appear to exist. Private key is required for signing.', 1);
         
-        $privateKeyShouldNotBeInAppPath = $this->appPath . '/private.key';
-        if(file_exists($privateKeyShouldNotBeInAppPath)) throw new \Exception("You CANNOT leave your private key in your app path. Move it to another location where it will not get distributed with your app.", 1);
+        //Need to find a better way to protect people
+        //$privateKeyShouldNotBeInAppPath = $this->appPath . '/private.key';
+        //if(file_exists($privateKeyShouldNotBeInAppPath)) throw new \Exception("You CANNOT leave your private key in your app path. Move it to another location where it will not get distributed with your app.", 1);
         
         $manifestPath          = $this->appPath . '/manifest.xml';
         $manifestSignaturePath = $this->appPath . '/manifest.sig';
@@ -302,6 +304,8 @@ class PHPAntSigner
         $manifestPath          = $this->appPath . '/manifest.xml';
         $manifestSignaturePath = $this->appPath . '/manifest.sig';
         $publicKeyPath         = $this->appPath . '/public.key';
+        //var_dump($publicKeyPath);
+        //die(__FILE__  . ':' . __LINE__ );
         if(!file_exists($publicKeyPath)) return false;
 
         //Get the signature of the manifest file
@@ -323,12 +327,9 @@ class PHPAntSigner
         $results = [];
 
         //2. Verify the files all have matching hashes.
-        $integrityOK = true;
+        $integrityOK = $this->verifySignature();
         
-        if(!$this->verifySignature()) {
-            $integrityOK = false;
-            $results[$this->appPath . '/manifest.xml'] = "INVALID SIGNATURE";
-        }
+        if(!$integrityOK) $results[$this->appPath . '/manifest.xml'] = "INVALID SIGNATURE";
 
         $app = simplexml_load_file($this->appPath . '/manifest.xml');
         foreach($app->file as $file) {
@@ -367,8 +368,8 @@ class PHPAntSigner
         $bob_sign_publickey = \Sodium\crypto_sign_publickey($bob_sign_kp);        
         $public             = base64_encode($bob_sign_publickey);
         $private            = base64_encode($bob_sign_secretkey);
-        $publicKeyPath      = $this->appPath . '/public.key';
-        $privateKeyPath     = $this->appPath . '/private.key';
+        $publicKeyPath      = $this->AE->Configs->document_root . 'public.key';
+        $privateKeyPath     = $this->AE->Configs->document_root . 'private.key';
 
         $fh = fopen($publicKeyPath,'w');
         fwrite($fh,$public);
@@ -396,10 +397,10 @@ class PHPAntSigner
         //Get the public key.
         $publicKey = $this->derivePublicKey($privateKeyPath);
         //Save it to the public.key file.
-        $fh = fopen($this->appPath . '/public.key','w');
+        $publicKeyPath = $this->appPath . '/public.key';        
+        $fh = fopen($publicKeyPath,'w');
         fwrite($fh,base64_encode($publicKey));
         fclose($fh);
-        $publicKeyPath = $this->appPath . '/public.key';        
         return $publicKeyPath;
     }
 
@@ -474,7 +475,13 @@ class PHPAntSigner
             $path = $this->appPath . '/' . $fileToDelete;
             if(file_exists($path)) unlink($path);
         }
-        return true;
+
+        $clean = true;
+        foreach($removeTheseFiles as $fileToDelete) {
+            if(file_exists($fileToDelete)) $clean = false;
+        }
+
+        return $clean;
     }
 
     /**
@@ -497,7 +504,7 @@ class PHPAntSigner
 
     function publish($args) {
         $AE             = $args['AE'];
-        $privateKeyPath = $args['privateKeyPath'];
+        $privateKeyPath = $args['AE']->Configs->getConfigs(['signing-key'])['signing-key'];
 
         $return = [];
 

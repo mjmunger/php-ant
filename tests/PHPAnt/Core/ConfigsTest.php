@@ -1,14 +1,14 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-require_once('tests/test_top.php');
+require_once('test_top.php');
 
 class AntConfigTest extends TestCase
 {
     var $passed = false;
 
     public function testConfigsExist() {
-        $exists = file_exists('config.php');
+        $exists = file_exists('includes/config.php');
         $this->assertTrue($exists,'The file config.php must exist in the root (www) dir.');
         return $exists;
     }
@@ -74,7 +74,7 @@ class AntConfigTest extends TestCase
 
         //Make sure getWebURI works
 
-        $url = $BC->getWebURI('/home/'.$vars['system_user'].'/www/includes/libs/library/resources/thing.png');
+        $url = $BC->getWebURI($vars['document_root'] .'/includes/libs/library/resources/thing.png');
         $expectedURL = $vars['http_host'] . '/includes/libs/library/resources/thing.png';
         $this->assertSame($expectedURL, $url);
     }

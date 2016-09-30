@@ -216,16 +216,7 @@ Class AntApp
 
         return false;
     }
-
-    function getRoutedAction($uri) {
-        foreach($this->routedActions as $regex => $action) {
-            if(preg_match($regex,$uri)) return $action;
-        }
-
-        //no match
-        return false;
-    }
-
+    
     /**
      * Retrieves the action, which should be run for routed URIs
      * Example:
@@ -238,6 +229,14 @@ Class AntApp
      * @param param
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
+
+    function getRoutedAction($uri) {
+        foreach($this->routedActions as $regex => $action) {
+            if(preg_match($regex,$uri)) return $action;
+        }
+        //no match
+        return false;
+    }
 
     /**
      * Hooks this app to a hook in the system.

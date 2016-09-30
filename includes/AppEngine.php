@@ -97,7 +97,7 @@ class AppEngine {
 
         //Setting $options['disableApps'] = true will prevent auto-loading and activation of apps.
         if(!$this->disableApps) {
-            $this->getenabledApps();
+            $this->getEnabledApps();
             $this->linkAppTests();
             $this->activateApps();
         }
@@ -268,9 +268,9 @@ class AppEngine {
      **/
 
     function runActions($requested_hook,$args=false) {
-        $return  = [];
-        $result  = [];
-        $grammar = [];
+        $actionReturnValues  = [];
+        $finalResult         = [];
+        $grammar             = [];
 
         $args['requested_hook'] = $requested_hook;
         
@@ -307,19 +307,19 @@ class AppEngine {
             $result['success'] = false;
             try {
                 $this->log('AppEngine',"Triggering $app->appName...",'AppEngine.log',9);
-                $result = $app->trigger($requested_hook,$args);
+                $actionReturnValues = $app->trigger($requested_hook,$args);
             } catch (Exception $e) {
                 $this->log('EXCEPTION',$e->getMessage());
             }
-            $row = [$requested_hook,$app->appName,($result['success']?"OK":"FAILED")];
+            $row = [$requested_hook,$app->appName,($actionReturnValues['success']?"OK":"FAILED")];
             $TL->addRow($row);
 
             //Compile grammar if it is being returned.
-            if(isset($result['grammar'])) $grammar = array_merge($grammar,$result['grammar']);
+            if(isset($result['grammar'])) $grammar = array_merge($grammar,$actionReturnValues['grammar']);
 
             //Merge other stuff.
-            $return            = array_merge($return,$result);
-            $return['success'] = $result['success'];
+            $finalResult            = array_merge($finalResult,$actionReturnValues);
+            //$return['success'] = $result['success'];
         }
 
       if(count($TL->rows) > 1) {
@@ -332,8 +332,8 @@ class AppEngine {
 
         unset($app);
 
-        $return['grammar'] = $grammar;
-        return $return;
+        //$return['grammar'] = $grammar;
+        return $finalResult;
     }
 
     /**
@@ -752,13 +752,18 @@ class AppEngine {
     function reload() {
         $this->log('AppEngine','Reloading');
         //Reload and reactivate the apps.
-        $this->getenabledApps();
+        $this->getEnabledApps();
         $this->activateApps();
+
+        //Re-load the grammar for the CLI.
         $this->runActions('cli-load-grammar');
+
         /* Load any libraries that are in the includes/libs/ directory. */
         $this->runActions('lib-loader');
+
         /* Load any spl-autoloaders that are contained in Apps */
-        $this->runActions('load_loaders');        
+        $this->runActions('load_loaders');
+
         $this->log('AppEngine','Reload complete.');
     }
 

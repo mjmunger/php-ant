@@ -1,6 +1,7 @@
 <?php
 namespace PHPAnt\Core;
 
+$rootDir = '/home/michael/php-ant/';
 $homedir  = getenv("HOME");
 $logdir   = $homedir . '/log/';
 $errorlog = $logdir  . 'errors.log';

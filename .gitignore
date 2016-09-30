@@ -11,3 +11,6 @@ disabled.log
 .blacklist-load 
 rtfm
 config.php
+private.key
+public.key
+apps/
