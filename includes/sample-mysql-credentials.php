@@ -14,9 +14,12 @@
 * information.
 **/
 
-$dbUsername = 'someuser';
-$dbPassword = 'somepass';
-$dbDatabase = 'somedatabase';
-$dbHost     = 'localhost';
+//$dbUsername = 'someuser';
+//$dbPassword = 'somepass';
+//$dbDatabase = 'somedatabase';
+//$dbHost     = 'localhost';
 
-?>
+$dbUsername = '%USER%';
+$dbPassword = '%PASSWORD%';
+$dbDatabase = '%DATABASE%';
+$dbHost     = '%HOST%';

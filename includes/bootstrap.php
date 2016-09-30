@@ -11,10 +11,10 @@ $errorlog = $logdir  . 'errors.log';
 /* Set the default date and timezone, For a list of supported timezones, see: http://php.net/manual/en/timezones.php */
 date_default_timezone_set('America/New_York');
 
-if(!file_exists('config.php')) {
+if(!file_exists('includes/config.php')) {
     die("You must have a config.php file configured. Try renaming / copying config.php.sample to config.php, and follow the instructions in the file");
 } else {
-    require('config.php');
+    require('includes/config.php');
 }
 
 /* Require all the interfaces so we can protect our code! */
@@ -99,6 +99,7 @@ if(!spl_autoload_register([$antConfigs,'ant_autoloader'])) die("Autoloader faile
 /** END LOAD CONFIGURATIONS **/
 
 /** Setup Logger **/
+
 $logger = new \Logger('bootstrap');
 $current_user = null;
 

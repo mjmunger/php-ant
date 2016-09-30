@@ -61,7 +61,7 @@ function gimmiePDO($testing=false) {
     /* Check for the existence of mysql-credentials.php */
     $creds = 'includes/mysql-credentials.php';
 
-    if(!file_exists($creds)) die("You must configure myql-credentials.php. See: <a href=\"https://php-ant.org/index.php/Database_Connection\">https://php-ant.org/index.php/Database_Connection</a>");
+    if(!file_exists($creds)) die("You must configure mysql-credentials.php. See: <a href=\"https://php-ant.org/index.php/Database_Connection\">https://php-ant.org/index.php/Database_Connection</a>");
 
     require($creds);
 
