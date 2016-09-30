@@ -687,8 +687,11 @@ PHP-Ant CLI v1.0
 
 Created by High Powered Help, Inc.
 
-For technical support, email michael@highpoweredhelp.com
-Help and documentation is located at https://www.highpoweredhelp.com/codex/
+Help and documentation is located at https://php-ant.org/
+
+For technical support, open a ticket on github.
+For commerical support, email michael@highpoweredhelp.com
+
 Use of this CLI may void your warranty. Type: 'show warranty' for details.
 ===============================================================================
 <?php

@@ -315,7 +315,7 @@ class AppEngine {
             $TL->addRow($row);
 
             //Compile grammar if it is being returned.
-            if(isset($result['grammar'])) $grammar = array_merge($grammar,$actionReturnValues['grammar']);
+            if(isset($actionReturnValues['grammar'])) $grammar = array_merge($grammar,$actionReturnValues['grammar']);
 
             //Merge other stuff.
             $finalResult            = array_merge($finalResult,$actionReturnValues);
@@ -332,7 +332,7 @@ class AppEngine {
 
         unset($app);
 
-        //$return['grammar'] = $grammar;
+        $finalResult['grammar'] = $grammar;
         return $finalResult;
     }
 
