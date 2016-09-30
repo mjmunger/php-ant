@@ -2,13 +2,14 @@
 <?php
 use PHPAnt\Core;
 
+$rootDir  = __DIR__;
+
 /* Get command line options */
 $options = getopt('v::d::s::');
 
 /*Default options*/
 $loader_debug = false;
 $safeMode     = false;
-
 /* Load bootstrap options. */
 if(sizeof($options) > 0) {
     if(array_key_exists('v', $options)) {

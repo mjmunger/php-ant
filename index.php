@@ -18,7 +18,8 @@ namespace PHPAnt\Core;
  * @author       Michael Munger <michael@highpoweredhelp.com>
  */ 
 
-$start = microtime(true);
+$start    = microtime(true);
+$rootDir  = __DIR__;
 
 include('includes/bootstrap.php');
 $env['Authenticator'] = $Authenticator;
