@@ -136,7 +136,7 @@ class CLISetup {
 	function getDefaultApps() {
 		chdir('includes/apps');
 
-		$defaultRepos = [ 'https://github.com/mjmunger/php-ant-test-app.git'
+		$defaultRepos = [ 'https://github.com/mjmunger/ant-app-test-app.git'
 					    , 'git@git.highpoweredhelp.com:michael/ant-app-default.git'
 					    , 'git@git.highpoweredhelp.com:michael/ant-app-configs.git'
 					    , 'git@git.highpoweredhelp.com:michael/ant-app-plugin-manager.git'
