@@ -136,14 +136,15 @@ class CLISetup {
 	function getDefaultApps() {
 		chdir('includes/apps');
 
-		$defaultRepos = [ 'git@git.highpoweredhelp.com:michael/ant-app-plugin-manager.git'
+		$defaultRepos = [ 'https://github.com/mjmunger/php-ant-test-app.git'
 					    , 'git@git.highpoweredhelp.com:michael/ant-app-default.git'
 					    , 'git@git.highpoweredhelp.com:michael/ant-app-configs.git'
-					    , 'https://github.com/mjmunger/php-ant-test-app.git'
+					    , 'git@git.highpoweredhelp.com:michael/ant-app-plugin-manager.git'
 					    ];
 
 		foreach($defaultRepos as $repo) {
 			$cmd = sprintf("git clone %s",$repo);
+			print "Running: $cmd" . PHP_EOL;
 			passthru($cmd);
 		}
 	}

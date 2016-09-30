@@ -389,8 +389,8 @@ class PHPAntSigner
             printf("" . PHP_EOL);
             printf("You should also make a COPY of your public key and store it for safe keeping as well." . PHP_EOL);
             printf("Your public key should be issued with your apps (this one and new ones)." . PHP_EOL);
-
         }
+        $this->AE->Configs->setConfig('signing-key',$privateKeyPath);
     }
 
     private function saveDerivedPublicKey($privateKeyPath) {
