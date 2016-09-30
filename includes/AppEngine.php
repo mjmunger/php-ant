@@ -787,9 +787,10 @@ class AppEngine {
         if(!file_exists($this->Configs->getLogDir())) mkdir($this->Configs->getLogDir());
 
         $logPath = $this->Configs->getLogDir() . $file;
-
+        //$remoteIp = $this->Configs->Request->ip;
         $timestamp = date('M d H:i:s');
         $buffer = '';
+        //$buffer .= str_pad($remoteIp, 18);
         $buffer .= str_pad($timestamp, 16);
         $buffer .= str_pad($component, 25);
         $buffer .= $message;

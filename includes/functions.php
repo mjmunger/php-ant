@@ -57,7 +57,7 @@
     return $m;
 }*/
 
-function gimmiePDO() {
+function gimmiePDO($testing=false) {
     /* Check for the existence of mysql-credentials.php */
     $creds = 'includes/mysql-credentials.php';
 
@@ -65,7 +65,11 @@ function gimmiePDO() {
 
     require($creds);
 
-    $dsn = "mysql:dbname=$dbDatabase;host=$dbHost";
+    if($testing) {
+        $dsn = "mysql:dbname=$dbTesting;host=$dbHost";
+    } else {
+        $dsn = "mysql:dbname=$dbDatabase;host=$dbHost";
+    }
     $dbh = null;
 
     try {
