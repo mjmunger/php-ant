@@ -2,7 +2,7 @@
 namespace PHPAnt\Core;
 
 /**
- * PHPAnt Starting Page
+ * PHPAnt main controller.
  *
  * The main startup page. Most everything here can be configured for the
  * system you're building. There are three events that fire here: include-header,
@@ -22,25 +22,26 @@ $start    = microtime(true);
 $rootDir  = __DIR__;
 
 include('includes/bootstrap.php');
-$env['Authenticator'] = $Authenticator;
+//$env['Authenticator'] = $Authenticator;
 
 $results = [];
-if($Authenticator->isApi) $results = $Engine->runRoutedActions();
+//if($Authenticator->isApi) $results = $Engine->runRoutedActions();
+
 //If a (single) routed action demands we stop executing after we complete routed actions, then stop execution.
 if(isset($results['exit'])) die();
 
-$Engine->runActions('include-header', $env);
+$Engine->runActions('include-header');
 
 $perfIndexLogger = new \Logger('performance-index');
 
 if(isset($current_user)) {
         $env = ['current_user' => $current_user];
-        $Engine->runActions('show-dashboard', $env);
+        $Engine->runActions('show-dashboard');
 }
 
-$Engine->runActions('include-navigation', $env);
-$Engine->runActions('show-dashboard', $env);
-$Engine->runActions('include-footer', $env);
+$Engine->runActions('include-navigation');
+$Engine->runActions('show-dashboard');
+$Engine->runActions('include-footer');
 
 $end = microtime(true);
 $t = $end - $start;

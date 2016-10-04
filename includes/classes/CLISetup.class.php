@@ -2,6 +2,8 @@
 
 class CLISetup {
 
+	private $pdo = NULL;
+
 	function createConfig($http_host, $sampleConfig = 'sample.config.php', $targetConfig = 'config.php') {
 		
 		//create web config.
@@ -99,6 +101,8 @@ class CLISetup {
     		return false;
     	}
 
+    	//Reconnect, and store the PDO connection in this class so we can use it later.
+    	$this->pdo = $pdo;
 	    return true;
 
 	}
@@ -129,7 +133,7 @@ class CLISetup {
 				,'attachments'
 				];
 		foreach($dirs as $dir) {
-			mkdir($dir);
+			if(!file_exists($dir)) mkdir($dir);
 		}
 	}
 
@@ -147,6 +151,45 @@ class CLISetup {
 			print "Running: $cmd" . PHP_EOL;
 			passthru($cmd);
 		}
+	}
+
+	function createAdminUser() {
+
+		print "Enter your email address. (This will become the administrator account!" . PHP_EOL;
+		$email = trim(fgets(STDIN));
+
+		print "Enter your first name" . PHP_EOL;
+		$first = trim(fgets(STDIN));
+
+		print "Enter your last name" . PHP_EOL;
+		$last  = trim(fgets(STDIN));
+
+		$passwordsMatch = false;
+
+		while(!$passwordsMatch) {
+			print "Create a default administrator password:" . PHP_EOL;
+			$pass1 = trim(fgets(STDIN));
+	
+			print "Confirm that password, please" . PHP_EOL;
+			$pass2 = trim(fgets(STDIN));
+
+			$passwordsMatch = (strcmp($pass1, $pass2) === 0 ? true : false);
+
+			if(!($passwordsMatch)) print "Passwords do not match! Please re-enter." . PHP_EOL;
+		}
+
+		$AdminUser = new PHPAnt\Core\Users($this->pdo);
+		$AdminUser->users_email    = $email;
+		$AdminUser->users_first    = $first;
+		$AdminUser->users_last     = $last;
+		$AdminUser->users_setup    = 'Y';
+		$AdminUser->users_active   = 'Y';
+		$AdminUser->users_roles_id = 1;
+		$AdminUser->createHash($pass1);
+
+		$result = $AdminUser->insert_me();
+
+		echo ($result ? "Adminsitrative user set to %email with a password of $pass1" . PHP_EOL : "Could not create administrative user!");
 	}
 
 	/**
@@ -235,6 +278,8 @@ class CLISetup {
 		$this->createDirs();
 
 		$this->getDefaultApps();
+
+		$this->createAdminUser();
 
 		//We're done!
 		print  "Setup complete. Use `php cli.php` to enter the CLI." . PHP_EOL;

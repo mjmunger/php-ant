@@ -28,6 +28,10 @@ class WebRequest
 		if(isset($server['SCRIPT_NAME']))        $this->script_name = $server['SCRIPT_NAME'];
 	}
 
+	function setCookies($cookies) {
+		$this->cookies = $cookies;
+	}
+
 	function parsePost($post) {
 		foreach($post as $key => $value) {
 			$value = $this->normalizeUTF($value);
