@@ -166,7 +166,9 @@ $Engine->runActions('pre-auth');
 
 /* Authorize the user. */
 $results = $Engine->runActions('auth-user');
-$Engine->current_user = ( isset($results['current_user']) ? $resuls['current_user'] : false );
+
+//If we authorized a user, store it here.
+if($results) $Engine->current_user = ( isset($results['current_user']) ? $resuls['current_user'] : false );
 
 /*Determine the user's permissions*/
 $Engine->runActions('set-user-permissions');

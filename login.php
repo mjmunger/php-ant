@@ -1,5 +1,5 @@
 <?php 
-
+die(__FILE__  . ':' . __LINE__ );
 //If a username has not been submitted, dont' attempt to authorize this person. If it has, authorize them, which should redirect them to their dashboard.
 $NOAUTH=!isset($_POST['user']);
 //echo "<pre>"; var_dump($NOAUTH); echo "</pre>";

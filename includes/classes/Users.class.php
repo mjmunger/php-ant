@@ -1,6 +1,5 @@
 <?php
 
-
 /* boundary(custom-namespace)=--fc1ead027aa75f4c0c9e49aa8d532dd4796dee41 */
 /* --fc1ead027aa75f4c0c9e49aa8d532dd4796dee41 */
 
@@ -83,7 +82,6 @@ class Users
 	var $primaryKey = false;
 	var $logger = '';
 	var $__oldlabel = '';
-
 
 
      /* boundary(custom-properties)=--81b47b8fe380c7a8d844501144e566f0e28b0ea8 */
@@ -177,7 +175,7 @@ class Users
 
         if(!$stmt->execute($values)) {
             $info = $stmt->errorInfo();
-            throw new \Exception(sprintf("Database error generating the parent class for $table. Database error (%s) %s",$info[1],$info[2]), 1);
+            throw new Exception(sprintf("Database error generating the parent class for $table. Database error (%s) %s",$info[1],$info[2]), 1);
         } 
 
         $row = $stmt->fetchObject();
@@ -311,7 +309,6 @@ class Users
     function threw_db_error() {
         return (count($this->errors) > 0)?true:false;
     }
-
      /* boundary(custom-methods)=--a19d1e7399aec0b42db5a508c49a968680ff20a8 */
      /* --a19d1e7399aec0b42db5a508c49a968680ff20a8 */
 

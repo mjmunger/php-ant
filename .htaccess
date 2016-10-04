@@ -11,6 +11,9 @@ RewriteEngine On
 #Pretty Links - Just like in WP, we need to parse it at index.php, and include appropriately.
 Options +FollowSymLinks
 
-RewriteCond %{SCRIPT_FILENAME} !-d
-RewriteCond %{SCRIPT_FILENAME} !-f
-RewriteRule .* index.php [L]
+#Route /login/ to login.php
+RewriteRule ^/login/ /login.php [L]
+
+#RewriteCond %{SCRIPT_FILENAME} !-d
+#RewriteCond %{SCRIPT_FILENAME} !-f
+#RewriteRule .* index.php [L]
