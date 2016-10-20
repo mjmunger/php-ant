@@ -22,10 +22,10 @@ $start    = microtime(true);
 $rootDir  = __DIR__;
 
 include('includes/bootstrap.php');
-//$env['Authenticator'] = $Authenticator;
+$env['Authenticator'] = $Authenticator;
 
 $results = [];
-//if($Authenticator->isApi)
+if($Authenticator->isApi)
 $results = $Engine->runRoutedActions();
 
 //If a (single) routed action demands we stop executing after we complete routed actions, then stop execution.

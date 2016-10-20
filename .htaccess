@@ -12,8 +12,8 @@ RewriteEngine On
 Options +FollowSymLinks
 
 #Route /login/ to login.php
-RewriteRule ^/login/ /login.php [L]
+RewriteRule login/ /login.php
 
-#RewriteCond %{SCRIPT_FILENAME} !-d
-#RewriteCond %{SCRIPT_FILENAME} !-f
-#RewriteRule .* index.php [L]
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteRule .* index.php [L]

@@ -178,18 +178,28 @@ class CLISetup {
 			if(!($passwordsMatch)) print "Passwords do not match! Please re-enter." . PHP_EOL;
 		}
 
-		$AdminUser = new PHPAnt\Core\Users($this->pdo);
-		$AdminUser->users_email    = $email;
-		$AdminUser->users_first    = $first;
-		$AdminUser->users_last     = $last;
-		$AdminUser->users_setup    = 'Y';
-		$AdminUser->users_active   = 'Y';
-		$AdminUser->users_roles_id = 1;
-		$AdminUser->createHash($pass1);
+		$sql = "INSERT INTO `users`
+				(`users_email`,
+				`users_password`,
+				`users_first`,
+				`users_last`,
+				`users_roles_id`)
+				VALUES
+				( ?
+				, ?
+				, ?
+				, ?
+				, ?
+				)";
+		
+		$this->pdo->beginTransaction();
+		$stmt = $this->pdo->prepare($sql);
+		
+		$vars = [$email, password_hash($pass1, PASSWORD_DEFAULT), $first, $last, 1];
+		$result = $stmt->execute($vars);
+		$this->pdo->commit();
 
-		$result = $AdminUser->insert_me();
-
-		echo ($result ? "Adminsitrative user set to %email with a password of $pass1" . PHP_EOL : "Could not create administrative user!");
+		echo ($result ? "Adminsitrative user set to $email with a password of $pass1" . PHP_EOL : "Could not create administrative user!");
 	}
 
 	/**
