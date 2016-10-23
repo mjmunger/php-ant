@@ -128,6 +128,5 @@ class ConfigWeb extends ConfigBase
 	    //returns the FQDN of the host. Ex: https://www.thedomain.com/
 	    $prefix = ($this->Server->SSL->HTTPS?'https://':'http://');
 	    return $prefix . $this->Server->HTTP->host . '/';
-		break;
 	}	
 }
