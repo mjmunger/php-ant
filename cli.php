@@ -2,7 +2,7 @@
 <?php
 use PHPAnt\Core;
 
-$rootDir  = __DIR__;
+$rootDir  = __DIR__ . '/';
 
 /* Get command line options */
 $options = getopt('v::d::s::');

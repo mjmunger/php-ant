@@ -7,8 +7,7 @@ class ConfigWeb extends ConfigBase
 	public $Server    = NULL;
 
 	function __construct(\PDO $pdo,$vars) {
-		//session_start();
-
+		
 		$this->http_host     = $vars['http_host']; //$_SERVER['HTTP_HOST'];
 		$this->document_root = $vars['document_root']; //$_SERVER['DOCUMENT_ROOT'];
 		$this->environment   = ConfigWeb::WEB;

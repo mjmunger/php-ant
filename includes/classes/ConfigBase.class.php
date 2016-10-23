@@ -47,8 +47,8 @@ class ConfigBase
     }
 
     function getLogDir() {
-        $homeDir = posix_getpwuid(posix_getuid());
-        return $homeDir['dir'] . '/log/';
+
+        return dirname($this->document_root) . '/log/';
     }
 
     /**

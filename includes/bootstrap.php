@@ -89,7 +89,7 @@ if(!spl_autoload_register([$antConfigs,'ant_autoloader'])) die("Autoloader faile
 
 /** Setup Logger **/
 
-$logger = new \Logger('bootstrap');
+//$logger = new \Logger('bootstrap');
 $current_user = null;
 
 /**
@@ -127,7 +127,7 @@ $Engine = new AppEngine($antConfigs,$options);
 $Engine->log('Bootstrap','Verbosity level: ' . $verbosity,'AppEngine.log',1);
 
 //Set the error handler to the AppEngine::handleError() method.
-set_error_handler(array(&$Engine,'handleError'));
+//set_error_handler(array(&$Engine,'handleError'));
 
 switch ($Engine->Configs->environment) {
     case ConfigBase::WEB:
@@ -163,7 +163,6 @@ $Engine->runActions('include-functions');
 
 /* Run actions that setup authentication.*/
 $Engine->runActions('pre-auth');
-
 /* Authorize the user. */
 $results = $Engine->runActions('auth-user');
 

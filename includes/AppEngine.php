@@ -782,7 +782,6 @@ class AppEngine {
      **/
 
     function log($component,$message,$file = 'AppEngine.log',$minimumVerbosity = 0, $debugPrint = false, $divAlert= false) {
-
         if($this->verbosity < $minimumVerbosity) return false;
 
         //if($debugPrint) $this->Configs->debug_print($message);
@@ -792,6 +791,7 @@ class AppEngine {
         if(!file_exists($this->Configs->getLogDir())) mkdir($this->Configs->getLogDir());
 
         $logPath = $this->Configs->getLogDir() . $file;
+        
         //$remoteIp = $this->Configs->Request->ip;
         $timestamp = date('M d H:i:s');
         $buffer = '';

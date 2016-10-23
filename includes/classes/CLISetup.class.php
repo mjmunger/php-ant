@@ -2,13 +2,19 @@
 
 class CLISetup {
 
-	private $pdo = NULL;
+	private $pdo           = NULL;
+	private $document_root = NULL;
 
-	function createConfig($http_host, $sampleConfig = 'sample.config.php', $targetConfig = 'config.php') {
+	function __construct($document_root) {
+		$this->document_root = $document_root;
+	}
+
+	function createConfig($http_host, $document_root, $sampleConfig = 'sample.config.php', $targetConfig = 'config.php') {
 		
 		//create web config.
 		$buffer = file_get_contents($sampleConfig);
 		$buffer = str_replace('%HTTPHOST%',$http_host,$buffer);
+		$buffer = str_replace('%DOCUMENT_ROOT%',$document_root,$buffer);
 		
 		$fh = fopen($targetConfig,'w');
 		fwrite($fh,$buffer);
@@ -18,13 +24,13 @@ class CLISetup {
 
 	}
 
-	function setupConfigs($http_host) {
-		$configs = [ 'includes/sample.config.php' => 'includes/config.php'
+	function setupConfigs($http_host, $document_root) {
+		$configs = [ 'includes/sample.config.php'     => 'includes/config.php'
 				   , 'includes/sample-cli-config.php' => 'includes/cli-config.php'
 				   ];
 
 		foreach($configs as $sample => $target) {
-			$this->createConfig($http_host,$sample,$target);
+			$this->createConfig($http_host, $document_root, $sample, $target);
 		}
 	}
 
@@ -153,30 +159,7 @@ class CLISetup {
 		}
 	}
 
-	function createAdminUser() {
-
-		print "Enter your email address. (This will become the administrator account!" . PHP_EOL;
-		$email = trim(fgets(STDIN));
-
-		print "Enter your first name" . PHP_EOL;
-		$first = trim(fgets(STDIN));
-
-		print "Enter your last name" . PHP_EOL;
-		$last  = trim(fgets(STDIN));
-
-		$passwordsMatch = false;
-
-		while(!$passwordsMatch) {
-			print "Create a default administrator password:" . PHP_EOL;
-			$pass1 = trim(fgets(STDIN));
-	
-			print "Confirm that password, please" . PHP_EOL;
-			$pass2 = trim(fgets(STDIN));
-
-			$passwordsMatch = (strcmp($pass1, $pass2) === 0 ? true : false);
-
-			if(!($passwordsMatch)) print "Passwords do not match! Please re-enter." . PHP_EOL;
-		}
+	function createAdminUser($setupInfo) {
 
 		$sql = "INSERT INTO `users`
 				(`users_email`,
@@ -195,26 +178,30 @@ class CLISetup {
 		$this->pdo->beginTransaction();
 		$stmt = $this->pdo->prepare($sql);
 		
-		$vars = [$email, password_hash($pass1, PASSWORD_DEFAULT), $first, $last, 1];
+		$vars = [$setupInfo->adminuser->username, password_hash($setupInfo->adminuser->password, PASSWORD_DEFAULT), $setupInfo->adminuser->first, $setupInfo->adminuser->last, 1];
 		$result = $stmt->execute($vars);
 		$this->pdo->commit();
 
-		echo ($result ? "Adminsitrative user set to $email with a password of $pass1" . PHP_EOL : "Could not create administrative user!");
+		$username = $setupInfo->adminuser->username;
+		$password = $setupInfo->adminuser->password;
+
+		echo ($result ? "Adminsitrative user set to $username with a password of $password" . PHP_EOL : "Could not create administrative user!");
 	}
 
-	/**
-	 * Runs the interactive part of the setup, and is responsible for getting user responses.
-	 * Example:
-	 *
-	 * @return void
-	 * @author Michael Munger <michael@highpoweredhelp.com>
-	 **/
-	function run() {
+	function interactiveSetup() {
+		$setupInfo = [];
+
 		//Configure the config.php file.
 		print "What is your http host? (Example: http://www.yoursite.com)" . PHP_EOL;
 		$http_host = trim(fgets(STDIN));
 
-		$this->setupConfigs($http_host);
+		$setupInfo['http_host'] = $http_host;
+
+		print "Enter the path for your document root for this installation? (Default: $this->document_root)". PHP_EOL;
+		$document_root = trim(fgets(STDIN));
+		if(strlen($document_root) == 0) $document_root = $this->document_root;
+
+		$setupInfo['document_root'] = $document_root;
 
 		//Setup a database.
 		print "Now, let's configure your database connection. Do you have an exsiting database to connect to [y/N]" . PHP_EOL;
@@ -227,21 +214,32 @@ class CLISetup {
 			$server = trim(fgets(STDIN));
 			if(strlen($server) == 0) $server = 'localhost';
 
+			$setupInfo['db']['server'] = $server;
+
 			print "Enter the name of the database we are going to create. (Default: phpant)" . PHP_EOL;
 			$database = trim(fgets(STDIN));
 			if(strlen($database) == 0) $database = 'phpant';
 
+			$setupInfo['db']['database'] = $database;
+			
 			print "Enter the administrative user for this database server. (Default: root)" . PHP_EOL;
 			$root = trim(fgets(STDIN));
 			if(strlen($root) == 0) $root = 'root';
 
+			$setupInfo['db']['rootuser'] = $root;
+
 			print "Enter the password for this administrative user" . PHP_EOL;
 			$rootpass = trim(fgets(STDIN));
 
+			$setupInfo['db']['rootpass'] = $rootpass;
+
 			print "Now, we need to create a database user your application will use to store information. Enter this new username (Default: antuser)". PHP_EOL;
+			
 			$username = trim(fgets(STDIN));
 			if(strlen($username) == 0) $username = 'antuser';
 
+			$setupInfo['db']['username'] = $username;
+			
 			$pass1 = 'foo';
 			$pass2 = 'bar';
 
@@ -255,19 +253,23 @@ class CLISetup {
 				if(!(strcmp($pass1, $pass2) === 0)) print "These passwords do not match. Please re-enter them so we can be sure there are not mistakes." . PHP_EOL;
 			}
 
-			$this->createDB($server,$root, $rootpass, $database, $username, $pass1);
-			$this->saveDBConnectionInfo($username,$pass1,$database,$server);
+			$setupInfo['db']['userpass'] = $pass1;
 
 		} else {
+			$setupInfo['db']['createDB'] = false;
 
 			print "What's the server IP or FQDN we are going to connect to?" . PHP_EOL;
 			$server = trim(fgets(STDIN));
+			$setupInfo['db']['server'] = $server;
 
 			print "What the name of the database we are going to use?" . PHP_EOL;
 			$database = trim(fgets(STDIN));
+			$setupInfo['db']['database'] = $database;
 
 			print "What's the user name for your database?". PHP_EOL;
 			$username = trim(fgets(STDIN));
+			
+			$setupInfo['db']['username'] = $username;
 
 			$pass1 = 'foo';
 			$pass2 = 'bar';
@@ -281,15 +283,78 @@ class CLISetup {
 
 				if(!(strcmp($pass1, $pass2) === 0)) print "These passwords do not match. Please re-enter them so we can be sure there are not mistakes." . PHP_EOL;
 			}
-
-			$this->saveDBConnectionInfo($username,$pass1,$database,$server);
+			$setupInfo['db']['userpass'] = $pass1;
 		}
+
+		print "Enter your email address. (This will become the administrator account!" . PHP_EOL;
+		$email = trim(fgets(STDIN));
+		$setupInfo['adminuser']['username'] = $email;
+
+		print "Enter your first name" . PHP_EOL;
+		$first = trim(fgets(STDIN));
+		$setupInfo['adminuser']['first'] = $first;
+
+		print "Enter your last name" . PHP_EOL;
+		$last  = trim(fgets(STDIN));
+		$setupInfo['adminuser']['last'] = $last;
+
+		$passwordsMatch = false;
+
+		while(!$passwordsMatch) {
+			print "Create a default administrator password:" . PHP_EOL;
+			$pass1 = trim(fgets(STDIN));
+	
+			print "Confirm that password, please" . PHP_EOL;
+			$pass2 = trim(fgets(STDIN));
+
+			$passwordsMatch = (strcmp($pass1, $pass2) === 0 ? true : false);
+
+			if(!($passwordsMatch)) print "Passwords do not match! Please re-enter." . PHP_EOL;
+		}
+
+		$setupInfo['adminuser']['password'] = $pass1;
+
+		return $setupInfo;
+	}
+
+	/**
+	 * Runs the interactive part of the setup, and is responsible for getting user responses.
+	 * Example:
+	 *
+	 * @return void
+	 * @author Michael Munger <michael@highpoweredhelp.com>
+	 **/
+	function run() {
+
+		if(file_exists('settings.json')) {
+			$buffer = file_get_contents('settings.json');
+			$setupInfo = json_decode($buffer);
+		} else {
+			$setupInfo = $this->interactiveSetup();
+		}
+
+		$this->setupConfigs($setupInfo->http_host,$setupInfo->document_root);
+		print_r($setupInfo);
+
+		if($setupInfo->db->createDB) $this->createDB( $setupInfo->db->server
+					   								, $setupInfo->db->rootuser
+					   								, $setupInfo->db->rootpass
+					   								, $setupInfo->db->database
+					   								, $setupInfo->db->username
+					   								, $setupInfo->db->userpass
+					   								);
+
+		$this->saveDBConnectionInfo( $setupInfo->db->username
+								   , $setupInfo->db->userpass
+								   , $setupInfo->db->database
+								   , $setupInfo->db->server
+								   );
 
 		$this->createDirs();
 
 		$this->getDefaultApps();
 
-		$this->createAdminUser();
+		$this->createAdminUser($setupInfo);
 
 		//We're done!
 		print  "Setup complete. Use `php cli.php` to enter the CLI." . PHP_EOL;

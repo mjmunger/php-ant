@@ -30,7 +30,7 @@ fi
 
 echo "Compiling PHP for `hostname` and sending a notification to $1"
 
- apt-get install --assume-yes apache2-dev libxml2-dev libbz2-dev libreadline-dev libmcrypt-dev libssl-dev libcurl4-openssl-dev libfreetype6-dev
+ apt-get install --assume-yes apache2-dev libxml2-dev libbz2-dev libreadline-dev libmcrypt-dev libssl-dev libcurl4-openssl-dev libfreetype6-dev libzip-dev
  # Sometimes, needed for Ubuntu
  apt-get install --assume-yes libjpeg8-dev libpng12-dev
  make clean
