@@ -50,31 +50,32 @@ class CLISetup {
 	 * @author Michael Munger <michael@highpoweredhelp.com>
 	 **/
 
-	function createDB($server,$root, $rootpass, $database, $username, $pass1, $skel = 'setup/skel.sql') {
-    	$dsn = "mysql:host=$server";
+	function createDB($setupInfo, $skel = 'setup/skel.sql') {
+    	$dsn = "mysql:host=" . $setupInfo->db->server;
     	$pdo = null;
 
 	    try {
-	        $pdo = new PDO($dsn, $root, $rootpass);
+	        $pdo = new PDO($dsn, $setupInfo->db->rootuser, $setupInfo->db->rootpass);
 	    } catch (Exception $e) {
 	    	echo $e->getMessage();
+	    	die(__FILE__  . ':' . __LINE__ );
 	    	return false;
 	    }
 
-	    $sql = "DROP DATABASE IF EXISTS $database";
+	    $sql = sprintf("DROP DATABASE IF EXISTS %s",$setupInfo->db->database);
 	    $stmt = $pdo->prepare($sql);
 	    if(!$stmt->execute()) return false;
 
-	    $sql = "CREATE DATABASE `$database`";
+	    $sql = sprintf("CREATE DATABASE `%s`",$setupInfo->db->database);
 	    $stmt = $pdo->prepare($sql);
 	    if(!$stmt->execute()) return false;
 
 	    //Reconnect using this database.
 
-    	$dsn = "mysql:dbname=$database;host=$server";
+    	$dsn = sprintf("mysql:dbname=%s;host=%s",$setupInfo->db->database,$setupInfo->db->server);
 
 		try {
-	        $pdo = new PDO($dsn, $root, $rootpass);
+	        $pdo = new PDO($dsn, $setupInfo->db->rootuser, $setupInfo->db->rootpass);
 	    } catch (Exception $e) {
 	    	echo $e->getMessage();
 	    	return false;
@@ -99,9 +100,14 @@ class CLISetup {
 
 	    //Grant god-like powers.
 
-	    $sql = "GRANT ALL ON $database.* TO $username IDENTIFIED BY '$pass1'";
+	    $sql = sprintf("GRANT ALL ON %s.* TO %s IDENTIFIED BY '%s'"
+	    	,$setupInfo->db->database
+	    	,$setupInfo->db->username
+	    	,$setupInfo->db->userpass
+	    	);
+
 	    $stmt = $pdo->prepare($sql);
-	    $vars = [$database,$username,$pass1];
+	    $vars = [$setupInfo->db->database,$setupInfo->db->username,$setupInfo->db->userpass];
     	if(!$stmt->execute()) {
     		var_dump($stmt->errorInfo());
     		return false;
@@ -147,9 +153,9 @@ class CLISetup {
 		chdir('includes/apps');
 
 		$defaultRepos = [ 'https://github.com/mjmunger/ant-app-test-app.git'
-					    , 'git@git.highpoweredhelp.com:michael/ant-app-default.git'
-					    , 'git@git.highpoweredhelp.com:michael/ant-app-configs.git'
-					    , 'git@git.highpoweredhelp.com:michael/ant-app-plugin-manager.git'
+					    , 'https://github.com/mjmunger/ant-app-default.git'
+					    , 'https://github.com/mjmunger/ant-app-configs.git'
+					    , 'https://github.com/mjmunger/phpant-app-manager.git'
 					    ];
 
 		foreach($defaultRepos as $repo) {
@@ -334,15 +340,9 @@ class CLISetup {
 		}
 
 		$this->setupConfigs($setupInfo->http_host,$setupInfo->document_root);
-		print_r($setupInfo);
+		print_r($setupInfo->db->createdb);
 
-		if($setupInfo->db->createDB) $this->createDB( $setupInfo->db->server
-					   								, $setupInfo->db->rootuser
-					   								, $setupInfo->db->rootpass
-					   								, $setupInfo->db->database
-					   								, $setupInfo->db->username
-					   								, $setupInfo->db->userpass
-					   								);
+		if($setupInfo->db->createdb) $this->createDB( $setupInfo );
 
 		$this->saveDBConnectionInfo( $setupInfo->db->username
 								   , $setupInfo->db->userpass

@@ -14,3 +14,7 @@ config.php
 private.key
 public.key
 apps/
+genjson.php
+php-ant.sublime-project
+php-ant.sublime-workspace
+settings.json
