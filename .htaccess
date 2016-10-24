@@ -1,7 +1,7 @@
-#Force SSL
+#Force SSL - in some cases, this only works when you have it in the sites configuration for apache. 
 RewriteEngine On
-#RewriteCond %{HTTPS} off
-#RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+RewriteCond %{HTTPS} off
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
 
 #Deny access to the private key if someone fails to remove it from the document root.
 <Files private.key>
@@ -10,9 +10,6 @@ RewriteEngine On
 
 #Pretty Links - Just like in WP, we need to parse it at index.php, and include appropriately.
 Options +FollowSymLinks
-
-#Route /login/ to login.php
-RewriteRule login/ /login.php
 
 RewriteCond %{SCRIPT_FILENAME} !-d
 RewriteCond %{SCRIPT_FILENAME} !-f
