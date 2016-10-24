@@ -127,7 +127,7 @@ $Engine = new AppEngine($antConfigs,$options);
 $Engine->log('Bootstrap','Verbosity level: ' . $verbosity,'AppEngine.log',1);
 
 //Set the error handler to the AppEngine::handleError() method.
-//set_error_handler(array(&$Engine,'handleError'));
+set_error_handler(array(&$Engine,'handleError'));
 
 switch ($Engine->Configs->environment) {
     case ConfigBase::WEB:
@@ -163,11 +163,12 @@ $Engine->runActions('include-functions');
 
 /* Run actions that setup authentication.*/
 $Engine->runActions('pre-auth');
+
 /* Authorize the user. */
 $results = $Engine->runActions('auth-user');
 
 //If we authorized a user, store it here.
-if($results) $Engine->current_user = ( isset($results['current_user']) ? $resuls['current_user'] : false );
+if($results) $Engine->current_user = ( isset($results['current_user']) ? $results['current_user'] : false );
 
 /*Determine the user's permissions*/
 $Engine->runActions('set-user-permissions');

@@ -29,17 +29,20 @@ class AppBlacklist
 	}
 
 	function removeFromBlacklist($path) {
+		if($this->disabled) return true;
 		$key = array_search($path, $this->blacklist);
 		$this->unban($key);
 	}
 
 	function save() {
+		if($this->disabled) return true;
 		$fp = fopen($this->blacklistPath,'w');
 		fwrite($fp,implode(PHP_EOL, $this->blacklist));
 		fclose($fp);
 	}
 
 	function clear() {
+		if($this->disabled) return true;
 		$fp = fopen($this->blacklistPath,'w');
 		ftruncate($fp,0);
 		fclose($fp);
@@ -47,6 +50,7 @@ class AppBlacklist
 	}
 
 	function unban($key) {
+		if($this->disabled) return true;
 		unset($this->blacklist[$key]);
 		$this->save();		
 	}

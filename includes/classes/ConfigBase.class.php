@@ -51,6 +51,12 @@ class ConfigBase
         return dirname($this->document_root) . '/log/';
     }
 
+    function getDomain() {
+        $buffer = str_replace('https://', '', $this->http_host);
+        $buffer = str_replace('http://', '', $buffer);
+        return $buffer;
+    }
+
     /**
      * Autoloader for BFW Toolkit classes.
      *
