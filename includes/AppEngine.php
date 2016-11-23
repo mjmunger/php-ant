@@ -651,7 +651,7 @@ class AppEngine {
                     $this->log("AppEngine"
                               ,sprintf("App init file path: %s [%s]", $appInitPath, ($exists?"EXISTS":"Does not exist"))
                               ,'AppEngine.log'
-                              ,14);
+                              ,9);
 
                     //Load init vars from the json init file if it exists.
                     if($exists) {
@@ -700,6 +700,14 @@ class AppEngine {
                 //Register the declared URIs for the app.
                 $uriList = $this->getAppURIs($path);
                 $app->registerURI($uriList);
+
+                foreach($uriList as $uri) {
+                    $this->log( 'AppEngine'
+                              , sprintf("Registered URI $uri to " . $app->appName)
+                              , 'AppEngine.log'
+                              , 9
+                              );
+                }
 
                 //Register routes for this app.
                 $routes = $this->getAppRoutes($path);

@@ -155,7 +155,7 @@ class ConfigBase
      **/
 
     function getSpecialValues() {
-        return [];
+        return ['%YEAR%' => date('Y')];
     }
 
     /**

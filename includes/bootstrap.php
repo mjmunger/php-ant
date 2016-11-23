@@ -124,6 +124,7 @@ require('AppEngine.php');
 
 $Engine = new AppEngine($antConfigs,$options);
 
+//$Engine->log('Bootstrap', str_pad('REQUEST START', 33,'=',STR_PAD_BOTH) ,'AppEngine.log',1);
 $Engine->log('Bootstrap','Verbosity level: ' . $verbosity,'AppEngine.log',1);
 
 //Set the error handler to the AppEngine::handleError() method.
