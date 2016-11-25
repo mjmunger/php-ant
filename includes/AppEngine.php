@@ -509,19 +509,17 @@ class AppEngine {
     }    
 
     /**
-     * Loads all the plugins from the plugins/ directory.
+     * Loads all the apps from the apps/ directory.
      *
-     * A plugin must have the following two components:
+     * A app must have the following two components:
      * # Its own directory
-     * # A file named plugin.php within that directory.
+     * # A file named app.php within that directory.
      *
      * Example:
      *
      * <code>
      * $AE->loadApps();
      * </code>
-     *
-     * This function is called at the bottom of this file. 
      *
      * @return void
      * @author Michael Munger <michael@highpoweredhelp.com>
@@ -561,7 +559,7 @@ class AppEngine {
                 //Add this file to a black list in case it causes issues, we can skip it later.
                 //$this->AppBlacklist->addToBlacklist($path);
 
-                require_once($file->getRealPath());
+                //require_once($file->getRealPath());
 
                 //Remove the file from the blacklist because there was not a fatal error.
                 //$this->AppBlacklist->removeFromBlacklist($path);
@@ -616,6 +614,8 @@ class AppEngine {
                     $answer = trim(fgets(STDIN));
                     if($answer == "n") continue;
                 }
+
+                require_once($path);
 
                 $manifestPath = dirname($path) . '/manifest.xml';
                 if(!file_exists($manifestPath)) {

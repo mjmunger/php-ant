@@ -22,6 +22,7 @@ if(sizeof($options) > 0) {
 
     if(array_key_exists('d', $options)) {
         /* Allow loader debug to run */
+        printf("*****DEBUG MODE***** \n");
         printf("Command line options received: \n");
         var_dump($options);
         $loader_debug = true;

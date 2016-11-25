@@ -6,6 +6,9 @@ if(!file_exists('includes/config.php')) die("You must have a config.php file con
 /* Require the configuration for this installation */
 require('includes/config.php');
 
+/* Make sure document_root exists */
+if(!file_exists($vars['document_root'])) die(sprintf("Document root is either not configured, or doesn't exist. Here's what I've got, does it look right to you? (document_root = %s )" . PHP_EOL , print_r($vars['document_root'],true)));
+
 /* Require all the interfaces so we can protect our code! */
 require('interfaces.php');
 

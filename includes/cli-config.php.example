@@ -37,7 +37,7 @@ function inCLI() {
 function getCLIVars() {
 	$who = trim(`whoami`);
 	$vars = ['http_host'     => 'https://yourdomain.com/'
-			,'document_root' => "/home/$who/www"
+			,'document_root' => "/home/$who/www/"
 			];
 
 	return $vars;
