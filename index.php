@@ -28,6 +28,7 @@ $results = [];
 //if($Authenticator->isApi)
 $results = $Engine->runRoutedActions();
 
+
 //If a (single) routed action demands we stop executing after we complete routed actions, then stop execution.
 if(isset($results['exit'])) die();
 

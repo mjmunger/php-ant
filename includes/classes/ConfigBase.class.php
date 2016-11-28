@@ -110,10 +110,10 @@ class ConfigBase
 
         /* Loop through all candidate files, and attempt to load them all in the correct order (FIFO) */
         foreach($candidate_files as $dependency) {
-            if($this->verbosity > 9) echo "Looking for: $dependency" . PHP_EOL;
+            //if($this->verbosity > 9) echo "Looking for: $dependency" . PHP_EOL;
             if(file_exists($dependency)) {
                 if(is_readable($dependency)) {
-                    if($this->verbosity > 9) echo "Found: $dependency" . PHP_EOL . PHP_EOL;                    
+                    //if($this->verbosity > 9) echo "Found: $dependency" . PHP_EOL . PHP_EOL;                    
                     return require_once($dependency);
                 }
             }

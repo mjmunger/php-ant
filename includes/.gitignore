@@ -1,3 +1,4 @@
-libs
+libs/*
+!libs/README.md
 mysql-credentials.php
 cli-config.php
