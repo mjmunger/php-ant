@@ -28,6 +28,9 @@ require('includes/classes/ConfigWeb.class.php');
 require('includes/classes/ConfigFactory.class.php');
 require('includes/classes/AppBlacklist.class.php');
 
+/* Include composer files if present */
+
+if(file_exists('includes/vendor/autoload.php')) require_once('includes/vendor/autoload.php');
 
 /* Custom Error Handler */
 /*include('error_handler.php');*/
