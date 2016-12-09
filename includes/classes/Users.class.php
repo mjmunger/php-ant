@@ -72,6 +72,7 @@ class Users
 	var $users_owner_id;
 	var $users_timezone;
 	var $users_roles_id;
+	var $users_guid;
 	/*</table columns>*/
 	var $pdo;
 	var $errors = [];

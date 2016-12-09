@@ -72,7 +72,7 @@ class Command {
 
 	function __construct($line) {
     $this->raw_command = trim($line);
-		$this->full_command = strtolower($this->raw_command);
+		$this->full_command = $this->raw_command;
     $this->length = strlen($this->full_command);
     /* We use the raw commands here to allow values to be case sensitive when saving config values.*/
     $this->tokens = explode(' ',$this->raw_command);

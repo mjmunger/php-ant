@@ -29,8 +29,12 @@ require('includes/classes/ConfigFactory.class.php');
 require('includes/classes/AppBlacklist.class.php');
 
 /* Include composer files if present */
+if(file_exists('includes/vendor/autoload.php')) include('includes/vendor/autoload.php');
 
-if(file_exists('includes/vendor/autoload.php')) require_once('includes/vendor/autoload.php');
+// echo "Hello";
+// $ad = new \Adldap\Adldap();
+// var_dump($ad);
+// var_dump(class_exists('\Adldap\Adldap'));
 
 /* Custom Error Handler */
 /*include('error_handler.php');*/
@@ -76,7 +80,7 @@ switch($antConfigs->environment) {
         break;
 }
 
-//Set the EngineVerbosity as it was saved - this overrides the command line params. 
+//Set the EngineVerbosity as it was saved - this overrides the command line params.
 $dbVerbosity = false;
 $configs = $antConfigs->getConfigs(['EngineVerbosity']);
 if(isset($configs['EngineVerbosity'])) $dbVerbosity = $configs['EngineVerbosity'];
@@ -140,7 +144,7 @@ switch ($Engine->Configs->environment) {
     case ConfigBase::WEB:
         //$Engine->Configs->checkWebVerbosity($Engine);
         break;
-    
+
     default:
         //Do nothing for now.
         break;
