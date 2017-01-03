@@ -12,7 +12,7 @@ namespace PHPAnt\Core;
  * on the fields, and instantiating a PHPMailer instance to send the final
  * email.
  *
- * @package      BFW
+ * @package      PHPAnt
  * @subpackage   Core
  * @category     Email Utilities
  * @author       Michael Munger <michael@highpoweredhelp.com>
@@ -365,16 +365,8 @@ class Notif {
         }
 
         foreach($this->findReplace as $find => $replace) {
-            if($this->verbosity > 9) {
-                echo str_pad("Find", 10);
-                echo $find;
-                echo PHP_EOL;
-    
-                echo str_pad("Replace", 10);
-                echo $replace;
-                echo PHP_EOL;
-            }
-
+            echo "<pre>"; var_dump($find); echo "</pre>";
+            echo "<pre>"; var_dump($replace); echo "</pre>";
             $this->body = str_replace($find, $replace, $this->body);
         }
 
@@ -383,8 +375,8 @@ class Notif {
         if(count($tags[0]) > 0) {
             /* Recurse this function the case settings contain fields that are not outright replaced in the first execution of this function. */
             if($this->verbosity > 9) {
-
-                debug_print($tags[0],"OUSTANDING TEMPLATE TAGS");
+                echo "OUSTANDING TEMPLATE TAGS";
+                echo "<pre>"; var_dump($tags[0]); echo "</pre>";
             }
             return $this->renderBody($this->body);
         }
@@ -435,9 +427,7 @@ class Notif {
     function prepareSend() {
         $errors = $this->verifySubstitutions();
 
-        if( $errors) {
-            return $errors;
-        }
+        if($errors) return  false;
 
         /* Prepare the body with substitutions */
         $this->renderBody();
@@ -447,6 +437,21 @@ class Notif {
 
         /* Return false on success so there are no "errors" being reported. */
         return false;
+    }
+
+    function send($name,$address) {
+        $errors = $this->prepareSend();
+        if($errors) {
+            echo "<pre>"; var_dump($errors); echo "</pre>";
+            die(__FILE__  . ':' . __LINE__ );
+        }
+
+        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+        $headers[] = "To: $name <$address>";
+        $headers[] = "From: $this->fromName <$this->fromAddress>";
+
+        mail($address,$this->subject,$this->body,implode("\r\n", $headers));
     }
 }
 ?>

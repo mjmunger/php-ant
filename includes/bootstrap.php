@@ -181,6 +181,8 @@ $results = $Engine->runActions('auth-user');
 //If we authorized a user, store it here.
 if($results) $Engine->current_user = ( isset($results['current_user']) ? $results['current_user'] : false );
 
+if($Engine->current_user) $Engine->current_user->load();
+
 /*Determine the user's permissions*/
 $Engine->runActions('set-user-permissions');
 

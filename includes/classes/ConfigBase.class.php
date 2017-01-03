@@ -137,9 +137,9 @@ class ConfigBase
     
     function getWebURI($filesystemPath) {
         $buffer = str_replace($this->document_root, '', $filesystemPath);
-        $tmp = explode('/', $buffer);
-        array_shift($tmp);
-        $buffer = implode('/', $tmp);
+        //$tmp = explode('/', $buffer);
+        //array_pop($tmp);
+        //$buffer = implode('/', $tmp);
         return $this->getHostFQDN() . $buffer;
     }
 

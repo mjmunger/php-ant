@@ -4,7 +4,7 @@ namespace PHPAnt\Core;
 
 class ConfigWeb extends ConfigBase
 {
-	public $Server    = NULL;
+	public $Server    				= NULL;
 
 	function __construct(\PDO $pdo,$vars) {
 		

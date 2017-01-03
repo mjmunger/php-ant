@@ -92,6 +92,7 @@ class Users
     * @var boolean $users_new If the user is a new user, this is set to true; otherwise, it is false.
     **/
     var $users_new;
+    var $role;
 
     /* Beneath this line, should be re-factored out. */
 

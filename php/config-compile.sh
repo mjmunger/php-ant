@@ -35,7 +35,7 @@ echo "Compiling PHP for `hostname` and sending a notification to $1"
  apt-get install --assume-yes libjpeg8-dev libpng12-dev
  make clean
  ./buildconf
- ./configure --with-config-file-path=/etc/php5/apache2 \
+ ./configure --with-config-file-path=/usr/local/lib/ \
  --with-pear=/usr/share/php \
  --with-bz2 \
  --with-curl \
@@ -61,7 +61,6 @@ echo "Compiling PHP for `hostname` and sending a notification to $1"
  --with-mcrypt=/usr/src/mcrypt-2.6.8 \
  --with-jpeg-dir=/usr/lib/x86_64-linux-gnu/ \
  --with-png-dir=/usr/lib/x86_64-linux-gnu/ \
- --with-ldap=/usr/lib/x86_64-linux-gnu/ \
  
 make
 #make tests
