@@ -10,35 +10,40 @@ namespace PHPAnt\Core;
 
 class AppEngine {
 
+    /**
+     * Turns the flag on to trace actions visually in the interface.
+     * @var boolean
+     */
+    var $visualTrace      = false;
 
     /**
-    * @var int $verbosity The level of verbosity the App Engine is set to. 
+    * @var int $verbosity The level of verbosity the App Engine is set to.
     **/
-    
+
     var $verbosity        = 0;
 
     /**
-    * @var array $apps Holds instantiated classes of apps. 
+    * @var array $apps Holds instantiated classes of apps.
     **/
-    
+
     var $apps             = [];
 
     /**
-    * @var array $enabledApps An associative array of apps that have been enabled. (name => path) 
+    * @var array $enabledApps An associative array of apps that have been enabled. (name => path)
     **/
-    
+
     var $enabledApps      = [];
 
     /**
-    * @var array $availableApps An associative array of apps that are found (discovered) in the file system. (name => path) 
+    * @var array $availableApps An associative array of apps that are found (discovered) in the file system. (name => path)
     **/
-    
+
     var $availableApps    = [];
 
     /**
-    * @var object $PM An instance of the Permission Manager class. 
+    * @var object $PM An instance of the Permission Manager class.
     **/
-    
+
     var $PM               = NULL;
 
 
@@ -47,7 +52,7 @@ class AppEngine {
     *      polymorphic and can either be a ConfigCLI class or a ConfigWeb class,
     *      which are both extended from ConfigBase.
     **/
-    
+
     var $Configs          = NULL;
     var $current_user     = NULL;
     var $sortHook         = NULL;
@@ -91,8 +96,6 @@ class AppEngine {
         $this->AppBlacklist = $options['AppBlacklist'];
         $this->disableApps  = $options['disableApps'];
 
-        $this->setVerbosity($options['verbosity']);
-
         $this->loadApps();
 
         //Setting $options['disableApps'] = true will prevent auto-loading and activation of apps.
@@ -101,6 +104,9 @@ class AppEngine {
             $this->linkAppTests();
             $this->activateApps();
         }
+
+        $this->setVerbosity($options['verbosity']);
+        $this->setVisualTrace($options['visualTrace']);
     }
 
     /**
@@ -179,7 +185,7 @@ class AppEngine {
             if($name[0] == "+" && !$this->disableApps && !in_array($path, $this->enabledApps)) {
                 $status = 'Auto';
                 if(!$this->enableApp($name,$path)) throw new Exception("Could not enable app $name in $path", 1);
-            }        
+            }
         }
     }
 
@@ -198,7 +204,7 @@ class AppEngine {
 
     function setVerbosity($int) {
         $this->verbosity = $int;
-        
+
         $this->log('AppEngine',sprintf("AppEngine verbosity set to: %s",$this->verbosity),'AppEngine.log',1);
 
         $this->Configs->setVerbosity($int);
@@ -208,9 +214,59 @@ class AppEngine {
         }
     }
 
+    function setVisualTrace($state) {
+        $this->visualTrace = $state;
+
+        $this->log('AppEngine',sprintf("Visual trace set to: %s",($this->visualTrace ? "on" : "off")),'AppEngine.log',1);
+
+        $this->Configs->setVisualTrace($this->visualTrace);
+
+        foreach($this->apps as $app) {
+            $app->visualTrace = $this->visualTrace;
+        }
+
+        return $this->visualTrace;
+    }
+
+    function showRoutedCodePath($uri) {
+        $appsWhoFire = [];
+
+        foreach($this->apps as $app) {
+            /*Skip non-enabled apps*/
+            //if(!$app->enabled) continue;
+
+            /* Add them to the requested hook array as a way of queing them to execute. */
+            if($app->fireOnURI($uri)) array_push($appsWhoFire, $app);
+        }
+
+        $TL = new TableLog();
+        foreach($appsWhoFire as $app) {
+            $action = (strlen($app->getRoutedAction($uri)) > 0 ? $app->getRoutedAction($uri) : "All");
+            if($action != 'All') {
+                foreach($app->hooks as $sig => $meta) {
+                    if($meta['hook'] == $action) {
+                        $priority = $meta['priority'];
+                        break;
+                    }
+                }
+            } else {
+                $priority = 'None';
+            }
+            $TL->setHeader(['App','App Path','Action','Priority']);
+            $row = [ $app->appName
+                   , $app->path
+                   , $action
+                   , $priority
+                   ];
+            $TL->addRow($row);
+        }
+
+        $TL->showTable();
+    }
+
     function getAppsWithRequestedHook($requested_hook) {
         $TL = new TableLog();
-        $TL->setHeader(['App','Priority']);  
+        $TL->setHeader(['App','Priority']);
         /* This array holds the apps we are going to fire because they have the hook registered.*/
         $appsWithRequestedHook = [];
 
@@ -240,7 +296,7 @@ class AppEngine {
                 $TL->addRow([$app->appName,$app->hooks[$hash]['priority']]);
             }
 
-        
+
                 $this->log('AppEngine'
                   ,$TL->makeTable()
                   ,'AppEngine.log'
@@ -252,9 +308,9 @@ class AppEngine {
 
     /**
      * Run actions for a specific hook.
-     * 
+     *
      * This function runs all the actions for a hook in priority order.
-     * 
+     *
      * Example:
      *
      * <code>
@@ -273,19 +329,25 @@ class AppEngine {
         $grammar             = [];
 
         $args['requested_hook'] = $requested_hook;
-        
+
         //Make sure we have an instance of AppEngine as $args['AE']
         if(!isset($args['AE'])) $args['AE'] = $this;
 
         $appsWithRequestedHook = $this->getAppsWithRequestedHook($requested_hook);
 
+        $this->log('AppEngine',str_pad("=",80,"="),'AppEngine.log',9);
+        $this->log('AppEngine',"RUNNING ACTION: $requested_hook",'AppEngine.log',9);
+        $this->log('AppEngine',str_pad("=",80,"="),'AppEngine.log',9);
         $this->log('AppEngine'
-                  ,sprintf("There are %s apps who respond to $requested_hook.",count($appsWithRequestedHook))
+                  ,sprintf("There are %s apps who respond to $requested_hook."
+                    ,count($appsWithRequestedHook)
+                  )
                   ,'AppEngine.log'
                   ,9
                   );
 
         $TL = new TableLog();
+        $TL->offset = 41;
         $TL->setHeader(['Hook','App','Result']);
 
         foreach($appsWithRequestedHook as $app) {
@@ -298,7 +360,7 @@ class AppEngine {
 
             if($this->Configs->environment == ConfigBase::WEB) {
                 if(!$app->shouldRun($args['AE'],$requested_hook)) {
-                    $row = [$requested_hook,$app->appName,'SKIPPED'];
+                    $row = [$requested_hook,$app->appName,'RESTRICTED'];
                     $TL->addRow($row);
                     continue;
                 }
@@ -400,7 +462,7 @@ class AppEngine {
                 break;
             case 'custom':
                 $pattern = $regex;
-                                    
+
             default:
                 # code...
                 break;
@@ -414,7 +476,7 @@ class AppEngine {
                 return trim($matches[2]);
             }
         }
-        return false;        
+        return false;
     }
 
     /**
@@ -479,7 +541,7 @@ class AppEngine {
 
     /**
      * Parses and retrieves regular expressions from app meta to determine
-     * app URIs and their associated actions which will be run when the 
+     * app URIs and their associated actions which will be run when the
      * URI satisfies the regular expression.
      * Example:
      *
@@ -504,9 +566,9 @@ class AppEngine {
             if(count($matches) === 0) continue;
 
             $routes[$matches[3]] = $matches[4];
-        }        
+        }
         return $routes;
-    }    
+    }
 
     /**
      * Loads all the apps from the apps/ directory.
@@ -526,8 +588,8 @@ class AppEngine {
      * @tested testLoadApps
      **/
 
-    function loadApps() { 
-        
+    function loadApps() {
+
         $counter = 0;
         $iterator = new \RecursiveDirectoryIterator($this->appRoot,\RecursiveDirectoryIterator::SKIP_DOTS);
         $TL = new TableLog();
@@ -539,10 +601,10 @@ class AppEngine {
 
                 $name = $this->getAppMeta($file->getRealPath(),'name');
                 $this->availableApps[$name] = $file->getRealPath();
-                
+
                 //Check the blacklist to see if this failed last time.
                 $path = $file->getRealPath();
-                
+
                 if($this->AppBlacklist->isBlacklisted($path) && !$this->AppBlacklist->disabled) {
                     $this->log('AppEngine',sprintf("Not loading %s because it has been blacklisted. It will be disabled because it had problems before.",$path));
                     //disable the app
@@ -638,7 +700,7 @@ class AppEngine {
 
                     //Remove the file from the blacklist because there was not a fatal error.
                     $this->AppBlacklist->removeFromBlacklist($path);
-                    
+
                     $this->log( "AppEngine"
                               , "Created an instance of " . get_class($app)
                               ,'AppEngine.log'
@@ -686,7 +748,7 @@ class AppEngine {
                 }
 
                 if(count($xml->action) === 0) $this->log('WARNING',"The app $name ($path) has NO actions. It will not do anything.");
-                
+
                 //Create all the hooks referenced in the manifest file.
                 foreach($xml->action as $action){
                     $hook             = (string)$action->hook;
@@ -799,7 +861,7 @@ class AppEngine {
         if(!file_exists($this->Configs->getLogDir())) mkdir($this->Configs->getLogDir());
 
         $logPath = $this->Configs->getLogDir() . $file;
-        
+
         //$remoteIp = $this->Configs->Request->ip;
         $timestamp = date('M d H:i:s');
         $buffer = '';
@@ -838,7 +900,7 @@ class AppEngine {
         //$message = sprintf("Error Context: %s", print_r($context,true));
         //$this->log('ERROR',$message);
     }
-    
+
     /**
      * Executes events based on declared routes.
      * Example:

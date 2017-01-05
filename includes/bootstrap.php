@@ -85,6 +85,11 @@ $dbVerbosity = false;
 $configs = $antConfigs->getConfigs(['EngineVerbosity']);
 if(isset($configs['EngineVerbosity'])) $dbVerbosity = $configs['EngineVerbosity'];
 
+//Set the visual trace as it was saved - this overrides the command line params.
+$visualTrace = false;
+$configs = $antConfigs->getConfigs(['visualTrace']);
+if(isset($configs['visualTrace'])) $visualTrace = ($configs['visualTrace'] == 'on' ? true : false);
+
 //Keep the higher verbosity between the CLI and the DB.
 if(isset($verbosity)) {
     $verbosity = max($verbosity,$dbVerbosity);
@@ -124,6 +129,7 @@ $options['loader_debug']      = false;
 //Override defaults if these options are set prior to loading this file. I.e., in the cli.php file.
 if(isset($safeMode))      $options['safeMode']      = $safeMode;
 if(isset($verbosity))     $options['verbosity']     = $verbosity;
+if(isset($visualTrace))   $options['visualTrace']   = $visualTrace;
 if(isset($loader_debug))  $options['loader_debug']  = $loader_debug;
 
 //Add classes

@@ -1,15 +1,40 @@
-To Do:
+To Do
 
-1. Emails need to be logged in the email_log. All emails are sent to users, so
-   later we may have to give non-usable accounts (Role = External (E)?) to those
-   people so we can mail them without them having to register in the system.
+#Urgent Bug Fix
 
-2. Need a config table so we can store configs in the database. This means
-   that we have to have a berkley DB style set of entries with family / key /
-   value tuples. Four column table should suffice. (ID, family, key, value).
-   We'll store the general ("global") configs in the 'app' family. This also
-   allows us to use a Config class to deal with an individual config.
+#Customer facing issues
 
-3. Add a hook for when an email is sent.
+#Important Usability
+Client bug manager CSS issues.
+Worker bug manger
+Admin bug manger
+Fix CSS for desktop.
+Resources vault
+New bug queue process script.
+Neglected bugs script.
 
-asdf
+
+#Nice to have
+Show image attachments inline
+Changed timestamps to relative times.
+Star important things
+Search
+Permalinks to comments.
+Tag people.. Make more intuitive. Perhaps use a "to" box?
+
+#If I have time.
+Emojis
+http://stackoverflow.com/questions/7814293/how-to-insert-utf-8-mb4-characteremoji-in-ios5-in-mysql
+Add a hook for when an email is sent
+
+Emails need to be logged in the email_log. All emails are sent to users, so later we may have to give non-usable accounts (Role = External (E)?) to those people so we can mail them without them having to register in the system.
+
+
+#done
+Jump to top button
+Fade out background for brew posts.
+Paste from clipboard http://stackoverflow.com/questions/6333814/how-does-the-paste-image-from-clipboard-functionality-work-in-gmail-and-google-c/6338207#6338207
+
+Changed alerts pop-up for empty post to toast.
+https://codeseven.github.io/toastr/
+Fix header image to use database settings.

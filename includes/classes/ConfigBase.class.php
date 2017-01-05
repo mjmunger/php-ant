@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace PHPAnt\Core;
 
@@ -13,6 +13,7 @@ class ConfigBase
     public $db            = null;
     public $pdo           = null;
     public $verbosity     = 0;
+    public $visualTrace   = false;
 
     function __construct(\PDO $pdo,$vars) {
         $this->pdo = $pdo;
@@ -24,6 +25,12 @@ class ConfigBase
     function setVerbosity($int) {
         $this->verbosity = (int) $int;
         return $this->verbosity;
+    }
+
+    function setVisualTrace($state) {
+        $this->visualTrace = $state;
+        $this->setConfig('visualTrace', ($state ? 'on' : 'off'));
+        return $this->visualTrace;
     }
 
     function getIncludesDir() {
@@ -113,12 +120,12 @@ class ConfigBase
             //if($this->verbosity > 9) echo "Looking for: $dependency" . PHP_EOL;
             if(file_exists($dependency)) {
                 if(is_readable($dependency)) {
-                    //if($this->verbosity > 9) echo "Found: $dependency" . PHP_EOL . PHP_EOL;                    
+                    //if($this->verbosity > 9) echo "Found: $dependency" . PHP_EOL . PHP_EOL;
                     return require_once($dependency);
                 }
             }
         }
-    }   
+    }
 
     /**
      * Converts a file system path to a web accessible URI.
@@ -127,14 +134,14 @@ class ConfigBase
      * <code>
      * $url = getWebURI('/home/user/www/includes/libs/library/resources/thing.png');
      * </code>
-     *  
+     *
      * @return string The web accessible URI to the file or directory (resource)
      * @param string $filesystemPath The full file system path to the resource.
      * @author Michael Munger <michael@highpoweredhelp.com>
-     * 
+     *
      * TEST: AntConfigTest::testBaseConfig
      **/
-    
+
     function getWebURI($filesystemPath) {
         $buffer = str_replace($this->document_root, '', $filesystemPath);
         //$tmp = explode('/', $buffer);
@@ -164,10 +171,10 @@ class ConfigBase
      * @author  Michael Munger <michael@highpoweredhelp.com>
      * @param   array $settings The key => value pairs in a current settings array.
      * @return  array The current configs with the special substitutions made.
-     */ 
-    
+     */
+
     function subSpecial($settings) {
-        
+
         $specialValues = $this->getSpecialValues();
 
         foreach($specialValues as $find => $replace) {
@@ -182,7 +189,7 @@ class ConfigBase
     }
 
     /**
-     * Returns an associative array with key value pairs for each of the requested settings. 
+     * Returns an associative array with key value pairs for each of the requested settings.
      * Example:
      *
      * <code>
@@ -197,7 +204,7 @@ class ConfigBase
      * @return array The current configs for the requested settings, which are used by the application and all the plugins.
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
-    
+
     function getConfigs($keys) {
         /* Transform array elements to be encapsulated in single quotes. */
         //$criteria = "'" . implode("', '", $keys) . "'";
@@ -218,17 +225,17 @@ class ConfigBase
         }
 
         $return = array();
-    
+
         while($row = $stmt->fetchObject()) {
             $return[$row->settings_key] = $row->settings_value;
         }
-        
+
         unset($m);
         unset($result);
         // Substitute special values
         $return = $this->subSpecial($return);
         return $return;
-    }   
+    }
 
     /**
      * Attempts to create a key-value pair as a setting. If the key already
@@ -246,10 +253,10 @@ class ConfigBase
      *
      * @return boolean. True on success, false otherwise.
      * @param string $key The key for the key value pair (name of the setting)
-     * @param string $value The value for the key value pair. 
+     * @param string $value The value for the key value pair.
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
-    
+
     function setConfig($key,$value) {
         /* First, does the key exist? */
         $query = "SELECT settings_id FROM settings WHERE settings_key = ?";
@@ -260,7 +267,7 @@ class ConfigBase
             $this->debug_print($squery);
             $this->debug_print($stmt);
         }
-    
+
         if($stmt->rowCount() > 0) {
             /* This key already exists. Update it. */
             $row    = $stmt->fetchObject();
@@ -274,21 +281,21 @@ class ConfigBase
                 $this->debug_print($query);
                 $this->debug_print($stmt);
             }
-    
+
         } else {
-    
+
             /* This is a new value. Create it. */
             $sql    = "INSERT INTO settings (`settings_key`, `settings_value`) VALUES (?, ?)";
             $values = [$key,$value];
-            $stmt   = $this->pdo->prepare($sql);    
-            
+            $stmt   = $this->pdo->prepare($sql);
+
             if(!$stmt->execute($values)) {
                 $this->debug_print($stmt->errorInfo());
                 $this->debug_print($squery);
                 $this->debug_print($stmt);
-            }   
+            }
         }
-    
+
         /* If we made it this far, it was probably OK. */
         return true;
     }
@@ -306,7 +313,7 @@ class ConfigBase
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
     function delConfig($key) {
-        
+
         $query = "DELETE FROM settings WHERE settings_key = ? LIMIT 1";
         $stmt = $this->pdo->prepare($query);
         $values = [$key];
@@ -324,8 +331,8 @@ class ConfigBase
      * @return string The fully qualified domain name of the host.
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
-    
+
     function getHostFQDN() {
         return $this->http_host . '/';
-    }       
+    }
 }

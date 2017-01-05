@@ -11,8 +11,8 @@
  * @subpackage   Core
  * @category     Page Components
  * @author       Michael Munger <michael@highpoweredhelp.com>
- */ 
-     
+ */
+
 
   $performance = array();
 
@@ -21,7 +21,7 @@
   require_once('application_top.php');
   $header_end = microtime(true);
   $t = $header_end -$header_start;
-  array_push($performance,array('Application Top' => $t));  
+  array_push($performance,array('Application Top' => $t));
   $perfHeaderLogger = new logger('performance-header');
 ?>
 <!DOCTYPE html>
@@ -33,7 +33,7 @@
   <link rel="stylesheet" type="text/css" href="/css/custom.css"/>
   <link rel="stylesheet" type="text/css" href="/css/glyphicons.css">
   <!-- End CSS Style Sheets -->
-  
+
   <!--Injected CSS Style Sheets-->
   <?php $PE->runActions('header_css_inject'); ?>
   <!--End Injected CSS Style Sheets-->
@@ -43,17 +43,17 @@
   <script type="text/javascript" src="/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="/js/modernizr.js"></script>
   <!-- End Standard Javascript / jQuery -->
-  
+
   <!-- Injected Javascript / jQuery -->
   <?php $PE->runActions('header_js_inject'); ?>
   <!-- End Javascript / jQuery -->
-  
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?php $configs = $PE->Configs->getConfigs(['siteTitle']); echo $configs['siteTitle']; ?></title>\
 </head>
 <body>
-<!--[if lt IE 9]> 
+<!--[if lt IE 9]>
 <div id="unsupportedBrowser">
   <div class="alert alert-warning text-center">It looks like you're using an old browser, which may not fully function on this site. <a href="https://bugzy.highpoweredhelp.com/docs/security/supported-browsers/">Click here to find out how to fix this for free</a>. </div>
 <div class="container">
@@ -69,7 +69,7 @@
 <div class="container">
 <script>
 //Browser support check.
-$(document).ready(function(e) {    
+$(document).ready(function(e) {
   var sBrowser, sUsrAg = navigator.userAgent;
   var unsupported = false;
 
@@ -91,7 +91,7 @@ $(document).ready(function(e) {
     {
       unsupported = true;
     }
-    
+
   } else if (sUsrAg.indexOf("Opera") > -1) {
     alert(sUsrAg);
   } else if (sUsrAg.indexOf("Firefox") > -1) {
@@ -107,7 +107,7 @@ $(document).ready(function(e) {
   } else if (sUsrAg.indexOf("MSIE") > -1) {
     //Done with HTML
   }
-  
+
   if(unsupported)
   {
     $("#unsupportedBrowser").slideDown(400);
@@ -117,23 +117,16 @@ $(document).ready(function(e) {
 </script>
 
 <?php
-if(isset($_COOKIE['sudo']))
-  {?>
-    <!-- Sudo -->
-    <div id="sudo" class="text-right">
-        <a href="/nosudo.php">Exit Sudo</a>
-    </div>
-    <!-- End Sudo -->   
-  <?php }
-  
+
+
   $header_start = microtime(true);
-  
+
   if($Authenticator->logged_in) {
     include('navigation.php');
   }
   $header_end = microtime(true);
   $t = $header_end - $header_start;
-  array_push($performance,array('Nav' => $t));  
+  array_push($performance,array('Nav' => $t));
 
   foreach($performance as $metric)
   {
