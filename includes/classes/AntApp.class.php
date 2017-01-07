@@ -140,6 +140,13 @@ Class AntApp
     public $routedActions   = [];
 
     /**
+     * Holds an associative array of priorites for actions that fire for routes in this app.
+     * @var array
+     */
+
+    public $routedActionPriorities = [];
+
+    /**
     * @var array $getFilters An array of get request variables that must be a)
     *      present and b) set to a certain value before the app engine will
     *      trigger the actions contained in this app.
@@ -218,11 +225,17 @@ Class AntApp
      **/
 
     function registerAppRoutes($routes) {
+        //echo "<pre>"; var_dump($routes); echo "</pre>";  echo __FILE__ . ":" . __LINE__;
         $startSize = count($this->routedActions);
         $this->routedActions = array_merge($this->routedActions,$routes);
         return (count($this->routedActions) > $startSize);
     }
 
+    function registerAppRoutePriorities($priorities) {
+        $startSize = count($this->routedActionPriorities);
+        $this->routedActionPriorities = array_merge($this->routedActionPriorities,$priorities);
+        return (count($this->routedActionPriorities) > $startSize);
+    }
     /**
      * Examines a given URI and determines if this app should fire or not.
      * Example:
@@ -271,7 +284,7 @@ Class AntApp
     /**
      * Hooks this app to a hook in the system.
      *
-     * When a appg is created, it can operate at many different areas inside the BFW Toolkit based web application. Each hook that is added in the various pages of the web app or functions of the CLI can have any number of hooks. If this app is to operate at the time that hook is fired, it should be "hooked" to that hook using this funciton. Usually, you'll see this being executed at the bottom of app.php after the app class has been extended and defined above it. See the standard apps for reference on structure. Each hook has a signature, which is generated from the hook, the callback function, and the priority. This signature is the key of the associative array that holds all apps.
+     * When an app is created, it can operate at many different areas inside the BFW Toolkit based web application. Each hook that is added in the various pages of the web app or functions of the CLI can have any number of hooks. If this app is to operate at the time that hook is fired, it should be "hooked" to that hook using this funciton. Usually, you'll see this being executed at the bottom of app.php after the app class has been extended and defined above it. See the standard apps for reference on structure. Each hook has a signature, which is generated from the hook, the callback function, and the priority. This signature is the key of the associative array that holds all apps.
      * Example:
      *
      * <code>
@@ -369,6 +382,7 @@ Class AntApp
                 try {
 
                     if($this->visualTrace) $args['AE']->Configs->pageEcho(sprintf('<span class="w3-tag w3-round w3-green" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
+
                     $result    = call_user_func(array($this,$hook['callback']),($args?$args:false));
 
                     //Increment the runcount for this action in this app.
@@ -617,9 +631,6 @@ Class AntApp
 
             $filters = ['requestFilter','alwaysRun'];
             if(in_array($key, $filters)) continue;
-
-            /*var_dump($key);
-            var_dump($value);*/
 
             switch(gettype($value)) {
                 case 'array':

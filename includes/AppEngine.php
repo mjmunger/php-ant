@@ -555,20 +555,37 @@ class AppEngine {
      **/
 
     function getAppRoutes($path) {
-        $pattern = '/(App URI:) *([\'"]{1}(.*)[\'"]{1}) *-> *([a-zA-Z-]*)/s';
-        $pattern = '/(App URI:) *([\'"]{1}(.*)[\'"]{1}) *-> *([a-zA-Z-]*)( *@ *([0-9]{1,2})){0,1}/s';
-        $buffer  = file($path);
-        $matches = NULL;
-        $routes = [];
+        $pattern    = '/(App URI:) *([\'"]{1}(.*)[\'"]{1}) *-> *([a-zA-Z-]*)/s';
+        $pattern    = '/(App URI:) *([\'"]{1}(.*)[\'"]{1}) *-> *([a-zA-Z-]*)( *@ *([0-9]{1,2})){0,1}/s';
+        $buffer     = file($path);
+        $matches    = NULL;
+        $routes     = [];
+        $priorities = [];
 
         foreach($buffer as $line) {
+            //Reset so we don't screw something up.
+            $priority = false;
             $line = trim($line);
             preg_match($pattern, $line,$matches);
             if(count($matches) === 0) continue;
 
-            $routes[$matches[3]] = $matches[4];
+            $regex  = $matches[3];
+            $action = $matches[4];
+
+            $routes[$regex] = $action;
+
+            //Capture optional routed action priority if it's there.
+            if(count($matches) == 7) $priority = (int) $matches[6];
+
+            //If it's not, default to 50 for backwards compatibility.
+            if(!$priority) $priority = 50;
+
+            $priorities[$action] = $priority;
         }
-        return $routes;
+
+        return [ 'routes'     => $routes
+               , 'priorities' => $priorities
+               ];
     }
 
     /**
@@ -774,8 +791,9 @@ class AppEngine {
                 }
 
                 //Register routes for this app.
-                $routes = $this->getAppRoutes($path);
-                $app->registerAppRoutes($routes);
+                $meta = $this->getAppRoutes($path);
+                $app->registerAppRoutes($meta['routes']);
+                $app->registerAppRoutePriorities($meta['priorities']);
 
                 array_push($this->apps,$app);
                 $this->activatedApps[$path]= $name;
@@ -917,15 +935,89 @@ class AppEngine {
 
     public function runRoutedActions() {
         $results = [];
+        $actions = [];
+        $args    = [];
+
         foreach($this->apps as $app) {
             //Find apps that respond to the current URI.
             if($app->fireOnURI($this->Configs->Server->Request->uri)) {
                 //Loop through events that fire for this app on this URI.
                 $action = $app->getRoutedAction($this->Configs->Server->Request->uri);
-                $return = $this->runActions($action);
-                $results = array_merge($results,$return);
+                //$this->runActions($action);
+
+                if($action) {
+                    $priority = $app->routedActionPriorities[$action];
+
+                    //Add this app to that action list.
+                    //$actions[$action] = [ $priority => & $app ];
+                    $data = [$priority, $action, $app];
+                    array_push($actions, $data);
+                }
             }
         }
+
+        // Now, we have a list of actions, and the apps that should run (along with the priorities there), so:
+        // 1. Let's loop through the actions, and
+        // 2. let's sort each of those arrays by priority.
+        // 3. Run the actions in that order.
+
+
+        //Loop through all our actions.
+        array_multisort($actions);
+
+        /**
+         * At this point, we have a multidimensional array like this:
+         *
+         * array(2) {
+         *   [0]=>
+         *   array(3) {
+         *     [0]=>
+         *     int(40)
+         *     [1]=>
+         *     string(24) "include-admin-navigation"
+         *     [2]=>
+         *     string(5) "&$app"
+         *   }
+         *   [1]=>
+         *   array(3) {
+         *     [0]=>
+         *     int(50)
+         *     [1]=>
+         *     string(15) "manage-projects"
+         *     [2]=>
+         *     string(5) "&$app"
+         *   }
+         * }
+         *
+         * So, next, we need to loop through this array, and break out the list
+         * into individual action lists. First, we need to build a unique list
+         * of actions that will be run.
+         */
+
+         $buffer = [];
+         foreach($actions as $executionSet) {
+             array_push($buffer,$executionSet[1]);
+         }
+
+        $uniqueActions = array_unique($buffer);
+
+        /**
+         * Next, we need to loop through the actions and execute the requested
+         * hooks in order. When a given hook gives us 'exit' => true, we need to
+         * continue rather than fully exit.
+         */
+
+         foreach($uniqueActions as $action) {
+             foreach($actions as $executionSet) {
+                if($action == $executionSet[1]){
+                    $args['requested_hook'] = $action;
+                    $args['AE'] = & $this;
+                    $return = $executionSet[2]->trigger($action,$args);
+                    $results = array_merge($results,$return);
+                }
+             }
+        }
+
         $results['success'] = true;
         return $results;
     }
