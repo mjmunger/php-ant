@@ -556,6 +556,7 @@ class AppEngine {
 
     function getAppRoutes($path) {
         $pattern = '/(App URI:) *([\'"]{1}(.*)[\'"]{1}) *-> *([a-zA-Z-]*)/s';
+        $pattern = '/(App URI:) *([\'"]{1}(.*)[\'"]{1}) *-> *([a-zA-Z-]*)( *@ *([0-9]{1,2})){0,1}/s';
         $buffer  = file($path);
         $matches = NULL;
         $routes = [];
@@ -718,7 +719,7 @@ class AppEngine {
                     //Load init vars from the json init file if it exists.
                     if($exists) {
                         $options = json_decode(file_get_contents($appInitPath));
-                        
+
                         $app->init($options,true);
 
                         //Verbose message.
