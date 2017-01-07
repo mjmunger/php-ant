@@ -12,7 +12,7 @@
  * @subpackage   Core
  * @category     Core Functions
  * @author       Michael Munger <michael@highpoweredhelp.com>
- */ 
+ */
 
 
 /**
@@ -27,7 +27,7 @@
  * while($row = $result->fetch_assoc()) {
  *   debug_print($row);
  * }
- * unset($m); 
+ * unset($m);
  * </code>
  *
  * @return object an instantiated class of MySQLi with a connection to the database.
@@ -36,7 +36,7 @@
  **/
 
 /*function gimmieDB() {
-    //Check for the existence of mysql-credentials.php 
+    //Check for the existence of mysql-credentials.php
     $creds = 'includes/mysql-credentials.php';
     if(file_exists($creds)){
         $permissions = decoct(fileperms($creds) & 0777);
@@ -86,7 +86,7 @@ function gimmiePDO($testing=false) {
 }
 /**
  * Includes a local (customized) copy of a file if it exists (in local/), otherwise, it includes the default (core) version.
- * 
+ *
  * Example:
  *
  * <code>
@@ -226,7 +226,7 @@ CREATE TABLE IF NOT EXISTS `Version` (
 eof;
 
     array_push($queries, $sql);
-    
+
     //Create thet settings table if we need it.
     $sql = <<<eof
 CREATE TABLE IF NOT EXISTS `settings` (
@@ -266,9 +266,9 @@ function check_schema() {
     $pdo = gimmiePDO();
 
     //Check to see if the version table exists.
-    $sql = "SELECT * 
+    $sql = "SELECT *
 FROM information_schema.tables
-WHERE table_schema = 'bugreport' 
+WHERE table_schema = 'bugreport'
     AND table_name = 'version'
 LIMIT 1";
 
@@ -293,6 +293,86 @@ function get_json_error_msg($error) {
     ];
 
     return $errors[$error];
+}
+
+/**
+ * Returns a human readable version of the period of time that has elapsed since a given time.
+ * @param DateInterval $diff The DateTimeInterval that represents the amount of time since an event to now.
+ * @return string Human readable time elapsed.
+ **/
+
+function getAgoTime($diff, $future = false) {
+	$return = '';
+
+	if($diff->y > 0) {
+
+		$return = $diff->y . ' years';
+
+		if($diff->y > 1) {
+			$return .= "s";
+		}
+
+		return $return;
+	}
+
+	if($diff->m > 0) {
+
+		$return = $diff->m . ' month';
+
+		if($diff->m > 1) {
+			$return .= "s";
+		}
+
+		return $return;
+	}
+
+	if($diff->d > 0) {
+
+		$return = $diff->d . ' day';
+
+		if($diff->d > 1) {
+			$return .= "s";
+		}
+
+		return $return;
+	}
+
+	if($diff->h > 0) {
+
+		$return = $diff->h . ' hour';
+
+		if($diff->h > 1) {
+			$return .= "s";
+		}
+
+		return $return;
+	}
+
+	if($diff->i > 0) {
+
+		$return = $diff->i . ' minute';
+
+		if($diff->i > 1) {
+			$return .= "s";
+		}
+
+		return $return;
+	}
+
+	if($diff->s > 0) {
+
+		$return = $diff->s . ' second';
+
+		if($diff->s > 1) {
+			$return .= "s";
+		}
+
+		return $return;
+	}
+
+
+	return ($future ? "LATE" : " just now");
+
 }
 
 /** END FUNCTION LIBRARY **/

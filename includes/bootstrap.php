@@ -82,6 +82,10 @@ switch($antConfigs->environment) {
 
 //Set the EngineVerbosity as it was saved - this overrides the command line params.
 $dbVerbosity = false;
+$hideErrors = 'hide';
+$errorLevel = $antConfigs->getConfigs(['errors']);
+if(count($errorLevel) > 0) $hideErrors = $errorLevel['errors'];
+
 $configs = $antConfigs->getConfigs(['EngineVerbosity']);
 if(isset($configs['EngineVerbosity'])) $dbVerbosity = $configs['EngineVerbosity'];
 
@@ -144,7 +148,7 @@ $Engine = new AppEngine($antConfigs,$options);
 $Engine->log('Bootstrap','Verbosity level: ' . $verbosity,'AppEngine.log',1);
 
 //Set the error handler to the AppEngine::handleError() method.
-set_error_handler(array(&$Engine,'handleError'));
+if($hideErrors != 'show') set_error_handler(array(&$Engine,'handleError'));
 
 switch ($Engine->Configs->environment) {
     case ConfigBase::WEB:
@@ -163,6 +167,7 @@ $configs = $Engine->Configs->getConfigs(['BlacklistDisabled','EngineVerbosity'])
 $Engine->AppBlacklist->disabled = (isset($configs['BlacklistDisabled'])?(bool)$configs['BlacklistDisabled']:false);
 
 /* NOTE: YOU CANNOT DO LOGGING THAT DOES debug_print (the final option) UNILT AFTER YOU'VE AUTHENTICATED THE USER! */
+if($Engine->visualTrace) printf('<span class="w3-tag w3-round w3-teal" style="margin:0.25em;">%s:%s</span>','Bootstrap','Boostrap Actions Begin');
 
 /* Load any libraries that are in the includes/libs/ directory. */
 $Engine->runActions('lib-loader');
@@ -194,3 +199,4 @@ $Engine->runActions('set-user-permissions');
 
 /* Do post-authorization tasks and cleanup*/
 $Engine->runActions('post-auth');
+if($Engine->visualTrace) printf('<span class="w3-tag w3-round w3-teal" style="margin:0.25em;">%s:%s</span>','Bootstrap','Boostrap Actions End');

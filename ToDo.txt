@@ -4,29 +4,40 @@ To Do
 
 #Customer facing issues
 
-#Important Usability
-Client bug manager CSS issues.
-Worker bug manger
-Admin bug manger
-Fix CSS for desktop.
+#Urgent and important
+What bugs are shown in the project manager? Adam can see private bugs? Bugs from other people?
+
+##Blocking
+
 Resources vault
 New bug queue process script.
 Neglected bugs script.
+Admin bug manger
 
 
-#Nice to have
-Show image attachments inline
-Changed timestamps to relative times.
+#Non-blocking
+Fix jump-to-bug (search?)
+Who's online - javascript to check status of who is there and report who is there when looking at a bug.
+Live "chat" updates - javascript to check the status of unread messages and add them.
 Star important things
 Search
 Permalinks to comments.
 Tag people.. Make more intuitive. Perhaps use a "to" box?
 
-#If I have time.
+#Urgent, but not important.
+Clear old tokens script
 Emojis
 http://stackoverflow.com/questions/7814293/how-to-insert-utf-8-mb4-characteremoji-in-ios5-in-mysql
 Add a hook for when an email is sent
 
+#Important, but not urgent
+New Project
+Manage Project
+New Worker
+Manage Worker
+Add Skillsets
+Manage Skillsets
+New User
 Emails need to be logged in the email_log. All emails are sent to users, so later we may have to give non-usable accounts (Role = External (E)?) to those people so we can mail them without them having to register in the system.
 
 
@@ -38,3 +49,8 @@ Paste from clipboard http://stackoverflow.com/questions/6333814/how-does-the-pas
 Changed alerts pop-up for empty post to toast.
 https://codeseven.github.io/toastr/
 Fix header image to use database settings.
+Client bug manager CSS issues.
+Fix CSS for desktop.
+Show image attachments inline
+Changed timestamps to relative times.
+Worker bug manger

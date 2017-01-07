@@ -335,4 +335,8 @@ class ConfigBase
     function getHostFQDN() {
         return $this->http_host . '/';
     }
+
+    function pageEcho($message, $comment = false) {
+        //pass - don't print in the CLI.
+    }
 }

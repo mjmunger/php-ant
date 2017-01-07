@@ -19,6 +19,30 @@ namespace PHPAnt\Core;
 Class AntApp
 {
 
+    /**
+     * Defines whether or not this app will run just once and not run again.
+     * @var boolean
+     */
+    public $runOnce         = false;
+
+    /**
+     * Defines whether or not this app has run already. Set to true when AntApp::runOnce is set to true AND after the app has been triggered.
+     * @var boolean
+     */
+    public $hasRun           = false;
+
+    /**
+     * A list of actions that have run already. Can be used to find out if an particular action that should only run once has run.
+     * @var array
+     */
+    public $actionsRun       = [];
+
+    /**
+     * An array of actions in this app that should run only once. configured in the app.json file.
+     * @var array
+     */
+
+    public $actionRunLimit    = [];
 
     /**
     * @var array $consoleMessages An array of messages that will be printed to the console.
@@ -313,6 +337,13 @@ Class AntApp
 
     public function trigger($requested_hook,$args = false)
     {
+        // short-circuit if this app should only run one time and has already won. Remember, first app wins, so control which actually fires by properly setting app priorities!
+
+        if($this->runOnce && $this->hasRun) return ['success' => true ];
+
+        // Mark this app as having run at least once.
+        $this->hasRun = true;
+
         $return = array();
         if($this->verbosity > 14) {
             echo "Triggering hooks for app: " . $this->appName . PHP_EOL;
@@ -324,17 +355,29 @@ Class AntApp
 
             $args['AE']->log($this->appName,"Hook: " . print_r($hook,true),'AppEngine.log',14);
 
+            //Check to see if the action has already reached a run limit, and if so, bail out.
+
 
             if($requested_hook == $hook['hook']) {
 
+                $actionRunCount = (isset( $this->actionsRun[$requested_hook] ) ? $this->actionsRun[$requested_hook] : 0);
+
+                if(isset($this->actionRunLimit[$requested_hook]) && $actionRunCount >= $this->actionRunLimit[$requested_hook]){
+                    $args['AE']->log($this->appName,"$requested_hook has reached its run limit ($actionRunCount). Not running again.");
+                    return [ 'success' => true ];
+                 }
                 try {
 
-                    if($this->visualTrace) printf('<span class="w3-tag w3-round w3-green" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook);
+                    if($this->visualTrace) $args['AE']->Configs->pageEcho(sprintf('<span class="w3-tag w3-round w3-green" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
                     $result    = call_user_func(array($this,$hook['callback']),($args?$args:false));
+
+                    //Increment the runcount for this action in this app.
+                    $actionRunCount++;
+                    $this->actionsRun[$requested_hook] = $actionRunCount;
 
                 } catch (Exception $e) {
                     //Disable this app on next load, and log the exception.
-                    if($args['AE']->visualTrace) printf('<span class="w3-tag w3-round w3-red" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook);
+                    if($args['AE']->visualTrace) $args['AE']->Configs->pageEcho(printf('<span class="w3-tag w3-round w3-red" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
                     $args['AE']->log($this->appName,$e->getMessage());
                     $args['AE']->log($this->appName,"***DISABLING THIS APP***");
                     $args['AE']->disableApp($this->appName,$args['AE']->availableApps[$this->appName]);
@@ -562,6 +605,7 @@ Class AntApp
      **/
 
     function init($options) {
+
         $this->getFilters  = [];
         $this->postFilters = [];
 
@@ -589,6 +633,7 @@ Class AntApp
                     break;
             }
         }
+
     }
 
     function setRequestFilter($filters) {
@@ -600,7 +645,7 @@ Class AntApp
 
             foreach($filters->$method as $var => $value) {
                 if(isset($this->AE))
-                    $this->AE->log('AppEngine'
+                    $this->AE->log($this->appName
                                   ,sprintf("For %s, parsing key => value: %s => %s",$method,$var,$value)
                                   ,'AppEngine.log'
                                   ,14);
@@ -671,19 +716,19 @@ Class AntApp
     function shouldRun(AppEngine $Engine, $requested_hook) {
         //If this URI is on the always run whitelist, return true without further processing.
         if($this->alwaysRun($Engine, $requested_hook)) {
-            $Engine->log('AppEngine',"$this->appName will run for $requested_hook because it's whitelisted.");
+            $Engine->log($this->appName,"$this->appName will run for $requested_hook because it's whitelisted.");
             return true;
         }
 
         //If we are not allowed to run on this URI, return false
         if(!$this->fireOnURI($Engine->Configs->Server->Request->uri)) {
-            $Engine->log('AppEngine',"$this->appName will NOT run for $requested_hook because it's restricted to specific URIs.");
+            $Engine->log($this->appName,"$this->appName will NOT run for $requested_hook because it's restricted to specific URIs.");
             return false;
         }
 
         //If there are filters in place to prevent this app from running, return false.
         if(!$this->filterOnRequest($Engine)) {
-            $Engine->log('AppEngine',"$this->appName will NOT run for $requested_hook because it's restricted by GET or POST filters.");
+            $Engine->log($this->appName,"$this->appName will NOT run for $requested_hook because it's restricted by GET or POST filters.");
             return false;
         }
 
@@ -704,7 +749,7 @@ Class AntApp
 
     function alwaysRun(AppEngine $Engine, $action) {
         $run = in_array($action, $this->actionWhitelist);
-        if($run) $Engine->log('AppEngine',"$action was whitelisted for $this->appName",'AppEngine.log',9);
+        if($run) $Engine->log($this->appName,"$action was whitelisted for $this->appName",'AppEngine.log',9);
         return $run;
     }
 }

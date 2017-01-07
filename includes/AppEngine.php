@@ -711,13 +711,14 @@ class AppEngine {
                     $exists = file_exists($appInitPath);
 
                     $this->log("AppEngine"
-                              ,sprintf("App init file path: %s [%s]", $appInitPath, ($exists?"EXISTS":"Does not exist"))
+                              ,sprintf("App init file path: %s [%s]", $appInitPath, ($exists?"EXISTS":"Does not exist, and that's OK. It's optional."))
                               ,'AppEngine.log'
                               ,9);
 
                     //Load init vars from the json init file if it exists.
                     if($exists) {
                         $options = json_decode(file_get_contents($appInitPath));
+                        
                         $app->init($options,true);
 
                         //Verbose message.

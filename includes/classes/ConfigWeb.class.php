@@ -7,7 +7,7 @@ class ConfigWeb extends ConfigBase
 	public $Server    				= NULL;
 
 	function __construct(\PDO $pdo,$vars) {
-		
+
 		$this->http_host     = $vars['http_host']; //$_SERVER['HTTP_HOST'];
 		$this->document_root = $vars['document_root']; //$_SERVER['DOCUMENT_ROOT'];
 		$this->environment   = ConfigWeb::WEB;
@@ -35,7 +35,7 @@ class ConfigWeb extends ConfigBase
 	 * @param string $type The class used to decorate the alert. (success, info, warning, danger). See: http://getbootstrap.com/components/#alerts
 	 * @author Michael Munger <michael@highpoweredhelp.com>
 	 **/
-	
+
 	function divAlert($msg,$type) {
         switch($type) {
             case 'error':
@@ -45,7 +45,7 @@ class ConfigWeb extends ConfigBase
                 printf('<div class="alert alert-success text-center">%s</div>',$msg);
                 break;
             case 'warning':
-                printf('<div class="alert alert-warning text-center">%s</div>',$msg);     
+                printf('<div class="alert alert-warning text-center">%s</div>',$msg);
                 break;
             default:
                 printf('<div class="alert alert-%s text-center">%s</div>','info',$msg);
@@ -64,7 +64,7 @@ class ConfigWeb extends ConfigBase
 	 * @return string. URI to the current resource.
 	 * @author Michael Munger <michael@highpoweredhelp.com>
 	 **/
-	
+
 	function getMyURI() {
 	    $URI = $_SERVER['REQUEST_URI'];
 	    //strip the leading /
@@ -78,11 +78,11 @@ class ConfigWeb extends ConfigBase
 	 * @param boolean $return If true, function returns the output as a string. If false, it prints it.
 	 * @return string|null The output string, or nothing if it prints it directly.
 	 **/
-	
+
 	function debug_print($msg, $return=false, $minimumVerbosity = 0) {
 
 		if($this->verbosity < $minimumVerbosity) return false;
-		
+
 		$output = sprintf(PHP_EOL . "<!-- %s -->" . PHP_EOL ,print_r($msg,true));
 
 		if($return) return $output;
@@ -93,9 +93,9 @@ class ConfigWeb extends ConfigBase
 	function checkWebVerbosity(PluginEngine $PE) {
 		/*check to see if we have entered a debug / verbosity level, and if so, store it in a session variable. */
 		if(isset($_GET['verbosity'])) {
-		
+
 		    $level = filter_var($_GET['verbosity'],FILTER_VALIDATE_INT);
-		
+
 		    if($level) {
 		        $_SESSION['verbosity'] = $level;
 		    } elseif($_GET['verbosity'] == 'off') {
@@ -103,13 +103,13 @@ class ConfigWeb extends ConfigBase
 		        $this->divAlert("Verbosity disabled.");
 		    }
 		}
-		
+
 		/* If the session variable has a verbosity level, use it so we can debug. */
-		
+
 		if(isset($_SESSION['verbosity'])) {
 		    $level = filter_var($_SESSION['verbosity'],FILTER_VALIDATE_INT);
 		    $PE->setVerbosity($level);
-		}	
+		}
 	}
 
 	/**
@@ -123,10 +123,14 @@ class ConfigWeb extends ConfigBase
 	 * @return string The fully qualified domain name of the host.
 	 * @author Michael Munger <michael@highpoweredhelp.com>
 	 **/
-	
+
 	function getHostFQDN() {
 	    //returns the FQDN of the host. Ex: https://www.thedomain.com/
 	    $prefix = ($this->Server->SSL->HTTPS?'https://':'http://');
 	    return $prefix . $this->Server->HTTP->host . '/';
-	}	
+	}
+
+    function pageEcho($message, $comment = false) {
+        echo ($comment ? sprintf('<!-- %s -->' . PHP_EOL,$message) : $message);
+    }
 }
