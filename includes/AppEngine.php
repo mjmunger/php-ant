@@ -231,6 +231,8 @@ class AppEngine {
     function showRoutedCodePath($uri) {
         $appsWhoFire = [];
 
+        $uri = str_replace($this->Configs->http_host, '', $uri);
+
         foreach($this->apps as $app) {
             /*Skip non-enabled apps*/
             //if(!$app->enabled) continue;

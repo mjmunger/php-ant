@@ -17,7 +17,7 @@ AppEngine::runRoutedActions now cycles through the apps in the following order:
 
 5. Now, armed with a unique list of actions that we need to run, we can loop through the master array,and execute those actions ona  per action basis, in the correct priority order.
 
-6. Results arrays ar aggragated normally.
+6. Results arrays are aggragated normally.
 
 See in-line code documentation for this method for more information including an example array.
 

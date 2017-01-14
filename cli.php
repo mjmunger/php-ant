@@ -5,11 +5,13 @@ use PHPAnt\Core;
 $rootDir  = __DIR__ . '/';
 
 /* Get command line options */
-$options = getopt('v::d::s::');
+$options = getopt('v::d::s::x::');
 
 /*Default options*/
 $loader_debug = false;
 $safeMode     = false;
+$execute      = false;
+
 /* Load bootstrap options. */
 if(sizeof($options) > 0) {
     if(array_key_exists('v', $options)) {
@@ -37,13 +39,25 @@ if(sizeof($options) > 0) {
         printf("Safemode requested" . PHP_EOL);
         $safeMode = true;
     }
-    
+
+    if(array_key_exists('x',$options)) {
+        $execute = $options['x'];
+    }
+
 }
 
 /* Include the application top... and everything else. */
-include('includes/bootstrap.php');
+include(__DIR__ . '/includes/bootstrap.php');
 
 $C = new PHPAnt\Core\Cli($Engine);
+
+// If we have given it a command from the command line, execute that and quite.
+if($execute) {
+    $cmd = new \PHPAnt\Core\Command($execute);
+    $C->processCommand($cmd);
+    exit;
+}
+
 if(sizeof($options) > 0) {
     /* Set debug mode if -d is specified. Also sets verbosity to 10, but may be overridden with the -v command. */
     if(array_key_exists('d',$options)) {
