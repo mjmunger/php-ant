@@ -375,6 +375,7 @@ class AppEngine {
             } catch (Exception $e) {
                 $this->log('EXCEPTION',$e->getMessage());
             }
+            if(!isset($actionReturnValues['success'])) echo "$app->appName not returning a success for $requested_hook!" . PHP_EOL;
             $row = [$requested_hook,$app->appName,($actionReturnValues['success']?"OK":"FAILED")];
             $TL->addRow($row);
 
@@ -786,7 +787,7 @@ class AppEngine {
 
                 foreach($uriList as $uri) {
                     $this->log( 'AppEngine'
-                              , sprintf("Registered URI $uri to " . $app->appName)
+                              , sprintf("Registered URI %s to %s" , $uri, $app->appName)
                               , 'AppEngine.log'
                               , 9
                               );
@@ -1016,11 +1017,13 @@ class AppEngine {
                     $args['AE'] = & $this;
                     $return = $executionSet[2]->trigger($action,$args);
                     $results = array_merge($results,$return);
+                    // if(isset($return['exit']) && $return['exit']) continue;
                 }
              }
         }
 
         $results['success'] = true;
+        $results['exit']    = true;
         return $results;
     }
 }

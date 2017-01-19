@@ -27,7 +27,7 @@ include('includes/bootstrap.php');
 $results = [];
 //if($Authenticator->isApi)
 
-if($Engine->visualTrace) printf('','Index Front Controller','Routed Actions Begin');
+if($Engine->visualTrace) printf('<span class="w3-tag w3-round w3-blue" style="margin:0.25em;">%s:%s</span> ','Index Front Controller','Routed Actions Begin');
 $results = $Engine->runRoutedActions();
 
 
