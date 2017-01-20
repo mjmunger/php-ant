@@ -1023,7 +1023,7 @@ class AppEngine {
         }
 
         $results['success'] = true;
-        $results['exit']    = true;
+        // $results['exit']    = true;
         return $results;
     }
 }
