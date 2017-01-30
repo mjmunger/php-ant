@@ -28,16 +28,19 @@ $results = [];
 //if($Authenticator->isApi)
 
 if($Engine->visualTrace) printf('<span class="w3-tag w3-round w3-blue" style="margin:0.25em;">%s:%s</span> ','Index Front Controller','Routed Actions Begin');
+$Engine->log("index.php","Running routed actions");
 $results = $Engine->runRoutedActions();
 
 
 //If a (single) routed action demands we stop executing after we complete routed actions, then stop execution.
 if(isset($results['exit'])) {
     if($Engine->visualTrace) printf('<span class="w3-tag w3-round w3-blue" style="margin:0.25em;">%s:%s</span> ','Index Front Controller','Routed Actions End. Terminating');
+	$Engine->log("index.php","Running routed actions terminating. Not running Non-Routed actions!");
     die();
 }
 
 if($Engine->visualTrace) printf('<span class="w3-tag w3-round w3-blue" style="margin:0.25em;">%s:%s</span>','Index Front Controller','Front Controller (Non-Routed Actions Begin)');
+$Engine->log("index.php", "Non-Routed actions begin");
 $Engine->runActions('include-header');
 
 if(isset($current_user)) {
@@ -50,5 +53,6 @@ $Engine->runActions('show-dashboard');
 $Engine->runActions('include-footer');
 
 if($Engine->visualTrace) printf('<span class="w3-tag w3-round w3-blue" style="margin:0.25em;">%s:%s</span>','Index Front Controller','Front Controller (Non-Routed Actions End)');
+$Engine->log("index.php", "Non-Routed actions end");
 $end = microtime(true);
 $t = $end - $start;

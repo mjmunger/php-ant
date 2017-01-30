@@ -860,6 +860,13 @@ class AppEngine {
         $this->log('AppEngine','Reload complete.');
     }
 
+    function truncateLog($file = 'AppEngine.log') {
+        $logPath = $this->Configs->getLogDir() . $file;
+        $fp = fopen($logPath,'w');
+        fwrite($fp,'');
+        fclose($fp);
+    }
+
     /**
      * Logs a message to the specified log file.
      * Example:
