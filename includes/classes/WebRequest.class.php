@@ -76,7 +76,8 @@ class WebRequest
 			//return array_map(['this','normalizeEncoding'], $value);
 			return $value;
 		} else {
-			return $this->normalizeEncoding($value);
+			return $value;
+			//return $this->normalizeEncoding($value);
 		}
 	}
 
