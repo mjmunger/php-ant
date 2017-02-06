@@ -14,4 +14,3 @@ if($Authenticator->authType == BFWAuth::MOBILE) {
 }
 
 header("location: " . $PE->Configs->getHostFQDN());
-?>

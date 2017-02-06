@@ -1,14 +1,88 @@
-To Do:
+ To Do
 
-1. Emails need to be logged in the email_log. All emails are sent to users, so
-   later we may have to give non-usable accounts (Role = External (E)?) to those
-   people so we can mail them without them having to register in the system.
+#Urgent Bug Fix
 
-2. Need a config table so we can store configs in the database. This means
-   that we have to have a berkley DB style set of entries with family / key /
-   value tuples. Four column table should suffice. (ID, family, key, value).
-   We'll store the general ("global") configs in the 'app' family. This also
-   allows us to use a Config class to deal with an individual config.
+#Customer facing issues
 
-3. Add a hook for when an email is sent.
+#Urgent and important
 
+Certified fixed
+client-accepted workflow to celebrate a job well done with the people subscribed to the bug.
+status-update workflow. Send out comments that haven't been seen via email. Neglected status / follow?
+autoclose workflow
+Report tech support issue (put in ticket table) - requires screenshot.
+Report tech support request (request table?) - new thing does not require screenshot
+Report marketing activity
+
+##Blocking
+Mobile does not have comments, etc...
+Ability to get to the bug I just field with a link immediately after filing it.
+"X is viewing with you" sucks on mobile.
+Tools don't work on mobile (not displayed)
+
+#Non-blocking
+change set owner
+Add project
+Add user
+
+Permissions per-project and per-resource (for client use).
+Fix jump-to-bug (search?)
+Who's online - javascript to check status of who is there and report who is there when looking at a bug.
+Live "chat" updates - javascript to check the status of unread messages and add them.
+Star important things
+Search
+Permalinks to comments.
+Tag people.. Make more intuitive. Perhaps use a "to" box?
+
+#Important, but not urgent
+Add a "cc" field so we can purposefully ping a user.
+Show which participants on the bug are subscribed (and give workers the ability to subscribe them)
+Have project tools become fixed position on scroll (https://css-tricks.com/scroll-fix-content/)
+New Project
+Manage Project
+New Worker
+Manage Worker
+Add Skillsets
+Manage Skillsets
+New User
+Emails need to be logged in the email_log. All emails are sent to users, so later we may have to give non-usable accounts (Role = External (E)?) to those people so we can mail them without them having to register in the system.
+
+#Important, non-blocking
+Clear old tokens script
+Emojis
+http://stackoverflow.com/questions/7814293/how-to-insert-utf-8-mb4-characteremoji-in-ios5-in-mysql
+Add a hook for when an email is sent
+
+Nice to have / fun stuff.
+Use timeago (http://timeago.yarp.com/) to auto-update timestamps on bugs.
+
+
+#done
+Jump to top button
+Fade out background for brew posts.
+Paste from clipboard http://stackoverflow.com/questions/6333814/how-does-the-paste-image-from-clipboard-functionality-work-in-gmail-and-google-c/6338207#6338207
+Changed alerts pop-up for empty post to toast.
+https://codeseven.github.io/toastr/
+Fix header image to use database settings.
+Client bug manager CSS issues.
+Fix CSS for desktop.
+Show image attachments inline
+Changed timestamps to relative times.
+Worker bug manger
+Assigning bugs for Workers and admins.
+Admin bug manger
+New bug queue process script.
+Resource vault - add resources.
+reply-and-assign.
+What project is this in? (Raman)
+Cannot acknowledge your own bug (even if a worker).
+Show who is looking at that page with you.
+"Friend is typing..." notif.
+show updates without refreshing page.
+What bugs are shown in the project manager? Adam can see private bugs? Bugs from other people?
+send to QA
+QA Workflow.
+Subcribed to all comments.
+On admin dashboard, change "Last login" to "last comment posted" in agoTime. Probably, we should sort by that.
+Fixed / not fixed.
+Include the most recent unread comments in the "assigned a bug" (be mindful of public / private comments!)

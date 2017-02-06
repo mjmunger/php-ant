@@ -12,87 +12,117 @@
  * @subpackage   Core
  * @category     Apps
  * @author       Michael Munger <michael@highpoweredhelp.com>
- */     
+ */
 
 namespace PHPAnt\Core;
 
 Class AntApp
 {
 
+    /**
+     * Defines whether or not this app will run just once and not run again.
+     * @var boolean
+     */
+    public $runOnce         = false;
 
     /**
-    * @var array $consoleMessages An array of messages that will be printed to the console. 
+     * Defines whether or not this app has run already. Set to true when AntApp::runOnce is set to true AND after the app has been triggered.
+     * @var boolean
+     */
+    public $hasRun           = false;
+
+    /**
+     * A list of actions that have run already. Can be used to find out if an particular action that should only run once has run.
+     * @var array
+     */
+    public $actionsRun       = [];
+
+    /**
+     * An array of actions in this app that should run only once. configured in the app.json file.
+     * @var array
+     */
+
+    public $actionRunLimit    = [];
+
+    /**
+    * @var array $consoleMessages An array of messages that will be printed to the console.
     **/
 
     public $consoleMessages = [];
-    
+
 
     /**
-    * @var string $appName The name of the app as it will be displayed to users and admins. 
+    * @var string $appName The name of the app as it will be displayed to users and admins.
     **/
-    
+
     public  $appName    = 'OverrideMe';
 
     /**
-    * @var string $version The version number of this app. 
+    * @var string $version The version number of this app.
     **/
-    
+
     public  $version       = '1';
 
     /**
-    * @var array $hooks The hooks upon which this app will operate. 
+    * @var array $hooks The hooks upon which this app will operate.
     **/
-    
+
     public  $hooks         = array();
 
     /**
     * @var boolean $loaded A flag denoting whether or not this app is loaded.
     **/
-    
+
     public  $loaded        = false;
 
 
     /**
     * @var boolean $enabled A flag denoting whether or not this app should be allowed to fire.
     **/
-    
+
     public  $enabled       = false;
 
     /**
-    * @var integer $verbosity The degree to which this app will print debugging information. This is usually inherited from the CLI object itself. 
+    * @var integer $verbosity The degree to which this app will print debugging information. This is usually inherited from the CLI object itself.
     **/
-    
+
     public  $verbosity     = 0;
 
+    /**
+     * Sets whether or not the action tags are shown on the interface so you can figure out what fires where.
+     * @var boolean
+     */
+
+    public $visualTrace    = false;
 
     /**
-    * @var array $errors Errors that are assocaited with this app for this session. This  should be cleared every time we restart or when we fix an error. 
+    * @var array $errors Errors that are assocaited with this app for this session. This  should be cleared every time we restart or when we fix an error.
     **/
 
     public $errors         = array();
 
 
     /**
-    * @var boolean $hasACL Reports to the app engine whether or not we should check an access control list before we allow anything in the app to fire. 
+    * @var boolean $hasACL Reports to the app engine whether or not we should check an access control list before we allow anything in the app to fire.
     **/
-    
+
     public $hasACL         = false;
 
 
     /**
-    * @var array $features An array of features that submit themselves to access control. 
+    * @var array $features An array of features that submit themselves to access control.
     **/
-    
+
     public $features       = array();
 
 
     /**
-    * @var string path The full path to where this app is stored in the file system. 
+    * @var string path The full path to where this app is stored in the file system.
     **/
-    
+
     public $path             = NULL;
 
-    
+
     /**
     * @var array $uriRegistry An array of regular expressions, which when
     *      matched, allow this app to execute code on a hook / action.
@@ -106,8 +136,15 @@ Class AntApp
     *      which are compared to a given request URI, and when matched, the action
     *      is fired in the App Engine.
     **/
-    
+
     public $routedActions   = [];
+
+    /**
+     * Holds an associative array of priorites for actions that fire for routes in this app.
+     * @var array
+     */
+
+    public $routedActionPriorities = [];
 
     /**
     * @var array $getFilters An array of get request variables that must be a)
@@ -121,8 +158,8 @@ Class AntApp
     * @var array $postFilters An array of POST variables that must be a)
     *      present and b) set to a certain value before the app engine will
     *      trigger the actions contained in this app.
-    **/        
-    
+    **/
+
     public $postFilters    = [];
 
 
@@ -135,16 +172,16 @@ Class AntApp
     *      sequence. Subsequent steps should use GET and POST variables to
     *      activate the getFilter and postFilter functionality.
     **/
-    
+
     public $actionWhitelist  = [];
 
-    //These two properties are stubs for use with phpunit. 
+    //These two properties are stubs for use with phpunit.
     public $testProperty      = NULL;
     public $testPropertyArray = [];
 
     function __construct() {
         $this->path = __DIR__;
-    }  
+    }
 
     /**
      * Registers a URI as a regular expression to this app.
@@ -173,7 +210,7 @@ Class AntApp
      * Adds routes and actions to the AntApp::routedActions array. When these
      * routes are present, the AppEngine can respond to URIs and route the
      * requests to the actions designated in the app meta as appropriate.
-     * 
+     *
      * Example:
      *
      * <code>
@@ -188,11 +225,17 @@ Class AntApp
      **/
 
     function registerAppRoutes($routes) {
+        //echo "<pre>"; var_dump($routes); echo "</pre>";  echo __FILE__ . ":" . __LINE__;
         $startSize = count($this->routedActions);
         $this->routedActions = array_merge($this->routedActions,$routes);
         return (count($this->routedActions) > $startSize);
     }
 
+    function registerAppRoutePriorities($priorities) {
+        $startSize = count($this->routedActionPriorities);
+        $this->routedActionPriorities = array_merge($this->routedActionPriorities,$priorities);
+        return (count($this->routedActionPriorities) > $startSize);
+    }
     /**
      * Examines a given URI and determines if this app should fire or not.
      * Example:
@@ -217,15 +260,6 @@ Class AntApp
         return false;
     }
 
-    function getRoutedAction($uri) {
-        foreach($this->routedActions as $regex => $action) {
-            if(preg_match($regex,$uri)) return $action;
-        }
-
-        //no match
-        return false;
-    }
-
     /**
      * Retrieves the action, which should be run for routed URIs
      * Example:
@@ -239,10 +273,18 @@ Class AntApp
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
+    function getRoutedAction($uri) {
+        foreach($this->routedActions as $regex => $action) {
+            if(preg_match($regex,$uri)) return $action;
+        }
+        //no match
+        return false;
+    }
+
     /**
      * Hooks this app to a hook in the system.
-     * 
-     * When a appg is created, it can operate at many different areas inside the BFW Toolkit based web application. Each hook that is added in the various pages of the web app or functions of the CLI can have any number of hooks. If this app is to operate at the time that hook is fired, it should be "hooked" to that hook using this funciton. Usually, you'll see this being executed at the bottom of app.php after the app class has been extended and defined above it. See the standard apps for reference on structure. Each hook has a signature, which is generated from the hook, the callback function, and the priority. This signature is the key of the associative array that holds all apps.
+     *
+     * When an app is created, it can operate at many different areas inside the BFW Toolkit based web application. Each hook that is added in the various pages of the web app or functions of the CLI can have any number of hooks. If this app is to operate at the time that hook is fired, it should be "hooked" to that hook using this funciton. Usually, you'll see this being executed at the bottom of app.php after the app class has been extended and defined above it. See the standard apps for reference on structure. Each hook has a signature, which is generated from the hook, the callback function, and the priority. This signature is the key of the associative array that holds all apps.
      * Example:
      *
      * <code>
@@ -308,25 +350,48 @@ Class AntApp
 
     public function trigger($requested_hook,$args = false)
     {
+        // short-circuit if this app should only run one time and has already won. Remember, first app wins, so control which actually fires by properly setting app priorities!
+
+        if($this->runOnce && $this->hasRun) return ['success' => true ];
+
+        // Mark this app as having run at least once.
+        $this->hasRun = true;
+
         $return = array();
         if($this->verbosity > 14) {
             echo "Triggering hooks for app: " . $this->appName . PHP_EOL;
             echo "AVAILABLE HOOKS:" . PHP_EOL;
-            $args['AE']->Configs->debug_print($this->hooks,$this->appName . " hooks",true);            
+            $args['AE']->Configs->debug_print($this->hooks,$this->appName . " hooks",true);
         }
 
         foreach($this->hooks as $hook) {
 
-            $args['AE']->log('AppEngine',"Hook: " . print_r($hook,true),'AppEngine.log',14);
+            $args['AE']->log($this->appName,"Hook: " . print_r($hook,true),'AppEngine.log',14);
+
+            //Check to see if the action has already reached a run limit, and if so, bail out.
+
 
             if($requested_hook == $hook['hook']) {
 
+                $actionRunCount = (isset( $this->actionsRun[$requested_hook] ) ? $this->actionsRun[$requested_hook] : 0);
+
+                if(isset($this->actionRunLimit[$requested_hook]) && $actionRunCount >= $this->actionRunLimit[$requested_hook]){
+                    $args['AE']->log($this->appName,"$requested_hook has reached its run limit ($actionRunCount). Not running again.");
+                    return [ 'success' => true ];
+                 }
                 try {
 
+                    if($this->visualTrace) $args['AE']->Configs->pageEcho(sprintf('<span class="w3-tag w3-round w3-green" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
+
                     $result    = call_user_func(array($this,$hook['callback']),($args?$args:false));
-                    
+
+                    //Increment the runcount for this action in this app.
+                    $actionRunCount++;
+                    $this->actionsRun[$requested_hook] = $actionRunCount;
+
                 } catch (Exception $e) {
                     //Disable this app on next load, and log the exception.
+                    if($args['AE']->visualTrace) $args['AE']->Configs->pageEcho(printf('<span class="w3-tag w3-round w3-red" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
                     $args['AE']->log($this->appName,$e->getMessage());
                     $args['AE']->log($this->appName,"***DISABLING THIS APP***");
                     $args['AE']->disableApp($this->appName,$args['AE']->availableApps[$this->appName]);
@@ -346,7 +411,7 @@ Class AntApp
                     $args['AE']->log($this->appName,"***DISABLING THIS APP***");
                     $args['AE']->disableApp($this->appName,$args['AE']->availableApps[$this->appName]);
                     $args['AE']->log($this->appName,"Reloading app engine...");
-                    $args['AE']->reload();                    
+                    $args['AE']->reload();
 
                 }
                 $return = array_merge($result,$return);
@@ -371,7 +436,7 @@ Class AntApp
         if(!array_key_exists($feature, $this->features)) {
             throw new Exception("You're trying to verify ACL for a feature not declared in the app's feature list. Cannot verify user access to this feature.", 0, null);
             return false;
-        }        
+        }
 
         /* From this point forward, we need the user object to determine access. */
         if(!isset($AE->current_user)) {
@@ -381,17 +446,17 @@ Class AntApp
         }
 
         /* Administrators can do whatever they want. */
-        
+
         if($AE->current_user->role->users_roles_role == 'A') {
             return true;
         }
 
-        
+
         /* was the current user passed? */
 
         /* Are they allowed to trigger this app? */
     }
-     
+
 
     /**
      * Sets the verbosity level for the app (and should set the verbosity level of all sub-functions, and sub-apps)
@@ -479,10 +544,10 @@ Class AntApp
      * $p->showError($msg);
      * </code>
      *
-     * @param mixed $msg Either a string message (in the case of a single error) or an array of text errors, which can all be displayed at once. 
+     * @param mixed $msg Either a string message (in the case of a single error) or an array of text errors, which can all be displayed at once.
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
-    
+
     public function showError($msg) {
         printf(str_pad('', 80,'*') . PHP_EOL);
         if(is_array($msg)) {
@@ -500,7 +565,7 @@ Class AntApp
         $baseDir = __DIR__;
 
         $candidate_files = array();
-        
+
         /* If this is not a database abstraction, then it is located in the classes directory. Try that last. */
         $candidate_path = sprintf($baseDir.'/classes/%s.class.php',$class);
         array_push($candidate_files, $candidate_path);
@@ -517,7 +582,7 @@ Class AntApp
             }
         }
         return ['success' => true];
-    }  
+    }
 
     public function consoleLog($message) {
         array_push($this->consoleMessages,$message);
@@ -554,6 +619,7 @@ Class AntApp
      **/
 
     function init($options) {
+
         $this->getFilters  = [];
         $this->postFilters = [];
 
@@ -565,9 +631,6 @@ Class AntApp
 
             $filters = ['requestFilter','alwaysRun'];
             if(in_array($key, $filters)) continue;
-
-            /*var_dump($key);
-            var_dump($value);*/
 
             switch(gettype($value)) {
                 case 'array':
@@ -581,7 +644,8 @@ Class AntApp
                     break;
             }
         }
-    }    
+
+    }
 
     function setRequestFilter($filters) {
 
@@ -592,7 +656,7 @@ Class AntApp
 
             foreach($filters->$method as $var => $value) {
                 if(isset($this->AE))
-                    $this->AE->log('AppEngine'
+                    $this->AE->log($this->appName
                                   ,sprintf("For %s, parsing key => value: %s => %s",$method,$var,$value)
                                   ,'AppEngine.log'
                                   ,14);
@@ -636,7 +700,7 @@ Class AntApp
         if(count($this->getFilters) == 0 && count($this->postFilters) == 0) return true;
 
         //loop through the post vars, to ensure that at least one of them allows this app to operate.
-        
+
         foreach($this->postFilters as $var => $value) {
 
             //Soft Fail if it should be set, but it's not.
@@ -663,19 +727,19 @@ Class AntApp
     function shouldRun(AppEngine $Engine, $requested_hook) {
         //If this URI is on the always run whitelist, return true without further processing.
         if($this->alwaysRun($Engine, $requested_hook)) {
-            $Engine->log('AppEngine',"$this->appName will run for $requested_hook because it's whitelisted.");
+            $Engine->log($this->appName,"$this->appName will run for $requested_hook because it's whitelisted.");
             return true;
         }
 
         //If we are not allowed to run on this URI, return false
         if(!$this->fireOnURI($Engine->Configs->Server->Request->uri)) {
-            $Engine->log('AppEngine',"$this->appName will NOT run for $requested_hook because it's restricted to specific URIs.");
+            $Engine->log($this->appName,"$this->appName will NOT run for $requested_hook because it's restricted to specific URIs.");
             return false;
         }
 
         //If there are filters in place to prevent this app from running, return false.
         if(!$this->filterOnRequest($Engine)) {
-            $Engine->log('AppEngine',"$this->appName will NOT run for $requested_hook because it's restricted by GET or POST filters.");
+            $Engine->log($this->appName,"$this->appName will NOT run for $requested_hook because it's restricted by GET or POST filters.");
             return false;
         }
 
@@ -696,7 +760,7 @@ Class AntApp
 
     function alwaysRun(AppEngine $Engine, $action) {
         $run = in_array($action, $this->actionWhitelist);
-        if($run) $Engine->log('AppEngine',"$action was whitelisted for $this->appName",'AppEngine.log',9);
+        if($run) $Engine->log($this->appName,"$action was whitelisted for $this->appName",'AppEngine.log',9);
         return $run;
     }
 }

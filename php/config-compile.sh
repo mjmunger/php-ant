@@ -30,12 +30,12 @@ fi
 
 echo "Compiling PHP for `hostname` and sending a notification to $1"
 
- apt-get install --assume-yes apache2-dev libxml2-dev libbz2-dev libreadline-dev libmcrypt-dev libssl-dev libcurl4-openssl-dev libfreetype6-dev
+ apt-get install --assume-yes apache2-dev libxml2-dev libbz2-dev libreadline-dev libmcrypt-dev libssl-dev libcurl4-openssl-dev libfreetype6-dev libzip-dev
  # Sometimes, needed for Ubuntu
  apt-get install --assume-yes libjpeg8-dev libpng12-dev
  make clean
  ./buildconf
- ./configure --with-config-file-path=/etc/php5/apache2 \
+ ./configure --with-config-file-path=/usr/local/lib/ \
  --with-pear=/usr/share/php \
  --with-bz2 \
  --with-curl \
@@ -50,7 +50,6 @@ echo "Compiling PHP for `hostname` and sending a notification to $1"
  --with-mysql-sock=/var/run/mysqld/mysqld.sock \
  --with-pdo-mysql \
  --with-openssl \
- --with-ssl-lib=/usr/lib/i386-linux-gnu/ \
  --with-regex=php \
  --with-readline \
  --with-zlib \
@@ -59,12 +58,12 @@ echo "Compiling PHP for `hostname` and sending a notification to $1"
  --with-apxs2=/usr/bin/apxs2 \
  --enable-soap \
  --with-freetype-dir=/usr/include/freetype2/ \
- --with-freetype \
  --with-mcrypt=/usr/src/mcrypt-2.6.8 \
  --with-jpeg-dir=/usr/lib/x86_64-linux-gnu/ \
- --with-png-dir=/usr/lib/x86_64-linux-gnu/
- make
- make tests
- make install
+ --with-png-dir=/usr/lib/x86_64-linux-gnu/ \
  
- cat body | mailx $1 -s "`hostname` PHP Compile done"
+make
+#make tests
+make install
+
+cat body | mailx $1 -s "`hostname` PHP Compile done"

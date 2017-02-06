@@ -1,0 +1,33 @@
+.placeholder {
+  margin-top: 20%;
+  min-height: 400px;
+}
+
+.maintenence.notification {
+    color: grey;
+    font-size: 24px;
+    line-height: 1.5em;
+    margin: auto;
+    text-align: center;
+    width: 25%;
+}
+
+@media (max-width:420px) {
+    .maintenence.notification {
+        width: 85%;
+    }
+
+    img.maintenenace.logo {
+        width: 85%;
+    }
+}
+
+@media (max-width:800px) {
+    .maintenence.notification {
+        width: 50%;
+    }
+
+    img.maintenenace.logo {
+        width: 50%;
+    }
+}

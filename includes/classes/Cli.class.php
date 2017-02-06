@@ -14,52 +14,52 @@ namespace PHPAnt\Core;
  * @subpackage   Core
  * @category     CLI
  * @author       Michael Munger <michael@highpoweredhelp.com>
- */     
+ */
 
 class Cli {
 
     var $apikey            = NULL;
 
     /**
-    * @var string $line The rame command line as it is entered from a user. 
+    * @var string $line The rame command line as it is entered from a user.
     **/
-    
+
     var $line              = '';
 
     /**
-    * @var array $grammar An associative array of commands that can be executed in the CLI. 
+    * @var array $grammar An associative array of commands that can be executed in the CLI.
     **/
-    
+
     var $grammar           = '';
 
     /**
-    * @var int $verbosity The master verbosity level of the CLI. This verbosity level should be in inherited by all plugins running in the CLI. 
+    * @var int $verbosity The master verbosity level of the CLI. This verbosity level should be in inherited by all plugins running in the CLI.
     **/
-    
+
     var $verbosity         = 0;
 
     /**
-    * @var boolean $debugMode Flag indicating debug mode. This should not be set manually. You should use Cli::setDebug() instead. 
+    * @var boolean $debugMode Flag indicating debug mode. This should not be set manually. You should use Cli::setDebug() instead.
     **/
-    
+
     var $debugMode         = false;
 
     /**
-    * @var boolena $run When true, the CLI will continue to run. When false, it will shutdown and exit. 
+    * @var boolena $run When true, the CLI will continue to run. When false, it will shutdown and exit.
     **/
-    
+
     var $run               = true;
 
     /**
-    * @var int $commandVerbosity Similar to CLI::verbosity, this is specific to the Command class that is executed when a command is run. It allows a deeper look into what is happening with a command as it is parsed and executed. Usually only used with super debug mode, which is a verbosity of 15 or greater. 
+    * @var int $commandVerbosity Similar to CLI::verbosity, this is specific to the Command class that is executed when a command is run. It allows a deeper look into what is happening with a command as it is parsed and executed. Usually only used with super debug mode, which is a verbosity of 15 or greater.
     **/
-    
+
     var $commandVerbosity  = 0;
 
     /**
-    * @var object $PE An instantiated class of the PluginEngine. 
+    * @var object $PE An instantiated class of the PluginEngine.
     **/
-    
+
     var $Engine                = NULL;
 
     /**
@@ -71,8 +71,8 @@ class Cli {
      * @author       Michael Munger <michael@highpoweredhelp.com>
      * @param        AppEngine $Engine. You must pass an instance of PluginEngine so the CLI can work with and act on plugins.
      * @tested       CLITest::testConstruct
-     */ 
-             
+     */
+
 
     function __construct(\PHPAnt\Core\AppEngine $Engine) {
         $this->Engine = $Engine;
@@ -117,7 +117,7 @@ class Cli {
         foreach($x as $y) {
             printf("%s ",ord($y));
         }
-        print "\n";    
+        print "\n";
     }
 
     /**
@@ -369,7 +369,7 @@ class Cli {
     }
 
     /**
-     * Reads from STDIN, and traverses the grammar tree looking for matches. 
+     * Reads from STDIN, and traverses the grammar tree looking for matches.
      * Example:
      *
      * <code>
@@ -647,7 +647,7 @@ class Cli {
             /* warranty */
                 if($cmd->is('show warranty')) {
 ?>
-                                  
+
                                   NO WARRANTY
 
 By virtue of your ssh/console access to this system, you are deemed to have (and
@@ -679,7 +679,7 @@ Caveat Emptor. Proceed with caution. Use at your own risk. You have been warned.
      * @return void
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
-    
+
     function run() {
 ?>
 ===============================================================================
@@ -687,8 +687,11 @@ PHP-Ant CLI v1.0
 
 Created by High Powered Help, Inc.
 
-For technical support, email michael@highpoweredhelp.com
-Help and documentation is located at https://www.highpoweredhelp.com/codex/
+Help and documentation is located at https://php-ant.org/
+
+For technical support, open a ticket on github.
+For commerical support, email michael@highpoweredhelp.com
+
 Use of this CLI may void your warranty. Type: 'show warranty' for details.
 ===============================================================================
 <?php
@@ -710,20 +713,20 @@ Use of this CLI may void your warranty. Type: 'show warranty' for details.
                 print PHP_EOL;
 
                 printf("Database Connection: OK" . PHP_EOL);
-                
+
                 print str_pad('Server Information:', 20);
                 print $pdo->getAttribute(PDO::ATTR_SERVER_INFO) . PHP_EOL;
-                
+
                 print str_pad('Connection Status:', 20);
                 print $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL;
-                
+
                 print str_pad('PDO Client Version:', 20);
                 print $pdo->getAttribute(PDO::ATTR_CLIENT_VERSION) . PHP_EOL;
 
                 print str_pad('PDO Driver Name:', 20);
                 print $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . PHP_EOL;
                 print PHP_EOL;
-                
+
             } else {
                 //
             }
@@ -761,7 +764,7 @@ Use of this CLI may void your warranty. Type: 'show warranty' for details.
                     case 'reload-grammar':
                         $this->loadGrammar();
                         break;
-                    
+
                     default:
                         // code...
                         break;
@@ -774,4 +777,3 @@ Use of this CLI may void your warranty. Type: 'show warranty' for details.
         printf("Done.\n");
     }
 }
-?>

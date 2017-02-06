@@ -10,35 +10,40 @@ namespace PHPAnt\Core;
 
 class AppEngine {
 
+    /**
+     * Turns the flag on to trace actions visually in the interface.
+     * @var boolean
+     */
+    var $visualTrace      = false;
 
     /**
-    * @var int $verbosity The level of verbosity the App Engine is set to. 
+    * @var int $verbosity The level of verbosity the App Engine is set to.
     **/
-    
+
     var $verbosity        = 0;
 
     /**
-    * @var array $apps Holds instantiated classes of apps. 
+    * @var array $apps Holds instantiated classes of apps.
     **/
-    
+
     var $apps             = [];
 
     /**
-    * @var array $enabledApps An associative array of apps that have been enabled. (name => path) 
+    * @var array $enabledApps An associative array of apps that have been enabled. (name => path)
     **/
-    
+
     var $enabledApps      = [];
 
     /**
-    * @var array $availableApps An associative array of apps that are found (discovered) in the file system. (name => path) 
+    * @var array $availableApps An associative array of apps that are found (discovered) in the file system. (name => path)
     **/
-    
+
     var $availableApps    = [];
 
     /**
-    * @var object $PM An instance of the Permission Manager class. 
+    * @var object $PM An instance of the Permission Manager class.
     **/
-    
+
     var $PM               = NULL;
 
 
@@ -47,7 +52,7 @@ class AppEngine {
     *      polymorphic and can either be a ConfigCLI class or a ConfigWeb class,
     *      which are both extended from ConfigBase.
     **/
-    
+
     var $Configs          = NULL;
     var $current_user     = NULL;
     var $sortHook         = NULL;
@@ -91,16 +96,17 @@ class AppEngine {
         $this->AppBlacklist = $options['AppBlacklist'];
         $this->disableApps  = $options['disableApps'];
 
-        $this->setVerbosity($options['verbosity']);
-
         $this->loadApps();
 
         //Setting $options['disableApps'] = true will prevent auto-loading and activation of apps.
         if(!$this->disableApps) {
-            $this->getenabledApps();
+            $this->getEnabledApps();
             $this->linkAppTests();
             $this->activateApps();
         }
+
+        $this->setVerbosity($options['verbosity']);
+        $this->setVisualTrace($options['visualTrace']);
     }
 
     /**
@@ -179,7 +185,7 @@ class AppEngine {
             if($name[0] == "+" && !$this->disableApps && !in_array($path, $this->enabledApps)) {
                 $status = 'Auto';
                 if(!$this->enableApp($name,$path)) throw new Exception("Could not enable app $name in $path", 1);
-            }        
+            }
         }
     }
 
@@ -198,7 +204,7 @@ class AppEngine {
 
     function setVerbosity($int) {
         $this->verbosity = $int;
-        
+
         $this->log('AppEngine',sprintf("AppEngine verbosity set to: %s",$this->verbosity),'AppEngine.log',1);
 
         $this->Configs->setVerbosity($int);
@@ -208,9 +214,61 @@ class AppEngine {
         }
     }
 
+    function setVisualTrace($state) {
+        $this->visualTrace = $state;
+
+        $this->log('AppEngine',sprintf("Visual trace set to: %s",($this->visualTrace ? "on" : "off")),'AppEngine.log',1);
+
+        $this->Configs->setVisualTrace($this->visualTrace);
+
+        foreach($this->apps as $app) {
+            $app->visualTrace = $this->visualTrace;
+        }
+
+        return $this->visualTrace;
+    }
+
+    function showRoutedCodePath($uri) {
+        $appsWhoFire = [];
+
+        $uri = str_replace($this->Configs->http_host, '', $uri);
+
+        foreach($this->apps as $app) {
+            /*Skip non-enabled apps*/
+            //if(!$app->enabled) continue;
+
+            /* Add them to the requested hook array as a way of queing them to execute. */
+            if($app->fireOnURI($uri)) array_push($appsWhoFire, $app);
+        }
+
+        $TL = new TableLog();
+        foreach($appsWhoFire as $app) {
+            $action = (strlen($app->getRoutedAction($uri)) > 0 ? $app->getRoutedAction($uri) : "All");
+            if($action != 'All') {
+                foreach($app->hooks as $sig => $meta) {
+                    if($meta['hook'] == $action) {
+                        $priority = $meta['priority'];
+                        break;
+                    }
+                }
+            } else {
+                $priority = 'None';
+            }
+            $TL->setHeader(['App','App Path','Action','Priority']);
+            $row = [ $app->appName
+                   , $app->path
+                   , $action
+                   , $priority
+                   ];
+            $TL->addRow($row);
+        }
+
+        $TL->showTable();
+    }
+
     function getAppsWithRequestedHook($requested_hook) {
         $TL = new TableLog();
-        $TL->setHeader(['App','Priority']);  
+        $TL->setHeader(['App','Priority']);
         /* This array holds the apps we are going to fire because they have the hook registered.*/
         $appsWithRequestedHook = [];
 
@@ -240,7 +298,7 @@ class AppEngine {
                 $TL->addRow([$app->appName,$app->hooks[$hash]['priority']]);
             }
 
-        
+
                 $this->log('AppEngine'
                   ,$TL->makeTable()
                   ,'AppEngine.log'
@@ -252,9 +310,9 @@ class AppEngine {
 
     /**
      * Run actions for a specific hook.
-     * 
+     *
      * This function runs all the actions for a hook in priority order.
-     * 
+     *
      * Example:
      *
      * <code>
@@ -268,24 +326,30 @@ class AppEngine {
      **/
 
     function runActions($requested_hook,$args=false) {
-        $return  = [];
-        $result  = [];
-        $grammar = [];
+        $actionReturnValues  = [];
+        $finalResult         = [];
+        $grammar             = [];
 
         $args['requested_hook'] = $requested_hook;
-        
+
         //Make sure we have an instance of AppEngine as $args['AE']
         if(!isset($args['AE'])) $args['AE'] = $this;
 
         $appsWithRequestedHook = $this->getAppsWithRequestedHook($requested_hook);
 
+        $this->log('AppEngine',str_pad("=",80,"="),'AppEngine.log',9);
+        $this->log('AppEngine',"RUNNING ACTION: $requested_hook",'AppEngine.log',9);
+        $this->log('AppEngine',str_pad("=",80,"="),'AppEngine.log',9);
         $this->log('AppEngine'
-                  ,sprintf("There are %s apps who respond to $requested_hook.",count($appsWithRequestedHook))
+                  ,sprintf("There are %s apps who respond to $requested_hook."
+                    ,count($appsWithRequestedHook)
+                  )
                   ,'AppEngine.log'
                   ,9
                   );
 
         $TL = new TableLog();
+        $TL->offset = 41;
         $TL->setHeader(['Hook','App','Result']);
 
         foreach($appsWithRequestedHook as $app) {
@@ -298,7 +362,7 @@ class AppEngine {
 
             if($this->Configs->environment == ConfigBase::WEB) {
                 if(!$app->shouldRun($args['AE'],$requested_hook)) {
-                    $row = [$requested_hook,$app->appName,'SKIPPED'];
+                    $row = [$requested_hook,$app->appName,'RESTRICTED'];
                     $TL->addRow($row);
                     continue;
                 }
@@ -307,19 +371,20 @@ class AppEngine {
             $result['success'] = false;
             try {
                 $this->log('AppEngine',"Triggering $app->appName...",'AppEngine.log',9);
-                $result = $app->trigger($requested_hook,$args);
+                $actionReturnValues = $app->trigger($requested_hook,$args);
             } catch (Exception $e) {
                 $this->log('EXCEPTION',$e->getMessage());
             }
-            $row = [$requested_hook,$app->appName,($result['success']?"OK":"FAILED")];
+            if(!isset($actionReturnValues['success'])) echo "$app->appName not returning a success for $requested_hook!" . PHP_EOL;
+            $row = [$requested_hook,$app->appName,($actionReturnValues['success']?"OK":"FAILED")];
             $TL->addRow($row);
 
             //Compile grammar if it is being returned.
-            if(isset($result['grammar'])) $grammar = array_merge($grammar,$result['grammar']);
+            if(isset($actionReturnValues['grammar'])) $grammar = array_merge($grammar,$actionReturnValues['grammar']);
 
             //Merge other stuff.
-            $return            = array_merge($return,$result);
-            $return['success'] = $result['success'];
+            $finalResult            = array_merge($finalResult,$actionReturnValues);
+            //$return['success'] = $result['success'];
         }
 
       if(count($TL->rows) > 1) {
@@ -332,8 +397,8 @@ class AppEngine {
 
         unset($app);
 
-        $return['grammar'] = $grammar;
-        return $return;
+        $finalResult['grammar'] = $grammar;
+        return $finalResult;
     }
 
     /**
@@ -400,7 +465,7 @@ class AppEngine {
                 break;
             case 'custom':
                 $pattern = $regex;
-                                    
+
             default:
                 # code...
                 break;
@@ -414,7 +479,7 @@ class AppEngine {
                 return trim($matches[2]);
             }
         }
-        return false;        
+        return false;
     }
 
     /**
@@ -479,7 +544,7 @@ class AppEngine {
 
     /**
      * Parses and retrieves regular expressions from app meta to determine
-     * app URIs and their associated actions which will be run when the 
+     * app URIs and their associated actions which will be run when the
      * URI satisfies the regular expression.
      * Example:
      *
@@ -493,27 +558,45 @@ class AppEngine {
      **/
 
     function getAppRoutes($path) {
-        $pattern = '/(App URI:) *([\'"]{1}(.*)[\'"]{1}) *-> *([a-zA-Z-]*)/s';
-        $buffer  = file($path);
-        $matches = NULL;
-        $routes = [];
+        $pattern    = '/(App URI:) *([\'"]{1}(.*)[\'"]{1}) *-> *([a-zA-Z-]*)/s';
+        $pattern    = '/(App URI:) *([\'"]{1}(.*)[\'"]{1}) *-> *([a-zA-Z-]*)( *@ *([0-9]{1,2})){0,1}/s';
+        $buffer     = file($path);
+        $matches    = NULL;
+        $routes     = [];
+        $priorities = [];
 
         foreach($buffer as $line) {
+            //Reset so we don't screw something up.
+            $priority = false;
             $line = trim($line);
             preg_match($pattern, $line,$matches);
             if(count($matches) === 0) continue;
 
-            $routes[$matches[3]] = $matches[4];
-        }        
-        return $routes;
-    }    
+            $regex  = $matches[3];
+            $action = $matches[4];
+
+            $routes[$regex] = $action;
+
+            //Capture optional routed action priority if it's there.
+            if(count($matches) == 7) $priority = (int) $matches[6];
+
+            //If it's not, default to 50 for backwards compatibility.
+            if(!$priority) $priority = 50;
+
+            $priorities[$action] = $priority;
+        }
+
+        return [ 'routes'     => $routes
+               , 'priorities' => $priorities
+               ];
+    }
 
     /**
-     * Loads all the plugins from the plugins/ directory.
+     * Loads all the apps from the apps/ directory.
      *
-     * A plugin must have the following two components:
+     * A app must have the following two components:
      * # Its own directory
-     * # A file named plugin.php within that directory.
+     * # A file named app.php within that directory.
      *
      * Example:
      *
@@ -521,15 +604,13 @@ class AppEngine {
      * $AE->loadApps();
      * </code>
      *
-     * This function is called at the bottom of this file. 
-     *
      * @return void
      * @author Michael Munger <michael@highpoweredhelp.com>
      * @tested testLoadApps
      **/
 
-    function loadApps() { 
-        
+    function loadApps() {
+
         $counter = 0;
         $iterator = new \RecursiveDirectoryIterator($this->appRoot,\RecursiveDirectoryIterator::SKIP_DOTS);
         $TL = new TableLog();
@@ -541,10 +622,10 @@ class AppEngine {
 
                 $name = $this->getAppMeta($file->getRealPath(),'name');
                 $this->availableApps[$name] = $file->getRealPath();
-                
+
                 //Check the blacklist to see if this failed last time.
                 $path = $file->getRealPath();
-                
+
                 if($this->AppBlacklist->isBlacklisted($path) && !$this->AppBlacklist->disabled) {
                     $this->log('AppEngine',sprintf("Not loading %s because it has been blacklisted. It will be disabled because it had problems before.",$path));
                     //disable the app
@@ -561,7 +642,7 @@ class AppEngine {
                 //Add this file to a black list in case it causes issues, we can skip it later.
                 //$this->AppBlacklist->addToBlacklist($path);
 
-                require_once($file->getRealPath());
+                //require_once($file->getRealPath());
 
                 //Remove the file from the blacklist because there was not a fatal error.
                 //$this->AppBlacklist->removeFromBlacklist($path);
@@ -617,6 +698,8 @@ class AppEngine {
                     if($answer == "n") continue;
                 }
 
+                require_once($path);
+
                 $manifestPath = dirname($path) . '/manifest.xml';
                 if(!file_exists($manifestPath)) {
                     $this->disableApp($name,$path);
@@ -638,7 +721,7 @@ class AppEngine {
 
                     //Remove the file from the blacklist because there was not a fatal error.
                     $this->AppBlacklist->removeFromBlacklist($path);
-                    
+
                     $this->log( "AppEngine"
                               , "Created an instance of " . get_class($app)
                               ,'AppEngine.log'
@@ -649,13 +732,14 @@ class AppEngine {
                     $exists = file_exists($appInitPath);
 
                     $this->log("AppEngine"
-                              ,sprintf("App init file path: %s [%s]", $appInitPath, ($exists?"EXISTS":"Does not exist"))
+                              ,sprintf("App init file path: %s [%s]", $appInitPath, ($exists?"EXISTS":"Does not exist, and that's OK. It's optional."))
                               ,'AppEngine.log'
-                              ,14);
+                              ,9);
 
                     //Load init vars from the json init file if it exists.
                     if($exists) {
                         $options = json_decode(file_get_contents($appInitPath));
+
                         $app->init($options,true);
 
                         //Verbose message.
@@ -686,7 +770,7 @@ class AppEngine {
                 }
 
                 if(count($xml->action) === 0) $this->log('WARNING',"The app $name ($path) has NO actions. It will not do anything.");
-                
+
                 //Create all the hooks referenced in the manifest file.
                 foreach($xml->action as $action){
                     $hook             = (string)$action->hook;
@@ -701,9 +785,18 @@ class AppEngine {
                 $uriList = $this->getAppURIs($path);
                 $app->registerURI($uriList);
 
+                foreach($uriList as $uri) {
+                    $this->log( 'AppEngine'
+                              , sprintf("Registered URI %s to %s" , $uri, $app->appName)
+                              , 'AppEngine.log'
+                              , 9
+                              );
+                }
+
                 //Register routes for this app.
-                $routes = $this->getAppRoutes($path);
-                $app->registerAppRoutes($routes);
+                $meta = $this->getAppRoutes($path);
+                $app->registerAppRoutes($meta['routes']);
+                $app->registerAppRoutePriorities($meta['priorities']);
 
                 array_push($this->apps,$app);
                 $this->activatedApps[$path]= $name;
@@ -752,14 +845,26 @@ class AppEngine {
     function reload() {
         $this->log('AppEngine','Reloading');
         //Reload and reactivate the apps.
-        $this->getenabledApps();
+        $this->getEnabledApps();
         $this->activateApps();
+
+        //Re-load the grammar for the CLI.
         $this->runActions('cli-load-grammar');
+
         /* Load any libraries that are in the includes/libs/ directory. */
         $this->runActions('lib-loader');
+
         /* Load any spl-autoloaders that are contained in Apps */
-        $this->runActions('load_loaders');        
+        $this->runActions('load_loaders');
+
         $this->log('AppEngine','Reload complete.');
+    }
+
+    function truncateLog($file = 'AppEngine.log') {
+        $logPath = $this->Configs->getLogDir() . $file;
+        $fp = fopen($logPath,'w');
+        fwrite($fp,'');
+        fclose($fp);
     }
 
     /**
@@ -777,7 +882,6 @@ class AppEngine {
      **/
 
     function log($component,$message,$file = 'AppEngine.log',$minimumVerbosity = 0, $debugPrint = false, $divAlert= false) {
-
         if($this->verbosity < $minimumVerbosity) return false;
 
         //if($debugPrint) $this->Configs->debug_print($message);
@@ -787,6 +891,7 @@ class AppEngine {
         if(!file_exists($this->Configs->getLogDir())) mkdir($this->Configs->getLogDir());
 
         $logPath = $this->Configs->getLogDir() . $file;
+
         //$remoteIp = $this->Configs->Request->ip;
         $timestamp = date('M d H:i:s');
         $buffer = '';
@@ -825,7 +930,7 @@ class AppEngine {
         //$message = sprintf("Error Context: %s", print_r($context,true));
         //$this->log('ERROR',$message);
     }
-    
+
     /**
      * Executes events based on declared routes.
      * Example:
@@ -840,16 +945,92 @@ class AppEngine {
 
     public function runRoutedActions() {
         $results = [];
+        $actions = [];
+        $args    = [];
+
         foreach($this->apps as $app) {
             //Find apps that respond to the current URI.
             if($app->fireOnURI($this->Configs->Server->Request->uri)) {
                 //Loop through events that fire for this app on this URI.
                 $action = $app->getRoutedAction($this->Configs->Server->Request->uri);
-                $return = $this->runActions($action);
-                $results = array_merge($results,$return);
+                //$this->runActions($action);
+
+                if($action) {
+                    $priority = $app->routedActionPriorities[$action];
+
+                    //Add this app to that action list.
+                    //$actions[$action] = [ $priority => & $app ];
+                    $data = [$priority, $action, $app];
+                    array_push($actions, $data);
+                }
             }
         }
+
+        // Now, we have a list of actions, and the apps that should run (along with the priorities there), so:
+        // 1. Let's loop through the actions, and
+        // 2. let's sort each of those arrays by priority.
+        // 3. Run the actions in that order.
+
+
+        //Loop through all our actions.
+        array_multisort($actions);
+
+        /**
+         * At this point, we have a multidimensional array like this:
+         *
+         * array(2) {
+         *   [0]=>
+         *   array(3) {
+         *     [0]=>
+         *     int(40)
+         *     [1]=>
+         *     string(24) "include-admin-navigation"
+         *     [2]=>
+         *     string(5) "&$app"
+         *   }
+         *   [1]=>
+         *   array(3) {
+         *     [0]=>
+         *     int(50)
+         *     [1]=>
+         *     string(15) "manage-projects"
+         *     [2]=>
+         *     string(5) "&$app"
+         *   }
+         * }
+         *
+         * So, next, we need to loop through this array, and break out the list
+         * into individual action lists. First, we need to build a unique list
+         * of actions that will be run.
+         */
+
+         $buffer = [];
+         foreach($actions as $executionSet) {
+             array_push($buffer,$executionSet[1]);
+         }
+
+        $uniqueActions = array_unique($buffer);
+
+        /**
+         * Next, we need to loop through the actions and execute the requested
+         * hooks in order. When a given hook gives us 'exit' => true, we need to
+         * continue rather than fully exit.
+         */
+
+         foreach($uniqueActions as $action) {
+             foreach($actions as $executionSet) {
+                if($action == $executionSet[1]){
+                    $args['requested_hook'] = $action;
+                    $args['AE'] = & $this;
+                    $return = $executionSet[2]->trigger($action,$args);
+                    $results = array_merge($results,$return);
+                    // if(isset($return['exit']) && $return['exit']) continue;
+                }
+             }
+        }
+
         $results['success'] = true;
+        // $results['exit']    = true;
         return $results;
     }
 }

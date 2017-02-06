@@ -1,6 +1,5 @@
 <?php
 
-
 /* boundary(custom-namespace)=--fc1ead027aa75f4c0c9e49aa8d532dd4796dee41 */
 /* --fc1ead027aa75f4c0c9e49aa8d532dd4796dee41 */
 
@@ -73,6 +72,7 @@ class Users
 	var $users_owner_id;
 	var $users_timezone;
 	var $users_roles_id;
+	var $users_guid;
 	/*</table columns>*/
 	var $pdo;
 	var $errors = [];
@@ -85,7 +85,6 @@ class Users
 	var $__oldlabel = '';
 
 
-
      /* boundary(custom-properties)=--81b47b8fe380c7a8d844501144e566f0e28b0ea8 */
      /* --81b47b8fe380c7a8d844501144e566f0e28b0ea8 */
 
@@ -93,6 +92,7 @@ class Users
     * @var boolean $users_new If the user is a new user, this is set to true; otherwise, it is false.
     **/
     var $users_new;
+    var $role;
 
     /* Beneath this line, should be re-factored out. */
 
@@ -177,7 +177,7 @@ class Users
 
         if(!$stmt->execute($values)) {
             $info = $stmt->errorInfo();
-            throw new \Exception(sprintf("Database error generating the parent class for $table. Database error (%s) %s",$info[1],$info[2]), 1);
+            throw new Exception(sprintf("Database error generating the parent class for $table. Database error (%s) %s",$info[1],$info[2]), 1);
         } 
 
         $row = $stmt->fetchObject();
@@ -311,7 +311,6 @@ class Users
     function threw_db_error() {
         return (count($this->errors) > 0)?true:false;
     }
-
      /* boundary(custom-methods)=--a19d1e7399aec0b42db5a508c49a968680ff20a8 */
      /* --a19d1e7399aec0b42db5a508c49a968680ff20a8 */
 
@@ -664,121 +663,6 @@ class Users
         }*/
     }
 
-
-    /* Beneath this line should be refactored out. */
-
-    /**
-    * Creates a salted hash from a given password.
-    * @param string $password The password we are generating the hash from.
-    * @return void
-    **/
-    
-    public function createHash($password) {
-            // format: algorithm:iterations:salt:hash
-            $salt = base64_encode(mcrypt_create_iv(self::PBKDF2_SALT_BYTE_SIZE, MCRYPT_DEV_URANDOM));
-            //This line should RETURN the password after being refactored.
-            $this->users_password= self::PBKDF2_HASH_ALGORITHM . ":" . self::PBKDF2_ITERATIONS . ":" .  $salt . ":" . 
-        base64_encode($this->pbkdf2(
-                self::PBKDF2_HASH_ALGORITHM,
-                $password,
-                $salt,
-                self::PBKDF2_ITERATIONS,
-                self::PBKDF2_HASH_BYTE_SIZE,
-                true
-        ));
-    }
-
-    /**
-    * Validates a given password against the hash in the database
-    *
-    * @param string $password The password we are submitting for verification.
-    * @param string $correct_hash The hash we should get if the password is correct.
-    **/ 
-    
-    private function validatePassword($password, $correct_hash) {
-        $params = explode(":", $correct_hash);
-        if(count($params) < self::HASH_SECTIONS) {
-             return false; 
-        }
-
-        $pbkdf2 = base64_decode($params[self::HASH_PBKDF2_INDEX]);
-        
-        return $this->slowEquals(
-            $pbkdf2,
-            $this->pbkdf2(
-                $params[self::HASH_ALGORITHM_INDEX],
-                $password,
-                $params[self::HASH_SALT_INDEX],
-                (int)$params[self::HASH_ITERATION_INDEX],
-                strlen($pbkdf2),
-                true
-                )
-            );
-    }
-
-    /**
-    * Compares two strings $a and $b in length-constant time.
-    * @param string @a First argument to compare.
-    * @param string @b Second argument to compare.
-    * @return boolean 
-    **/
-    
-    private function slowEquals($a, $b) {
-        $diff = strlen($a) ^ strlen($b);
-        for($i = 0; $i < strlen($a) && $i < strlen($b); $i++) {
-            $diff |= ord($a[$i]) ^ ord($b[$i]);
-        }
-        return $diff === 0; 
-    }
-
-    /**
-     * PBKDF2 key derivation function as defined by RSA's PKCS #5: https://www.ietf.org/rfc/rfc2898.txt
-     *
-     * Test vectors can be found here: https://www.ietf.org/rfc/rfc6070.txt. This implementation of PBKDF2 was originally created by https://defuse.ca. With improvements by http://www.variations-of-shadow.com
-     * 
-     * @param const $algorithm The hash algorithm to use. Recommended: SHA256
-     * @param string $password The password.
-     * @param string $salt A salt that is unique to the password.
-     * @param integer $count Iteration count. Higher is better, but slower. Recommended: At least 1000.
-     * @param double $key_length The length of the derived key in bytes.
-     * @param boolean $raw_output If true, the key is returned in raw binary format. Hex encoded otherwise.
-     *
-     * @return string A $key_length-byte key derived from the password and salt.
-     **/
-
-    private function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output = false) {
-        $algorithm = strtolower($algorithm);
-    
-        if(!in_array($algorithm, hash_algos(), true)) {
-            die('PBKDF2 ERROR: Invalid hash algorithm.');
-        }
-    
-        if($count <= 0 || $key_length <= 0) {
-            die('PBKDF2 ERROR: Invalid parameters.');
-        }
-
-        $hash_length = strlen(hash($algorithm, "", true));
-        $block_count = ceil($key_length / $hash_length);
-
-        $output = "";
-        for($i = 1; $i <= $block_count; $i++) {
-            // $i encoded as 4 bytes, big endian.
-            $last = $salt . pack("N", $i);
-            // first iteration
-            $last = $xorsum = hash_hmac($algorithm, $last, $password, true);
-            // perform the other $count - 1 iterations
-            for ($j = 1; $j < $count; $j++) {
-                $xorsum ^= ($last = hash_hmac($algorithm, $last, $password, true));
-            }
-            $output .= $xorsum;
-        }
-
-        if($raw_output) {
-            return substr($output, 0, $key_length);
-        } else {
-            return bin2hex(substr($output, 0, $key_length));
-        }
-    }   
 
      /* --a19d1e7399aec0b42db5a508c49a968680ff20a8 */
 }

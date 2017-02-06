@@ -1,0 +1,19 @@
+{
+  "http_host": "http://phpant.local",
+  "document_root": "/var/www/",
+  "db": {
+    "server": "localhost",
+    "database": "phpant",
+    "rootuser": "root",
+    "rootpass": "rootpass",
+    "username": "antuser",
+    "userpass": "foopass",
+    "createdb": true
+  },
+  "adminuser": {
+  	"first":"Foo",
+  	"last":"Bar",
+  	"username":"you@yourdomain.com",
+  	"password":"barpass"
+  }
+}

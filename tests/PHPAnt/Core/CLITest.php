@@ -1,5 +1,5 @@
 <?php
-require_once('tests/test_top.php');
+require_once('test_top.php');
 
 use PHPUnit\Framework\TestCase;
 
@@ -13,7 +13,7 @@ class CLITest extends TestCase
         $this->assertInstanceOf('PHPAnt\Core\AppEngine', $A);
 
         //Enable the test app from this test suite.
-        $appPath = $A->Configs->document_root . '/includes/apps/TestApp/app.php';
+        $appPath = $A->Configs->document_root . '/includes/apps/ant-app-test-app/app.php';
         $name = $A->getAppMeta($appPath,'name');
 
         $result = $A->enableApp($name,$appPath);

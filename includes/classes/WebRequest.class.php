@@ -5,27 +5,55 @@ namespace PHPAnt\Core;
 
 class WebRequest
 {
-	var $scheme       = NULL;
-	var $method       = NULL;
-	var $uri          = NULL;
-	var $time_float   = NULL;
-	var $time         = NULL;
-	var $ip           = NULL;
-	var $port         = NULL;
-	var $script_name  = NULL;
-	var $post_vars	  = [];
-	var $get_vars	  = [];
-	var $request_vars = [];
+	public $scheme                  = NULL;
+	public $method                  = NULL;
+	public $uri                     = NULL;
+	public $time_float              = NULL;
+	public $time                    = NULL;
+	public $ip                      = NULL;
+	public $port                    = NULL;
+	public $script_name             = NULL;
+	public $post_vars	            = [];
+	public $get_vars	            = [];
+	public $request_vars            = [];
+	public $authenticityToken       = NULL;
 
 	function setup($server) {
 		if(isset($server['REQUEST_SCHEME']))     $this->scheme      = $server['REQUEST_SCHEME'];
+
 		if(isset($server['REQUEST_METHOD']))     $this->method      = $server['REQUEST_METHOD'];
+
 		if(isset($server['REQUEST_URI']))        $this->uri         = $server['REQUEST_URI'];
+
 		if(isset($server['REQUEST_TIME_FLOAT'])) $this->time_float  = $server['REQUEST_TIME_FLOAT'];
+
 		if(isset($server['REQUEST_TIME']))       $this->time        = $server['REQUEST_TIME'];
+
 		if(isset($server['REMOTE_ADDR']))        $this->ip          = $server['REMOTE_ADDR'];
+
 		if(isset($server['REMOTE_PORT']))        $this->port        = $server['REMOTE_PORT'];
+
 		if(isset($server['SCRIPT_NAME']))        $this->script_name = $server['SCRIPT_NAME'];
+
+		$this->generateAuthenticityToken();
+	}
+
+	function generateAuthenticityToken() {
+
+		if(version_compare(phpversion(), '7.0.0','<')) {
+			$seed = bin2hex(openssl_random_pseudo_bytes(64));
+		} else {
+			$seed = bin2hex(random_bytes(64));
+		}
+
+		//To make this better, we should generate this key value per-installation at setup.
+		$this->authenticityToken = hash_hmac('sha256',$seed, '8EzvCGcys1c9');
+		session_start();
+		$_SESSION['authenticityToken'] = $this->authenticityToken;
+	}
+
+	function setCookies($cookies) {
+		$this->cookies = $cookies;
 	}
 
 	function parsePost($post) {
@@ -46,6 +74,15 @@ class WebRequest
 	function normalizeUTF($value) {
 		//if(mb_check_encoding($value,'UTF-8')) $value = mb_convert_encoding($value, "ISO-8859-1", mb_detect_encoding($value, "UTF-8, ISO-8859-1, ISO-8859-15", true));
 		return $value;
+	}
+
+	function normalizeUTF($value) {
+		if(is_array($value)) {
+			//return array_map(['this','normalizeEncoding'], $value);
+			return $value;
+		} else {
+			return $this->normalizeEncoding($value);
+		}
 	}
 
 	function mergeRequest() {

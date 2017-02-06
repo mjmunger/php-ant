@@ -12,97 +12,97 @@ namespace PHPAnt\Core;
  * on the fields, and instantiating a PHPMailer instance to send the final
  * email.
  *
- * @package      BFW
+ * @package      PHPAnt
  * @subpackage   Core
  * @category     Email Utilities
  * @author       Michael Munger <michael@highpoweredhelp.com>
- */ 
+ */
 
 class Notif {
 
     /**
-    * @var array findReplace An array that contains the values which will be found / replaced before the email is sent. 
+    * @var array findReplace An array that contains the values which will be found / replaced before the email is sent.
     **/
 
     var $findReplace = array();
 
 
     /**
-    * @var string $templateDirectory The directory where the template for this email will be found. 
+    * @var string $templateDirectory The directory where the template for this email will be found.
     **/
 
-    var $templateDirectory = NULL;  
+    var $templateDirectory = NULL;
 
 
     /**
-    * @var string $template The template of the email, which will become the body of the email. 
+    * @var string $template The template of the email, which will become the body of the email.
     **/
 
     var $template = NULL;
 
 
     /**
-    * @var string $subject The rendered subject that will be sent in the email. 
+    * @var string $subject The rendered subject that will be sent in the email.
     **/
-    
+
     var $subject = NULL;
 
     /**
-    * @var string $body The rendered body of the email. 
+    * @var string $body The rendered body of the email.
     **/
 
     var $body = NULL;
 
 
     /**
-    * @var string $to The "to" address for the email. 
+    * @var string $to The "to" address for the email.
     **/
-    
+
     var $to = NULL;
 
     /**
-    * @var string $fromAddress Holds the from address of the sender. 
+    * @var string $fromAddress Holds the from address of the sender.
     **/
-    
+
     var $fromAddress = NULL;
-    
+
     /**
     * @var string $fromName Holds the  from name of the sender.
     **/
-    
+
     var $fromName = NULL;
-    
+
     /**
     * @var string $replyToAddress Holds the  reply-to address (if different from sender address)
     **/
-    
+
     var $replyToAddress = NULL;
-    
+
     /**
     * @var string $replyToName Holds the reply-to name if different from the sender.
     **/
-    
+
     var $replyToName = NULL;
-    
+
     /**
-    * @var array $cc Holds an array of addresses that should be included in the cc.  
+    * @var array $cc Holds an array of addresses that should be included in the cc.
     **/
-    
+
     var $cc = array();
-    
+
     /**
     * @var array $bcc Holds an array of email addressses that should be included in the bcc
     **/
-    
+
     var $bcc = array();
 
 
     /**
-    * @var int $verbosity The level of debugging verbosity for this notif. 
+    * @var int $verbosity The level of debugging verbosity for this notif.
     **/
 
     var $verbosity = 0;
-    
+
 
     /**
      * Instantiate a Notif object
@@ -119,9 +119,9 @@ class Notif {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function __construct($templateDir = NULL) {
+    function __construct($templateDir) {
 
-        $this->templateDirectory = ($templateDir?$templateDir .'/emails/':getDocumentRoot() . '/emails/');
+        $this->templateDirectory = $templateDir . '/emails/';
         $d = new \DateTime();
         $this->addFindReplace('THISYEAR',$d->format("Y"));
     }
@@ -311,9 +311,9 @@ class Notif {
      *         tags that are not represented.
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
-    
+
     function verifySubstitutions() {
-        
+
         $errors = array();
         $missing = $this->findMissingDefinitions($this->template);
 
@@ -332,7 +332,7 @@ class Notif {
                 array_push($errors, "$tag is in the subject, but has not been set. Please define a find and replace definition for $tag");
             }
             return $errors;
-        }        
+        }
 
         return false;
     }
@@ -356,7 +356,7 @@ class Notif {
      * @param  string $body Use this to override the template of the notification for rendering the body. You should probably never use this.
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
-    
+
     function renderBody($body=false) {
         if($body) {
             $this->body = $body;
@@ -365,16 +365,6 @@ class Notif {
         }
 
         foreach($this->findReplace as $find => $replace) {
-            if($this->verbosity > 9) {
-                echo str_pad("Find", 10);
-                echo $find;
-                echo PHP_EOL;
-    
-                echo str_pad("Replace", 10);
-                echo $replace;
-                echo PHP_EOL;
-            }
-
             $this->body = str_replace($find, $replace, $this->body);
         }
 
@@ -383,8 +373,8 @@ class Notif {
         if(count($tags[0]) > 0) {
             /* Recurse this function the case settings contain fields that are not outright replaced in the first execution of this function. */
             if($this->verbosity > 9) {
-
-                debug_print($tags[0],"OUSTANDING TEMPLATE TAGS");
+                echo "OUSTANDING TEMPLATE TAGS";
+                echo "<pre>"; var_dump($tags[0]); echo "</pre>";
             }
             return $this->renderBody($this->body);
         }
@@ -403,7 +393,7 @@ class Notif {
      * @return string The final subject of the email.
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
-    
+
     function renderSubject() {
         $this->subject = $this->subjectTemplate;
 
@@ -421,7 +411,7 @@ class Notif {
      * <code>
      *  if($n->prepareSend()) {
      *       foreach($errors as $err) {
-     *           echo $error; 
+     *           echo $error;
      *       }
      *   } else {
      *       echo "Prepare successful!";
@@ -433,11 +423,10 @@ class Notif {
      **/
 
     function prepareSend() {
+
         $errors = $this->verifySubstitutions();
 
-        if( $errors) {
-            return $errors;
-        }
+        if($errors !== false) return  $errors;
 
         /* Prepare the body with substitutions */
         $this->renderBody();
@@ -448,5 +437,21 @@ class Notif {
         /* Return false on success so there are no "errors" being reported. */
         return false;
     }
+
+    function send($name,$address) {
+        $errors = $this->prepareSend();
+        if($errors !== false) {
+            echo "<pre>"; var_dump($errors); echo "</pre>";
+            die(__FILE__  . ':' . __LINE__ );
+        }
+
+        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+        $headers[] = "To: $name <$address>";
+        $headers[] = "From: $this->fromName <$this->fromAddress>";
+
+        if(count($this->cc) > 0) $headers[] = "Cc: " . implode('; ', $this->cc);
+
+        return mail($address,$this->subject,$this->body,implode("\r\n", $headers));
+    }
 }
-?>

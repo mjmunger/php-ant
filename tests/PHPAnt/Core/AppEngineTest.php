@@ -23,7 +23,7 @@ class AppEngineTest extends TestCase
 		$options['Blacklist'] = $BL;
 		$A = getMyAppEngine($options);
 
-		$appPath = 'includes/apps/TestApp/app.php';
+		$appPath = 'includes/apps/ant-app-test-app/app.php';
 		$name = $A->getAppMeta($appPath,'name');
 		$this->assertSame('Test Ant App', $name);
 
@@ -41,7 +41,7 @@ class AppEngineTest extends TestCase
 		$A = getMyAppEngine($options);
 
 		//Enable the test app from this test suite.
-		$appPath = $A->Configs->document_root . '/includes/apps/TestApp/app.php';
+		$appPath = $A->Configs->document_root . '/includes/apps/ant-app-test-app/app.php';
 		$name = $A->getAppMeta($appPath,'name');
 
 		$result = $A->enableApp($name,$appPath);
@@ -122,7 +122,7 @@ class AppEngineTest extends TestCase
 		$this->assertFileExists($A->availableApps['Test Ant App']);
 
 		//Enable the test app.
-		$appPath = $appRoot . 'TestApp/app.php';
+		$appPath = $appRoot . 'ant-app-test-app/app.php';
 		$name = $A->getAppMeta($appPath,'name');
 		$result = $A->enableApp($name,$appPath);
 		$this->assertTrue($result['success']);
@@ -148,9 +148,8 @@ class AppEngineTest extends TestCase
 		$options['appRoot'] = $appRoot;
 		$A = getMyAppEngine($options);		
 
-
 		//Enable the test app.
-		$appPath = $appRoot . 'TestApp/app.php';
+		$appPath = $appRoot . 'ant-app-test-app/app.php';
 		$this->assertFileExists($appPath);
 		$name = $A->getAppMeta($appPath,'name');
 		$result = $A->enableApp($name,$appPath);
@@ -198,7 +197,7 @@ class AppEngineTest extends TestCase
 		$A = getMyAppEngine($options);
 		
 		//Enable the test app.
-		$appPath = $appRoot . 'TestApp/app.php';
+		$appPath = $appRoot . 'ant-app-test-app/app.php';
 		$name = $A->getAppMeta($appPath,'name');
 		$result = $A->enableApp($name,$appPath);
 		$this->assertTrue($result['success']);
@@ -263,7 +262,7 @@ class AppEngineTest extends TestCase
 
 
 		//Enable the test app.
-		$appPath = $appRoot . 'TestApp/app.php';
+		$appPath = $appRoot . 'ant-app-test-app/app.php';
 		$results = $A->getAppActions($appPath);
 
 		$this->assertCount(5, $results);
@@ -284,7 +283,7 @@ class AppEngineTest extends TestCase
 
 
 		//Enable the test app.
-		$appPath = $appRoot . 'TestApp/app.php';
+		$appPath = $appRoot . 'ant-app-test-app/app.php';
 
 		//Test App URI parsing.
 
@@ -320,9 +319,9 @@ class AppEngineTest extends TestCase
 		$A = getMyAppEngine($options);
 
 		//Enable the test app from this test suite.
-		$appPath            = $A->Configs->document_root . '/includes/apps/TestApp/app.php';
-		$manifestPath       = $A->Configs->document_root . '/includes/apps/TestApp/manifest.xml';
-		$manifestPathBackup = $A->Configs->document_root . '/includes/apps/TestApp/manifest.xml.bak';
+		$appPath            = $A->Configs->document_root . '/includes/apps/ant-app-test-app/app.php';
+		$manifestPath       = $A->Configs->document_root . '/includes/apps/ant-app-test-app/manifest.xml';
+		$manifestPathBackup = $A->Configs->document_root . '/includes/apps/ant-app-test-app/manifest.xml.bak';
 
 		if(file_exists($manifestPath)) rename($manifestPath, $manifestPathBackup);
 		$this->assertFileNotExists($manifestPath);
@@ -393,29 +392,36 @@ class AppEngineTest extends TestCase
 
 	public function testAppEngineRunRoutedActions($uri,$expected) {
 		//Get the configs by themselves.
-		$C = getMyConfigs();
+		$C = getWebConfigs();
 		//Set the URI
 		$C->Server->Request->uri = $uri;
 
 		//Get an instance of the AppEngine
-		$appRoot = $C->document_root . '/includes/apps/';
+		$appRoot = $C->document_root . 'includes/apps/';
+
 
 		$options = getDefaultOptions();
 		$BL = new PHPAnt\Core\AppBlacklist();
 		$options['Blacklist'] = $BL;
 		$options['appRoot'] = $appRoot;
 		$A = getMyAppEngine($options);	
-		$A->Configs->Server->Request->uri = $uri;	
+		$A->Configs = $C;
+		$A->Configs->Server->Request->uri = $uri;
 
 
 		//Enable the test app.
-		$appPath = $appRoot . 'TestApp/app.php';
-		$A->enableApp($appPath);
+		$appPath = $appRoot . '/ant-app-test-app/app.php';
+		$result = $A->enableApp('Test Ant App', $appPath);
+		$this->assertTrue($result['success']);
+
 		$A->reload();
 
 		//Check to make sure the actions are registered for the Test app.
+		$foundTheApp = false;
 		foreach($A->apps as $app) {
-			if($app->AppName == 'Test Ant App') {
+			if($app->appName == 'Test Ant App') {
+				$foundTheApp = true;
+				$this->assertGreaterThan(0, count($app->routedActions));
 				$isPresent = false;
 				foreach($app->routedActions as $regex => $action) {
 					if($action == $expected) $isPresent = true;
@@ -423,10 +429,15 @@ class AppEngineTest extends TestCase
 			}
 		}
 
+		$this->assertTrue($foundTheApp);
+
 		$this->assertTrue($isPresent);
 
 		//Run the action
-		$result = $A->RunRoutedActions();
+		$this->assertInstanceOf('PHPAnt\Core\AppEngine', $A);
+		$result = $A->runRoutedActions();
+		$this->assertArrayHasKey('test-value', $result);
+
 		$this->assertSame($expected, $result['test-value']);
 
 	}

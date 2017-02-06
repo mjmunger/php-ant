@@ -14,7 +14,7 @@ namespace PHPAnt\Core;
  * @subpackage   Core
  * @category     Plugins
  * @author       Michael Munger <michael@highpoweredhelp.com>
- */     
+ */
 
 Class TableLog
 {
@@ -23,6 +23,7 @@ Class TableLog
 	var $columnSize = [];
 	var $sortColumn = 0;
 	var $tableWidth = 0;
+    var $offset     = 0;
 
 	function __construct() {
 		//TBD
@@ -121,7 +122,7 @@ Class TableLog
 		array_unshift($this->rows, $this->headers);
 
 		$this->calculateColumnSize();
-		
+
 		$buffer .= PHP_EOL;
 
 		//Print all the lines.
@@ -134,9 +135,14 @@ Class TableLog
 			for($c=0;$c<count($this->headers); $c++) {
 				$buffer .= str_pad($row[$c], $this->columnSize[$c] +2);
 			}
-			//button up the line.
+
+            //button up the line.
 			$buffer .= PHP_EOL;
 			if($counter == 1) $buffer .= str_pad('', $this->getTableWidth(),'-') . PHP_EOL;
+
+            // Add the left offset.
+            $buffer  = str_pad($buffer,$this->offset," ",STR_PAD_LEFT);
+            
 		}
 		$buffer .= PHP_EOL;
 

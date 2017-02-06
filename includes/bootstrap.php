@@ -1,21 +1,13 @@
 <?php
 namespace PHPAnt\Core;
 
-$homedir  = getenv("HOME");
-$logdir   = $homedir . '/log/';
-$errorlog = $logdir  . 'errors.log';
+if(!file_exists('includes/config.php')) die("You must have a config.php file configured. Try renaming / copying config.php.sample to config.php, and follow the instructions in the file");
 
-\ini_set("log_errors", 1);
-\ini_set("error_log", $errorlog);
+/* Require the configuration for this installation */
+require('includes/config.php');
 
-/* Set the default date and timezone, For a list of supported timezones, see: http://php.net/manual/en/timezones.php */
-date_default_timezone_set('America/New_York');
-
-if(!file_exists('includes/config.php')) {
-    die("You must have a config.php file configured. Try renaming / copying config.php.sample to config.php, and follow the instructions in the file");
-} else {
-    require('includes/config.php');
-}
+/* Make sure document_root exists */
+if(!file_exists($vars['document_root'])) die(sprintf("Document root is either not configured, or doesn't exist. Here's what I've got, does it look right to you? (document_root = %s )" . PHP_EOL , print_r($vars['document_root'],true)));
 
 /* Require all the interfaces so we can protect our code! */
 require('interfaces.php');
@@ -24,7 +16,6 @@ require('interfaces.php');
 require('includes/functions.php');
 
 check_schema();
-
 /* These are hard required because they are bootstrapping classes */
 require('includes/classes/ServerEnvironment.class.php');
 require('includes/classes/SSLEnvironment.class.php');
@@ -37,6 +28,13 @@ require('includes/classes/ConfigWeb.class.php');
 require('includes/classes/ConfigFactory.class.php');
 require('includes/classes/AppBlacklist.class.php');
 
+/* Include composer files if present */
+if(file_exists('includes/vendor/autoload.php')) include('includes/vendor/autoload.php');
+
+// echo "Hello";
+// $ad = new \Adldap\Adldap();
+// var_dump($ad);
+// var_dump(class_exists('\Adldap\Adldap'));
 
 /* Custom Error Handler */
 /*include('error_handler.php');*/
@@ -70,6 +68,7 @@ switch($antConfigs->environment) {
         $WR->parsePost($_POST);
         $WR->parseGet($_GET);
         $WR->mergeRequest();
+        $WR->setCookies($_COOKIE);
         $Server->Request = $WR;
 
         //Setup script execution environment
@@ -81,10 +80,19 @@ switch($antConfigs->environment) {
         break;
 }
 
-//Set the EngineVerbosity as it was saved - this overrides the command line params. 
+//Set the EngineVerbosity as it was saved - this overrides the command line params.
 $dbVerbosity = false;
+$hideErrors = 'hide';
+$errorLevel = $antConfigs->getConfigs(['errors']);
+if(count($errorLevel) > 0) $hideErrors = $errorLevel['errors'];
+
 $configs = $antConfigs->getConfigs(['EngineVerbosity']);
 if(isset($configs['EngineVerbosity'])) $dbVerbosity = $configs['EngineVerbosity'];
+
+//Set the visual trace as it was saved - this overrides the command line params.
+$visualTrace = false;
+$configs = $antConfigs->getConfigs(['visualTrace']);
+if(isset($configs['visualTrace'])) $visualTrace = ($configs['visualTrace'] == 'on' ? true : false);
 
 //Keep the higher verbosity between the CLI and the DB.
 if(isset($verbosity)) {
@@ -100,7 +108,7 @@ if(!spl_autoload_register([$antConfigs,'ant_autoloader'])) die("Autoloader faile
 
 /** Setup Logger **/
 
-$logger = new \Logger('bootstrap');
+//$logger = new \Logger('bootstrap');
 $current_user = null;
 
 /**
@@ -115,7 +123,7 @@ if(file_exists('../local/application_local.php')) include('../local/application_
 /* is PURPOSELY placed after functions and the autoloaders so those classes
 /* are available to plugins. */
 
-/* Plugin Engine Options */
+/* App Engine Options */
 
 $options                      = [];
 $options['verbosity']         = 0;
@@ -125,6 +133,7 @@ $options['loader_debug']      = false;
 //Override defaults if these options are set prior to loading this file. I.e., in the cli.php file.
 if(isset($safeMode))      $options['safeMode']      = $safeMode;
 if(isset($verbosity))     $options['verbosity']     = $verbosity;
+if(isset($visualTrace))   $options['visualTrace']   = $visualTrace;
 if(isset($loader_debug))  $options['loader_debug']  = $loader_debug;
 
 //Add classes
@@ -135,16 +144,21 @@ require('AppEngine.php');
 
 $Engine = new AppEngine($antConfigs,$options);
 
+//$Engine->log('Bootstrap', str_pad('REQUEST START', 33,'=',STR_PAD_BOTH) ,'AppEngine.log',1);
 $Engine->log('Bootstrap','Verbosity level: ' . $verbosity,'AppEngine.log',1);
 
 //Set the error handler to the AppEngine::handleError() method.
-set_error_handler(array(&$Engine,'handleError'));
+if($hideErrors == 'show') {
+    error_reporting(E_ALL);
+} else {
+    set_error_handler(array(&$Engine,'handleError'));
+}
 
 switch ($Engine->Configs->environment) {
     case ConfigBase::WEB:
         //$Engine->Configs->checkWebVerbosity($Engine);
         break;
-    
+
     default:
         //Do nothing for now.
         break;
@@ -157,6 +171,7 @@ $configs = $Engine->Configs->getConfigs(['BlacklistDisabled','EngineVerbosity'])
 $Engine->AppBlacklist->disabled = (isset($configs['BlacklistDisabled'])?(bool)$configs['BlacklistDisabled']:false);
 
 /* NOTE: YOU CANNOT DO LOGGING THAT DOES debug_print (the final option) UNILT AFTER YOU'VE AUTHENTICATED THE USER! */
+if($Engine->visualTrace) printf('<span class="w3-tag w3-round w3-teal" style="margin:0.25em;">%s:%s</span>','Bootstrap','Boostrap Actions Begin');
 
 /* Load any libraries that are in the includes/libs/ directory. */
 $Engine->runActions('lib-loader');
@@ -171,45 +186,21 @@ $Engine->runActions('db-check');
 $Engine->runActions('include-functions');
 
 /**** AUTHENTICATION AND CURRENT USER SETUP BEGINS ****/
+
+/* Run actions that setup authentication.*/
 $Engine->runActions('pre-auth');
 
+/* Authorize the user. */
+$results = $Engine->runActions('auth-user');
 
-/**** <AUTHENTICATION CLASSES AND FACTORIES> *****/
-include('includes/classes/AuthBfwBase.class.php');
-include('includes/classes/AuthCLI.class.php');
-include('includes/classes/AuthMobile.class.php');
-include('includes/classes/AuthWeb.class.php');
-include("includes/classes/AuthEnvFactory.class.php");
+//If we authorized a user, store it here.
+if($results) $Engine->current_user = ( isset($results['current_user']) ? $results['current_user'] : false );
 
-/**** </AUTHENTICATION CLASSES AND FACTORIES> *****/
-/*@Todo: Refactor this to create a factory for bootstrap objects so we don't have to use this if switch. */
-if(!isset($NOAUTH) || $NOAUTH===false) {
-    try {
-        $Authenticator = AuthEnvFactory::getAuthenticator($antConfigs->pdo,$logger);
-    } catch (Exception $e) {
-        $antConfigs->divAlert($e->getMessage());
-        echo "<pre>"; echo $e->getTraceAsString(); echo "</pre>";
-    }
-    
-    //Do not require authentication for the CLI
-    switch ($Authenticator->authType) {
-        case AntAuth::CLI:
-            //print "CLI Access is for administrators only. God like permissions are present. Caveat emptor" . PHP_EOL;
-            break;
-        case AntAuth::WEB || AntAuth::MOBILE:
-            $Authenticator->checkCookies();
-            
-            if(!$Authenticator->authorized) $Authenticator->authorize($Engine);
-            
-            $Authenticator->redirect($Engine);
-    
-            $current_user = $Authenticator->current_user;
-            break;
-        default:
-            throw new Exception("Invalid Authenticator - could not determine if you are authentication from mobile, web, or CLI", 1);
-            break;
-    }
-    
-    $Engine->current_user = $current_user;
-    if(!is_null($Engine->current_user)) $Engine->log($Engine->current_user->getFullName(),"Accessed: " . $Engine->Configs->Server->Request->uri);
-}
+if($Engine->current_user) $Engine->current_user->load();
+
+/*Determine the user's permissions*/
+$Engine->runActions('set-user-permissions');
+
+/* Do post-authorization tasks and cleanup*/
+$Engine->runActions('post-auth');
+if($Engine->visualTrace) printf('<span class="w3-tag w3-round w3-teal" style="margin:0.25em;">%s:%s</span>','Bootstrap','Boostrap Actions End');
