@@ -72,11 +72,6 @@ class WebRequest
 	}
 
 	function normalizeUTF($value) {
-		//if(mb_check_encoding($value,'UTF-8')) $value = mb_convert_encoding($value, "ISO-8859-1", mb_detect_encoding($value, "UTF-8, ISO-8859-1, ISO-8859-15", true));
-		return $value;
-	}
-
-	function normalizeUTF($value) {
 		if(is_array($value)) {
 			//return array_map(['this','normalizeEncoding'], $value);
 			return $value;
