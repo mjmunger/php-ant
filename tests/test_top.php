@@ -1,9 +1,8 @@
 <?php
+include('tests/test-config.php');
+
 /* Set the default date and timezone, For a list of supported timezones, see: http://php.net/manual/en/timezones.php */
 date_default_timezone_set('America/New_York');
-
-//We need this for configs.
-$rootDir = __DIR__ . '/';
 
 /* Include Mocks and Mock functions */
 include('tests/classes/PDOMock.class.php');
@@ -37,12 +36,10 @@ require_once('includes/classes/AppBlacklist.class.php');
  * @author Michael Munger <michael@highpoweredhelp.com>
  **/
 function getMockVars($ssl = true) {
-	$user = exec('whoami');
+	if(!file_exists('tests/test-config.php')) die("You must configure tests/test-config.php before you can run unit tests." . PHP_EOL);
 
-	$vars = ['http_host'     => ($ssl?'https://www.google.com':'http://www.google.com')
-	        ,'document_root' => __DIR__ . '/'
-	        ,'system_user'   => $user
-	        ];
+	include('tests/test-config.php');
+
 	return $vars;
 }
 

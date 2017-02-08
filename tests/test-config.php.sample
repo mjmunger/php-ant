@@ -1,0 +1,8 @@
+<?php
+
+/* Basic system configurations parameters - Defined the CLI vars*/
+$who = 'foouser';
+
+$vars = ['http_host'     => 'https://example.org'
+        ,'document_root' => '/home/'.$who.'/www/'
+        ];
