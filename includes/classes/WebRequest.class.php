@@ -17,6 +17,7 @@ class WebRequest
 	public $get_vars	            = [];
 	public $request_vars            = [];
 	public $authenticityToken       = NULL;
+	public $json                    = false;
 
 	function setup($server) {
 		if(isset($server['REQUEST_SCHEME']))     $this->scheme      = $server['REQUEST_SCHEME'];
@@ -84,5 +85,23 @@ class WebRequest
 	function mergeRequest() {
 		$this->request_vars = [];
 		$this->request_vars = array_merge($this->post_vars,$this->get_vars);
+	}
+
+	function importJSON($input) {
+		if($this->method == 'GET') return false;
+
+		$jsonString = trim(file_get_contents($input));
+
+		try {
+			$json = json_decode($jsonString);
+		} catch (Exception $e) {
+			return false;
+		}
+
+		if(json_last_error() != JSON_ERROR_NONE) return false;
+
+		$this->json = $json;
+
+		return true;
 	}
 }
