@@ -54,6 +54,7 @@ class AppEngine {
     **/
 
     var $Configs          = NULL;
+
     var $current_user     = NULL;
     var $sortHook         = NULL;
     var $safeMode         = false;

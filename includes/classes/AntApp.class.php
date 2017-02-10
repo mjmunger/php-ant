@@ -175,6 +175,15 @@ Class AntApp
 
     public $actionWhitelist  = [];
 
+    /**
+     * @var mixed $currentRoute The current route that is running for an app
+     *                          when runRoutedActions() is executing. Set
+     *                          from within runRoutedActions(). If a current
+     *                          route is not valid / matching, false.
+     **/
+
+    var $currentRoute     = false;
+
     //These two properties are stubs for use with phpunit.
     public $testProperty      = NULL;
     public $testPropertyArray = [];
@@ -254,7 +263,10 @@ Class AntApp
         if(count($this->uriRegistry) == 0) return true;
 
         foreach($this->uriRegistry as $regex) {
-            if(preg_match($regex, $uri)) return true;
+            if(preg_match($regex, $uri)) {
+                $this->currentRoute = $regex;
+                return true;
+            }
         }
 
         return false;
@@ -276,6 +288,23 @@ Class AntApp
     function getRoutedAction($uri) {
         foreach($this->routedActions as $regex => $action) {
             if(preg_match($regex,$uri)) return $action;
+        }
+        //no match
+        return false;
+    }
+
+    /**
+     * Returns the route that fires for a specified URI. If more than one
+     * route match, it returns the first one. (If you have more than one 
+     * matching route, tou should write better routes than that!).
+     *
+     * @return string The route that fires for the URI.
+     * @param  string The uri for which we want a matching route.
+     **/
+
+    function getRoute($uri) {
+        foreach($this->routedActions as $regex => $action) {
+            if(preg_match($regex,$uri)) return $regex;
         }
         //no match
         return false;
