@@ -6,6 +6,11 @@ namespace PHPAnt\Core;
 class WebRequest
 {
 	public $scheme                  = NULL;
+
+	/**
+	 * @var $method string Imported from $_SERVER['REQUEST_METHOD'] Which request method was used to access the page; i.e. 'GET', 'HEAD', 'POST', 'PUT'.
+	 * */
+	
 	public $method                  = NULL;
 	public $uri                     = NULL;
 	public $time_float              = NULL;
