@@ -15,6 +15,8 @@ class WebRequest
 	public $script_name             = NULL;
 	public $post_vars	            = [];
 	public $get_vars	            = [];
+	public $put_vars	            = [];
+	public $put_raw 	            = [];
 	public $request_vars            = [];
 	public $authenticityToken       = NULL;
 	public $json                    = false;
@@ -103,5 +105,51 @@ class WebRequest
 		$this->json = $json;
 
 		return true;
+	}
+
+	function parsePut($input,$headers) {
+		if($this->method != 'PUT') return false;
+
+		$buffer = trim(file_get_contents($input));
+
+		$this->put_raw = $buffer;
+
+		switch ($headers['Content-Type']) {
+			case 'application/json':
+				try {
+					$json = json_decode($buffer);
+				} catch (Exception $e) {
+					return false;
+				}
+
+				if(json_last_error() == JSON_ERROR_NONE) {
+					$this->json = $json;
+					return true;
+				}
+				break;
+			case 'application/x-www-form-urlencoded':
+				try {
+					$keypairs = explode("&", $buffer);
+
+					$array = [];
+					foreach($keypairs as $x) {
+						$parts = explode("=", $x);
+						$key = $parts[0];
+						$value = $parts[1];
+						$array[$key] = $value;
+					}
+					
+					$this->put_vars = $array;
+				
+				} catch (Exception $e) {
+					//pass
+				}
+				break;
+			
+			default:
+				# code...
+				break;
+		}
+
 	}
 }

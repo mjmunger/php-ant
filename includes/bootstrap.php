@@ -70,6 +70,7 @@ switch($antConfigs->environment) {
         $WR->mergeRequest();
         $WR->setCookies($_COOKIE);
         $WR->importJSON('php://input');
+        $WR->parsePut('php://input', getallheaders());
         $Server->Request = $WR;
 
         //Setup script execution environment
