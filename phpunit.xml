@@ -10,6 +10,7 @@
          verbose="true">
     <testsuite>
         <directory suffix="Test.php">tests/Andretti</directory>
+        <directory suffix="Test.php">tests/PHPAnt/Core/phpant-app-manager</directory>
     </testsuite>
 
     <filter>

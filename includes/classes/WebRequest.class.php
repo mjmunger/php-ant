@@ -10,7 +10,7 @@ class WebRequest
 	/**
 	 * @var $method string Imported from $_SERVER['REQUEST_METHOD'] Which request method was used to access the page; i.e. 'GET', 'HEAD', 'POST', 'PUT'.
 	 * */
-	
+
 	public $method                  = NULL;
 	public $uri                     = NULL;
 	public $time_float              = NULL;
@@ -25,6 +25,7 @@ class WebRequest
 	public $request_vars            = [];
 	public $authenticityToken       = NULL;
 	public $json                    = false;
+	public $json_error              = false;
 
 	function setup($server) {
 		if(isset($server['REQUEST_SCHEME']))     $this->scheme      = $server['REQUEST_SCHEME'];
@@ -130,6 +131,8 @@ class WebRequest
 				if(json_last_error() == JSON_ERROR_NONE) {
 					$this->json = $json;
 					return true;
+				} else {
+					$this->json_error = get_json_error(json_last_error());
 				}
 				break;
 			case 'application/x-www-form-urlencoded':
@@ -155,6 +158,55 @@ class WebRequest
 				# code...
 				break;
 		}
+
+	}
+	function parsePatch($input,$headers) {
+
+		if($this->method != 'PATCH') return false;
+
+		$buffer = trim(file_get_contents($input));
+
+		$this->patch_raw = $buffer;
+
+		switch ($headers['Content-Type']) {
+			case 'application/json':
+				try {
+					$json = json_decode($buffer);
+				} catch (Exception $e) {
+					return false;
+				}
+
+				if(json_last_error() == JSON_ERROR_NONE) {
+					$this->json = $json;
+					return true;
+				} else {
+					$this->json_error = get_json_error(json_last_error());
+				}
+				break;
+			case 'application/x-www-form-urlencoded':
+				try {
+					$keypairs = explode("&", $buffer);
+
+					$array = [];
+					foreach($keypairs as $x) {
+						$parts = explode("=", $x);
+						$key = $parts[0];
+						$value = $parts[1];
+						$array[$key] = $value;
+					}
+					
+					$this->put_vars = $array;
+				
+				} catch (Exception $e) {
+					//pass
+				}
+				break;
+			
+			default:
+				# code...
+				break;
+		}
+
 
 	}
 }

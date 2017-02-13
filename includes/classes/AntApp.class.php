@@ -792,4 +792,10 @@ Class AntApp
         if($run) $Engine->log($this->appName,"$action was whitelisted for $this->appName",'AppEngine.log',9);
         return $run;
     }
+
+    function getGitHash() {
+        $cmd = 'git rev-parse --short HEAD';
+        $output = trim(shell_exec($cmd));
+        return $output;
+    }
 }

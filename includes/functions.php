@@ -375,4 +375,56 @@ function getAgoTime($diff, $future = false) {
 
 }
 
+/**
+ * Returns the human readable error code for a JSON error.
+ * @param $json_error_code int The error code returned from json_last_error()
+ * */
+
+function get_json_error($json_error_code) {
+    switch($json_error_code) {
+        case JSON_ERROR_NONE:
+            return "No error has occurred";
+            break;
+        
+        case JSON_ERROR_DEPTH:
+            return "The maximum stack depth has been exceeded";
+            break;
+        
+        case JSON_ERROR_STATE_MISMATCH:
+            return "Invalid or malformed JSON";
+            break;
+        
+        case JSON_ERROR_CTRL_CHAR:
+            return "Control character error, possibly incorrectly encoded";
+            break;
+        
+        case JSON_ERROR_SYNTAX:
+            return "JSON syntax error";
+            break;
+        
+        case JSON_ERROR_UTF8:
+            return "Malformed UTF-8 characters, possibly incorrectly encoded";
+            break;
+        
+        case JSON_ERROR_RECURSION:
+            return "One or more recursive references in the value to be encoded";
+            break;
+        
+        case JSON_ERROR_INF_OR_NAN:
+            return "One or more NAN or INF values in the value to be encoded";
+            break;
+        
+        case JSON_ERROR_UNSUPPORTED_TYPE:
+            return "A value of a type that cannot be encoded was given";
+            break;
+        
+        case JSON_ERROR_INVALID_PROPERTY_NAME:
+            return "A property name that cannot be encoded was given";
+            break;
+        
+        case JSON_ERROR_UTF16:
+            return "Malformed UTF-16 characters, possibly incorrectly encoded";
+            break;
+    }
+}
 /** END FUNCTION LIBRARY **/
