@@ -3,6 +3,10 @@
 #Urgent Bug Fix
 
 #Customer facing issues
+See all my teams bugs
+See my old bugs
+"It's fixed" button not showing up for customer confirmation.
+Reduce the emails.
 
 #Urgent and important
 
@@ -21,6 +25,7 @@ Ability to get to the bug I just field with a link immediately after filing it.
 Tools don't work on mobile (not displayed)
 
 #Non-blocking
+Propose as fixed missing for developer accounts.
 change set owner
 Add project
 Add user

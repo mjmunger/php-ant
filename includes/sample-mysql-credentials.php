@@ -19,7 +19,19 @@
 //$dbDatabase = 'somedatabase';
 //$dbHost     = 'localhost';
 
+/**
+ * This variable is required for unit testing. It is a test database that is used in conjunction with your unit tests.
+ **/
+
+//$dbTesting  = '%somdatabase_test';
+
 $dbUsername = '%USER%';
 $dbPassword = '%PASSWORD%';
 $dbDatabase = '%DATABASE%';
 $dbHost     = '%HOST%';
+
+/**
+ * This variable is required for unit testing. It is a test database that is used in conjunction with your unit tests.
+ **/
+
+$dbTesting  = '%DATABASE%_test';

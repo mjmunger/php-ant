@@ -50,7 +50,7 @@ namespace PHPAnt\Core;
  * @license      MIT
  *
  * Generated with PHPAnt. https://php-ant.org/
- * PHPAnt is copyright (c) 2015-2016 High Powered Help, Inc. All rights reserved.
+ * PHPAnt is copyright (c) 2015-2017 High Powered Help, Inc. All rights reserved.
  */ 
  
 class Settings

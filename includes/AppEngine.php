@@ -106,7 +106,9 @@ class AppEngine {
         }
 
         $this->setVerbosity($options['verbosity']);
-        $this->setVisualTrace($options['visualTrace']);
+        $visualTraceState = (isset($options['visualTrace']) ? $options['visualTrace'] : "off");
+
+        $this->setVisualTrace($visualTraceState);
     }
 
     /**
