@@ -19,3 +19,4 @@ php-ant.sublime-project
 php-ant.sublime-workspace
 settings.json
 ToDo.txt
+tests/test-config.php

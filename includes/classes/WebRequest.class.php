@@ -6,6 +6,11 @@ namespace PHPAnt\Core;
 class WebRequest
 {
 	public $scheme                  = NULL;
+
+	/**
+	 * @var $method string Imported from $_SERVER['REQUEST_METHOD'] Which request method was used to access the page; i.e. 'GET', 'HEAD', 'POST', 'PUT'.
+	 * */
+
 	public $method                  = NULL;
 	public $uri                     = NULL;
 	public $time_float              = NULL;
@@ -15,8 +20,12 @@ class WebRequest
 	public $script_name             = NULL;
 	public $post_vars	            = [];
 	public $get_vars	            = [];
+	public $put_vars	            = [];
+	public $put_raw 	            = [];
 	public $request_vars            = [];
 	public $authenticityToken       = NULL;
+	public $json                    = false;
+	public $json_error              = false;
 
 	function setup($server) {
 		if(isset($server['REQUEST_SCHEME']))     $this->scheme      = $server['REQUEST_SCHEME'];
@@ -71,23 +80,133 @@ class WebRequest
 		}
 	}
 
-	function normalizeEncoding($value) {
-		if(mb_check_encoding($value,'UTF-8')) $value = mb_convert_encoding($value, "ISO-8859-1", mb_detect_encoding($value, "UTF-8, ISO-8859-1, ISO-8859-15", true));
-
-		return $value;
-	}
-
 	function normalizeUTF($value) {
 		if(is_array($value)) {
 			//return array_map(['this','normalizeEncoding'], $value);
 			return $value;
 		} else {
-			return $this->normalizeEncoding($value);
+			return $value;
+			//return $this->normalizeEncoding($value);
 		}
 	}
 
 	function mergeRequest() {
 		$this->request_vars = [];
 		$this->request_vars = array_merge($this->post_vars,$this->get_vars);
+	}
+
+	function importJSON($input) {
+		if($this->method == 'GET') return false;
+
+		$jsonString = trim(file_get_contents($input));
+
+		try {
+			$json = json_decode($jsonString);
+		} catch (Exception $e) {
+			return false;
+		}
+
+		if(json_last_error() != JSON_ERROR_NONE) return false;
+
+		$this->json = $json;
+
+		return true;
+	}
+
+	function parsePut($input,$headers) {
+		if($this->method != 'PUT') return false;
+
+		$buffer = trim(file_get_contents($input));
+
+		$this->put_raw = $buffer;
+
+		switch ($headers['Content-Type']) {
+			case 'application/json':
+				try {
+					$json = json_decode($buffer);
+				} catch (Exception $e) {
+					return false;
+				}
+
+				if(json_last_error() == JSON_ERROR_NONE) {
+					$this->json = $json;
+					return true;
+				} else {
+					$this->json_error = get_json_error(json_last_error());
+				}
+				break;
+			case 'application/x-www-form-urlencoded':
+				try {
+					$keypairs = explode("&", $buffer);
+
+					$array = [];
+					foreach($keypairs as $x) {
+						$parts = explode("=", $x);
+						$key = $parts[0];
+						$value = $parts[1];
+						$array[$key] = $value;
+					}
+					
+					$this->put_vars = $array;
+				
+				} catch (Exception $e) {
+					//pass
+				}
+				break;
+			
+			default:
+				# code...
+				break;
+		}
+
+	}
+	function parsePatch($input,$headers) {
+
+		if($this->method != 'PATCH') return false;
+
+		$buffer = trim(file_get_contents($input));
+
+		$this->patch_raw = $buffer;
+
+		switch ($headers['Content-Type']) {
+			case 'application/json':
+				try {
+					$json = json_decode($buffer);
+				} catch (Exception $e) {
+					return false;
+				}
+
+				if(json_last_error() == JSON_ERROR_NONE) {
+					$this->json = $json;
+					return true;
+				} else {
+					$this->json_error = get_json_error(json_last_error());
+				}
+				break;
+			case 'application/x-www-form-urlencoded':
+				try {
+					$keypairs = explode("&", $buffer);
+
+					$array = [];
+					foreach($keypairs as $x) {
+						$parts = explode("=", $x);
+						$key = $parts[0];
+						$value = $parts[1];
+						$array[$key] = $value;
+					}
+					
+					$this->put_vars = $array;
+				
+				} catch (Exception $e) {
+					//pass
+				}
+				break;
+			
+			default:
+				# code...
+				break;
+		}
+
+
 	}
 }

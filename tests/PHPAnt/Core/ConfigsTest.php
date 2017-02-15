@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-require_once('test_top.php');
+require_once('tests/test_top.php');
 
 class AntConfigTest extends TestCase
 {

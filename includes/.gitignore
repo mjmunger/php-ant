@@ -3,3 +3,6 @@ libs/*
 mysql-credentials.php
 cli-config.php
 rtfm/*
+composer.json
+composer.lock
+vendor/
