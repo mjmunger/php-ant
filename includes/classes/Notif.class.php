@@ -103,6 +103,12 @@ class Notif {
 
     var $verbosity = 0;
 
+    /**
+     * @var string subjectTemplate The template used for the email subject.
+     * */
+
+    var $subjectTemplate = NULL;
+
 
     /**
      * Instantiate a Notif object
@@ -119,7 +125,7 @@ class Notif {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function __construct($templateDir) {
+    public function __construct($templateDir) {
 
         $this->templateDirectory = $templateDir . '/emails/';
         $d = new \DateTime();
@@ -130,7 +136,9 @@ class Notif {
      * Adds a find / replace pair to Notif::findReplace, which will be used to modify the template prior to being sent.
      * Example:
      *
-     * Template substitution tags should ALWAYS be upper case and enclosed in '%'. For example, %NAME%.
+     * Template substitution tags in the templae MUST be upper case and enclosed in '%'. This method automatically wraps 
+     * precent signs (%) around the string provided for the $find parameter, and converts it to upper case. 
+     * For example, name becomes: %NAME%.
      *
      * <code>
      * $n = new Notif();
@@ -138,7 +146,7 @@ class Notif {
      * </code>
      *
      * @return void
-     * @param string $find The string we will search the email template for.
+     * @param string $find The string (not enclosed in %) we will search the email template for.
      * @param string $replace The string we will replace that string with.
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
@@ -247,7 +255,7 @@ class Notif {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function setFromName($name) {
+    public function setFromName($name) {
         if(strlen($name) == 0) {
             $errors = ['error' => "You must supply a \"From Name\" for an email."];
             return $errors;
@@ -312,7 +320,7 @@ class Notif {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function verifySubstitutions() {
+    public function verifySubstitutions() {
 
         $errors = array();
         $missing = $this->findMissingDefinitions($this->template);
@@ -357,7 +365,7 @@ class Notif {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function renderBody($body=false) {
+    private function renderBody($body=false) {
         if($body) {
             $this->body = $body;
         } else {
@@ -394,7 +402,7 @@ class Notif {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function renderSubject() {
+    private function renderSubject() {
         $this->subject = $this->subjectTemplate;
 
         foreach($this->findReplace as $find => $replace) {
@@ -422,7 +430,7 @@ class Notif {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    function prepareSend() {
+    private function prepareSend() {
 
         $errors = $this->verifySubstitutions();
 
@@ -438,12 +446,17 @@ class Notif {
         return false;
     }
 
-    function send($name,$address) {
+    /**
+     * Magic function that executes prepareSend, which runs
+     * verifySubstitutions, renderBody, and renderSubject, then checks for
+     * errors, builds the sending headers, builds the cc list, renders and
+     * sends the email.
+     **/
+
+    public function send($name,$address) {
         $errors = $this->prepareSend();
-        if($errors !== false) {
-            echo "<pre>"; var_dump($errors); echo "</pre>";
-            die(__FILE__  . ':' . __LINE__ );
-        }
+
+        if($errors !== false) return errors;
 
         $headers[] = 'MIME-Version: 1.0';
         $headers[] = 'Content-type: text/html; charset=iso-8859-1';

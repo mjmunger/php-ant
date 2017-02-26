@@ -134,7 +134,12 @@ class AppEngine {
      * Tested with testAppEnableDisable()
      **/
     function enableApp($name,$path) {
-
+        //If the path doesn't exist, don't try to enable it!
+        if(!file_exists($path)) {
+            $message = "Not going to try to enable $name because $path doesn't exist or is inaccessible!";
+            $this->log($message);
+            return ['success' => false, 'message' => $message ];
+        }
         //Check to make sure it's not blacklisted.
         if($this->AppBlacklist->isBlacklisted($path)) {
             $this->log('AppEngine',"You cannot enable $name ($path) because it has been blacklisted. You must first remove it from the blacklist, and then try again.",'AppEngine.log',0,false,'warning');
@@ -690,6 +695,13 @@ class AppEngine {
         foreach($this->enabledApps as $name => $path) {
 
             if(in_array($path, $paths)) {
+
+            //If the path doesn't exist, don't try to enable it!
+            if(!file_exists($path)) {
+                $message = "Not going to try to activate $name because $path doesn't exist or is inaccessible!";
+                $this->log("AppEngine",$message);
+                continue;
+            }
 
                 $this->log('AppEngine',sprintf("Activating app: %s", $name),'AppEngine.log',9,1);
                 //Add this file to a black list in case it causes issues, we can skip it later.

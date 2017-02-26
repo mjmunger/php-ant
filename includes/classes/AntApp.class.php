@@ -798,4 +798,95 @@ Class AntApp
         $output = trim(shell_exec($cmd));
         return $output;
     }
+
+    /**
+     * Fulfils a request with a JSON response and the appropriate response code.
+     * @param array $data An associative array with at least a 'success' element, and either a message or error element.
+     * @param integer $code (Optional) If you supply an integer response code here, it will override the one the method determines is appropriate.
+     * @return void. This is a final method, it "dies" after execution to keep responses clean.
+     * */
+
+    function respond($data, $code = false) {
+        switch($data['success']) {
+            case true:
+                $responseCode = 200;
+                break;
+
+            case false:
+                $responseCode = 400;
+                break;
+        }
+
+        //Override if $code is set:
+        if($code) $responseCode = $code;
+
+        http_response_code($responseCode);
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        die();
+    }
+
+    /**
+     * Recursively scans the app/css directory (and all sub-directories) for CSS files, and includes them in the header.
+     * For use with the header-inject-css.
+     * @param array $args the standard argument array passed from the app engine.
+     * */
+
+    function injectCSS($args) {
+
+        $format = '<link rel="stylesheet" type="text/css" href="%s"/>' . PHP_EOL;
+
+        $Directory = new \RecursiveDirectoryIterator($this->path . '/css/');
+        $Iterator  = new \RecursiveIteratorIterator($Directory);
+        $files     = new \RegexIterator($Iterator, '/^.+\.css$/i', \RecursiveRegexIterator::GET_MATCH);
+
+        foreach($files as $file) {
+            $url = $args['AE']->Configs->getWebURI($file[0]);
+            printf($format,$url);
+        }
+
+        $url = $args['AE']->Configs->getWebURI($file[0]);
+        printf($format,$url);
+        return [ 'success' => true ];
+    }
+
+    function injectFooterJS($args) {
+
+        $format = '<script src="%s"></script>' . PHP_EOL;
+
+        $targetPath = $this->path . '/js/footer/';
+        if(!file_exists($targetPath)) return ['success' => true];
+        
+        $Directory = new \RecursiveDirectoryIterator($this->path . '/js/footer/');
+        $Iterator  = new \RecursiveIteratorIterator($Directory);
+        $files     = new \RegexIterator($Iterator, '/^.+\.js$/i', \RecursiveRegexIterator::GET_MATCH);
+
+        foreach($files as $file) {
+            $url = $args['AE']->Configs->getWebURI($file[0]);
+            printf($format,$url);
+        }
+
+        return [ 'success' => true ];
+    }
+
+    function injectHeaderJS($args) {
+
+        $format = '<link rel="stylesheet" type="text/css" href="%s"/>' . PHP_EOL;
+        $targetPath = $this->path . '/js/header/';
+
+        if(!file_exists($targetPath)) return ['success' => true];
+
+        $Directory = new \RecursiveDirectoryIterator($targetPath);
+        $Iterator  = new \RecursiveIteratorIterator($Directory);
+        $files     = new \RegexIterator($Iterator, '/^.+\.css$/i', \RecursiveRegexIterator::GET_MATCH);
+
+        foreach($files as $file) {
+            $url = $args['AE']->Configs->getWebURI($file[0]);
+            printf($format,$url);
+        }
+
+        $url = $args['AE']->Configs->getWebURI($file[0]);
+        printf($format,$url);
+        return [ 'success' => true ];
+    }
 }

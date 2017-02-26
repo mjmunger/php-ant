@@ -16,5 +16,4 @@ phpdoc -d "." -t "./docs" \
 --ignore="includes/classes/pIndicator.class.php" \
 --ignore="includes/classes/pCache.class.php" \
 --ignore="includes/classes/pSplit.class.php" \
---ignore="includes/parents/*" \
 --template="responsive-twig"

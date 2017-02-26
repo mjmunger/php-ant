@@ -3,26 +3,19 @@
 #Urgent Bug Fix
 
 #Customer facing issues
-See all my teams bugs
-See my old bugs
-"It's fixed" button not showing up for customer confirmation.
-Reduce the emails.
+Report tech support issue (put in ticket table) - requires screenshot.
+Report tech support request (request table?) - new thing does not require screenshot
+Work Order - setup new things.
+SMM work order / project with its workflows to report marketing activity
+
+# Staff requests 
+
+Don't email each and every comment in a conversation. Establish an algo that looks at the comment rate, and only send out comments when the rate goes below a certain amount.
 
 #Urgent and important
 
-Certified fixed
-client-accepted workflow to celebrate a job well done with the people subscribed to the bug.
-status-update workflow. Send out comments that haven't been seen via email. Neglected status / follow?
-Report tech support issue (put in ticket table) - requires screenshot.
-Report tech support request (request table?) - new thing does not require screenshot
-Report marketing activity
-Work Order - setup new things.
-
 ##Blocking
-Mobile does not have comments, etc...
-Ability to get to the bug I just field with a link immediately after filing it.
-"X is viewing with you" sucks on mobile.
-Tools don't work on mobile (not displayed)
+
 
 #Non-blocking
 Propose as fixed missing for developer accounts.
@@ -30,9 +23,12 @@ change set owner
 Add project
 Add user
 Bug report processGetRequest() needs to be refactored into classes so that we instantiate a class based on the user type and show the different types of navigation.
+"X is viewing with you" sucks on mobile.
+status-update workflow. Send out comments that haven't been seen via email. Neglected status / follow?
+client-accepted workflow to celebrate a job well done with the people subscribed to the bug.
+See all my teams bugs on main dashboard.
 
 Permissions per-project and per-resource (for client use).
-Fix jump-to-bug (search?)
 
 Star important things
 Search
@@ -100,3 +96,11 @@ Include the most recent unread comments in the "assigned a bug" (be mindful of p
 autoclose workflow
 Who's online - javascript to check status of who is there and report who is there when looking at a bug.
 Live "chat" updates - javascript to check the status of unread messages and add them.
+See my old bugs
+"It's fixed" button not showing up for customer confirmation.
+Reduce the emails. - No longer sending "assigned" and reply emails. It stays assigned to whoever it is assigned to until a manager or better changes it.
+Certified fixed
+Mobile does not have comments, etc...
+Ability to get to the bug I just field with a link immediately after filing it.
+Tools don't work on mobile (not displayed)
+Fix jump-to-bug (search?)

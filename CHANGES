@@ -1,0 +1,6 @@
+CHANGE LOG:
+
+* Removed phpunit.xml from versioning, and replaced it with
+  phpunit.xml.sample. Also, added phpunit.xml to .gitignore. This keeps
+  changes to the file (like test suites), which are specific to a particular
+  project out of the versioned code.
