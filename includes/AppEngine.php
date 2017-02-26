@@ -54,6 +54,7 @@ class AppEngine {
     **/
 
     var $Configs          = NULL;
+
     var $current_user     = NULL;
     var $sortHook         = NULL;
     var $safeMode         = false;
@@ -375,6 +376,7 @@ class AppEngine {
             } catch (Exception $e) {
                 $this->log('EXCEPTION',$e->getMessage());
             }
+            if(!isset($actionReturnValues['success'])) echo "$app->appName not returning a success for $requested_hook!" . PHP_EOL;
             $row = [$requested_hook,$app->appName,($actionReturnValues['success']?"OK":"FAILED")];
             $TL->addRow($row);
 
@@ -786,7 +788,7 @@ class AppEngine {
 
                 foreach($uriList as $uri) {
                     $this->log( 'AppEngine'
-                              , sprintf("Registered URI $uri to " . $app->appName)
+                              , sprintf("Registered URI %s to %s" , $uri, $app->appName)
                               , 'AppEngine.log'
                               , 9
                               );
@@ -857,6 +859,13 @@ class AppEngine {
         $this->runActions('load_loaders');
 
         $this->log('AppEngine','Reload complete.');
+    }
+
+    function truncateLog($file = 'AppEngine.log') {
+        $logPath = $this->Configs->getLogDir() . $file;
+        $fp = fopen($logPath,'w');
+        fwrite($fp,'');
+        fclose($fp);
     }
 
     /**
@@ -1016,11 +1025,13 @@ class AppEngine {
                     $args['AE'] = & $this;
                     $return = $executionSet[2]->trigger($action,$args);
                     $results = array_merge($results,$return);
+                    // if(isset($return['exit']) && $return['exit']) continue;
                 }
              }
         }
 
         $results['success'] = true;
+        // $results['exit']    = true;
         return $results;
     }
 }

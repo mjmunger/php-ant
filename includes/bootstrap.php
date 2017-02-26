@@ -69,6 +69,9 @@ switch($antConfigs->environment) {
         $WR->parseGet($_GET);
         $WR->mergeRequest();
         $WR->setCookies($_COOKIE);
+        $WR->importJSON('php://input');
+        $WR->parsePut('php://input', getallheaders());
+        $WR->parsePatch('php://input', getallheaders());
         $Server->Request = $WR;
 
         //Setup script execution environment
@@ -148,7 +151,11 @@ $Engine = new AppEngine($antConfigs,$options);
 $Engine->log('Bootstrap','Verbosity level: ' . $verbosity,'AppEngine.log',1);
 
 //Set the error handler to the AppEngine::handleError() method.
-if($hideErrors != 'show') set_error_handler(array(&$Engine,'handleError'));
+if($hideErrors == 'show') {
+    error_reporting(E_ALL);
+} else {
+    set_error_handler(array(&$Engine,'handleError'));
+}
 
 switch ($Engine->Configs->environment) {
     case ConfigBase::WEB:

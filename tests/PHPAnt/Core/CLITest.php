@@ -1,5 +1,5 @@
 <?php
-require_once('test_top.php');
+require_once('tests/test_top.php');
 
 use PHPUnit\Framework\TestCase;
 
