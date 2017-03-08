@@ -63,7 +63,7 @@ echo "Compiling PHP for `hostname` and sending a notification to $1"
  --with-png-dir=/usr/lib/x86_64-linux-gnu/ \
  
 make
-#make tests
+make tests
 make install
 
 cat body | mailx $1 -s "`hostname` PHP Compile done"

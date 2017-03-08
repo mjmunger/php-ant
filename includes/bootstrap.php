@@ -66,6 +66,10 @@ switch($antConfigs->environment) {
         $WR = new WebRequest();
         $WR->setup($_SERVER);
         $WR->parsePost($_POST);
+        //Verify a token if it has been given.
+        $WR->verifyAuthenticityToken();
+        //Create a new one for this request.
+        $WR->generateAuthenticityToken();
         $WR->parseGet($_GET);
         $WR->mergeRequest();
         $WR->setCookies($_COOKIE);

@@ -2,6 +2,8 @@
 
 namespace PHPAnt\Core;
 
+use \PDO;
+
 /**
  * Represents an email notification
  **/
@@ -21,94 +23,123 @@ namespace PHPAnt\Core;
 class Notif {
 
     /**
+     * @var PDO $pdo An instance of PDO for database operations.
+     * */
+
+    public $pdo = NULL;
+
+    /**
     * @var array findReplace An array that contains the values which will be found / replaced before the email is sent.
     **/
 
-    var $findReplace = array();
+    public $findReplace = array();
 
 
     /**
     * @var string $templateDirectory The directory where the template for this email will be found.
     **/
 
-    var $templateDirectory = NULL;
+    public $templateDirectory = NULL;
 
 
     /**
     * @var string $template The template of the email, which will become the body of the email.
     **/
 
-    var $template = NULL;
+    public $template = NULL;
 
 
     /**
     * @var string $subject The rendered subject that will be sent in the email.
     **/
 
-    var $subject = NULL;
+    public $subject = NULL;
 
     /**
     * @var string $body The rendered body of the email.
     **/
 
-    var $body = NULL;
+    public $body = NULL;
 
 
     /**
     * @var string $to The "to" address for the email.
     **/
 
-    var $to = NULL;
+    public $to = NULL;
 
     /**
     * @var string $fromAddress Holds the from address of the sender.
     **/
 
-    var $fromAddress = NULL;
+    public $fromAddress = NULL;
 
     /**
     * @var string $fromName Holds the  from name of the sender.
     **/
 
-    var $fromName = NULL;
+    public $fromName = NULL;
 
     /**
     * @var string $replyToAddress Holds the  reply-to address (if different from sender address)
     **/
 
-    var $replyToAddress = NULL;
+    public $replyToAddress = NULL;
 
     /**
     * @var string $replyToName Holds the reply-to name if different from the sender.
     **/
 
-    var $replyToName = NULL;
+    public $replyToName = NULL;
 
     /**
     * @var array $cc Holds an array of addresses that should be included in the cc.
     **/
 
-    var $cc = array();
+    public $cc = array();
 
     /**
     * @var array $bcc Holds an array of email addressses that should be included in the bcc
     **/
 
-    var $bcc = array();
+    public $bcc = array();
 
 
     /**
     * @var int $verbosity The level of debugging verbosity for this notif.
     **/
 
-    var $verbosity = 0;
+    public $verbosity = 0;
 
     /**
      * @var string subjectTemplate The template used for the email subject.
      * */
 
-    var $subjectTemplate = NULL;
+    public $subjectTemplate = NULL;
 
+    /**
+     * @var boolean useVERP Tells the notif whether or not to use VERP.
+     * 
+     * When VERP is enabled, a GUID is appeneded to the from address envelop
+     * and this message is saved in the email log so that the send
+     * and receive status can be tracked from inside your application.
+     * Also, this enables the logging feature of PHPAnt. Loggin is not possible
+     * without Verp.
+     * */
+
+    public $useVERP = true;
+
+    /**
+     * @var string verpId String that is used as the VERP id in the oubound mail.
+     * */
+
+    public $verpId = NULL;
+
+    /**
+     * @var string finalHeaders The final, rendered headers of an email that is sent.
+     * */
+
+    public $finalHeaders = NULL;
 
     /**
      * Instantiate a Notif object
@@ -125,8 +156,9 @@ class Notif {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    public function __construct($templateDir) {
+    public function __construct($templateDir, PDO $pdo) {
 
+        $this->pdo = $pdo;
         $this->templateDirectory = $templateDir . '/emails/';
         $d = new \DateTime();
         $this->addFindReplace('THISYEAR',$d->format("Y"));
@@ -240,6 +272,8 @@ class Notif {
         } else {
             return false; //Everything was OK!
         }
+
+        //Use VERP if defined.
     }
 
     /**
@@ -279,7 +313,8 @@ class Notif {
      * @param string $string The message to be checked. Normally, $this->template.
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
-    private function findMissingDefinitions($string) {
+
+    public function findMissingDefinitions($string) {
         /* Get all the tags in this template */
         preg_match_all('#%[A-Z0-9]*%#', $string, $tags);
         $templateTags = $tags[0];
@@ -325,6 +360,8 @@ class Notif {
         $errors = array();
         $missing = $this->findMissingDefinitions($this->template);
 
+        $missing = array_unique($missing);
+
         if(count($missing) > 0) {
             foreach($missing as $tag) {
                 array_push($errors, "$tag is in the template, but has not been set. Please define a find and replace definition for $tag");
@@ -334,6 +371,8 @@ class Notif {
 
         /* Do the same for the subject */
         $missing = $this->findMissingDefinitions($this->subjectTemplate);
+
+        $missing = array_unique($missing);
 
         if(count($missing) > 0) {
             foreach($missing as $tag) {
@@ -430,7 +469,7 @@ class Notif {
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-    private function prepareSend() {
+    final function prepareSend() {
 
         $errors = $this->verifySubstitutions();
 
@@ -446,6 +485,88 @@ class Notif {
         return false;
     }
 
+
+    /**
+     * Creates a unique ID for tracing emails
+     * @return string the unique ID that can be appended to a from address.
+     * */
+
+    public function createVerpID() {
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $dictionary = str_split($chars);
+
+        $buffer = [];
+
+        $counter = 0;
+        while($counter < 32) {
+            if(version_compare(phpversion(), '7.0.0','<')) {
+                $buffer[$counter] = $dictionary[rand(0,61)];
+            } else {
+                $buffer[$counter] = $dictionary[random_int(0,61)];
+            }
+            $counter ++;
+        }
+
+        return implode("", $buffer);
+    }
+
+    public function setupVerp() {
+        if($this->useVERP == false) return true;
+
+        if($this->fromAddress === null) throw new Exception("You cannot setupVerp without first setting a fromAddress", 1);
+        
+
+        $this->verpId = $this->createVerpID();
+        $this->fromAddress .= "+=" . $this->verpId;
+        
+        return true;
+    }
+
+    public function renderHeaders() {
+        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+        $headers[] = "From: $this->fromName <$this->fromAddress>";
+
+        if(count($this->cc) > 0) $headers[] = "Cc: " . implode('; ', $this->cc);
+
+        $this->finalHeaders = implode("\r\n", $headers);
+    }
+
+    public function logSend($name,$address) {
+
+        $sql = <<<EOQ
+INSERT INTO `bugreport`.`email_log`
+(
+`email_log_to`,
+`email_log_from`,
+`email_log_subject`,
+`email_log_body`,
+`email_log_headers`
+)
+VALUES
+(
+:email_log_to, 
+:email_log_from, 
+:email_log_subject, 
+:email_log_body, 
+:email_log_headers
+);
+EOQ;
+
+        $stmt = $this->pdo->prepare($sql);
+        $values = [ 'email_log_to'                   => $address
+                  , 'email_log_from'                 => $this->fromAddress
+                  , 'email_log_subject'              => $this->subject
+                  , 'email_log_body'                 => $this->body
+                  , 'email_log_headers'              => $this->finalHeaders
+                  ];
+        $result = $stmt->execute($values);
+
+        if($result === false) return ['success' => false, 'error' => $stmt->errorInfo()[2] ];
+
+        return ['success' => true, 'email_log_id' => $this->pdo->lastInsertId()];
+    }
+
     /**
      * Magic function that executes prepareSend, which runs
      * verifySubstitutions, renderBody, and renderSubject, then checks for
@@ -458,13 +579,14 @@ class Notif {
 
         if($errors !== false) return errors;
 
-        $headers[] = 'MIME-Version: 1.0';
-        $headers[] = 'Content-type: text/html; charset=iso-8859-1';
-        $headers[] = "To: $name <$address>";
-        $headers[] = "From: $this->fromName <$this->fromAddress>";
+        $this->setupVerp();
 
-        if(count($this->cc) > 0) $headers[] = "Cc: " . implode('; ', $this->cc);
+        $this->renderHeaders();
 
-        return mail($address,$this->subject,$this->body,implode("\r\n", $headers));
+        $result = mail($address, $this->subject, $this->body, $this->finalHeaders );
+
+        if($this->useVERP) $this->logSend($name,$address);
+
+        return ($result && $this->useVERP ? $this->verpId : $result);
     }
 }

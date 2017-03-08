@@ -889,4 +889,9 @@ Class AntApp
         printf($format,$url);
         return [ 'success' => true ];
     }
+
+    function rejectAuthenticityToken() {
+            http_response_code(401);
+            die("You have tried to submit a request without a valid authenticity token. Can't do that.");
+    }
 }
