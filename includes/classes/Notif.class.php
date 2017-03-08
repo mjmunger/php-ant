@@ -517,7 +517,9 @@ class Notif {
         
 
         $this->verpId = $this->createVerpID();
-        $this->fromAddress .= "+=" . $this->verpId;
+        $buffer = explode("@", $this->fromAddress);
+        $buffer[0] = $buffer[0] .= "+=" . $this->verpId;
+        $this->fromAddress = implode('@', $buffer);
         
         return true;
     }
