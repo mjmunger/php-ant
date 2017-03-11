@@ -302,7 +302,7 @@ class AppEngineTest extends TestCase
 
  		//Test App Route parsing
  		$routes = $A->getAppRoutes($appPath);
- 		$this->assertCount(3,$routes);
+ 		$this->assertCount(2,$routes);
 
 	}
 
@@ -393,6 +393,8 @@ class AppEngineTest extends TestCase
 	public function testAppEngineRunRoutedActions($uri,$expected) {
 		//Get the configs by themselves.
 		$C = getWebConfigs();
+
+		$stub = $this->createMock(SomeClass::class);
 		//Set the URI
 		$C->Server->Request->uri = $uri;
 

@@ -3,32 +3,33 @@
 #Urgent Bug Fix
 
 #Customer facing issues
+Report tech support issue (put in ticket table) - requires screenshot.
+Report tech support request (request table?) - new thing does not require screenshot
+Work Order - setup new things.
+SMM work order / project with its workflows to report marketing activity
+
+# Staff requests 
+
+Don't email each and every comment in a conversation. Establish an algo that looks at the comment rate, and only send out comments when the rate goes below a certain amount.
 
 #Urgent and important
 
-Certified fixed
-client-accepted workflow to celebrate a job well done with the people subscribed to the bug.
-status-update workflow. Send out comments that haven't been seen via email. Neglected status / follow?
-autoclose workflow
-Report tech support issue (put in ticket table) - requires screenshot.
-Report tech support request (request table?) - new thing does not require screenshot
-Report marketing activity
-
 ##Blocking
-Mobile does not have comments, etc...
-Ability to get to the bug I just field with a link immediately after filing it.
-"X is viewing with you" sucks on mobile.
-Tools don't work on mobile (not displayed)
+
 
 #Non-blocking
+Propose as fixed missing for developer accounts.
 change set owner
 Add project
 Add user
+Bug report processGetRequest() needs to be refactored into classes so that we instantiate a class based on the user type and show the different types of navigation.
+"X is viewing with you" sucks on mobile.
+status-update workflow. Send out comments that haven't been seen via email. Neglected status / follow?
+client-accepted workflow to celebrate a job well done with the people subscribed to the bug.
+See all my teams bugs on main dashboard.
 
 Permissions per-project and per-resource (for client use).
-Fix jump-to-bug (search?)
-Who's online - javascript to check status of who is there and report who is there when looking at a bug.
-Live "chat" updates - javascript to check the status of unread messages and add them.
+
 Star important things
 Search
 Permalinks to comments.
@@ -56,6 +57,12 @@ Add a hook for when an email is sent
 Nice to have / fun stuff.
 Use timeago (http://timeago.yarp.com/) to auto-update timestamps on bugs.
 
+#Major improvements
+Allow for app dependencies so that one app can extend another. Currently, you cannot extend an app if the name of the app precedes the dependent app. For example, AdminDashboard cannot extend ManagerDashboard at the app level because admin dashboard is loaded befor Manager dashboard, which means the spl_autoloader for the manager app has not yet been queued. Therefore, when the Admin dashboard tries to find that class, it does not yet exist. The solution is to have dependencies in the manifest.xml file, which forces other apps to load first when the current app is dependent on those apps. 
+
+Refactor injectCSS and injectJS (for footer and header) into the AntApp class. Safely read the css and js directories and add those files as necessary. It should also generate a signed hash list. Perhaps it should read the manifest file for those files, and build a list from that. Then we know that those files are "supposed to be there".
+
+Add to Bugzy Core: the ability to use symlinks to "import" css and js from a central repo in the app. This has to be on a per-file basis so that we can put custom js files in there by themselves.
 
 #done
 Jump to top button
@@ -86,3 +93,14 @@ Subcribed to all comments.
 On admin dashboard, change "Last login" to "last comment posted" in agoTime. Probably, we should sort by that.
 Fixed / not fixed.
 Include the most recent unread comments in the "assigned a bug" (be mindful of public / private comments!)
+autoclose workflow
+Who's online - javascript to check status of who is there and report who is there when looking at a bug.
+Live "chat" updates - javascript to check the status of unread messages and add them.
+See my old bugs
+"It's fixed" button not showing up for customer confirmation.
+Reduce the emails. - No longer sending "assigned" and reply emails. It stays assigned to whoever it is assigned to until a manager or better changes it.
+Certified fixed
+Mobile does not have comments, etc...
+Ability to get to the bug I just field with a link immediately after filing it.
+Tools don't work on mobile (not displayed)
+Fix jump-to-bug (search?)

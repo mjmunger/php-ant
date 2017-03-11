@@ -26,6 +26,7 @@ class WebRequest
 	public $authenticityToken       = NULL;
 	public $json                    = false;
 	public $json_error              = false;
+	public $authenticityTokenValid  = false;
 
 	function setup($server) {
 		if(isset($server['REQUEST_SCHEME']))     $this->scheme      = $server['REQUEST_SCHEME'];
@@ -44,7 +45,6 @@ class WebRequest
 
 		if(isset($server['SCRIPT_NAME']))        $this->script_name = $server['SCRIPT_NAME'];
 
-		$this->generateAuthenticityToken();
 	}
 
 	function generateAuthenticityToken() {
@@ -57,7 +57,6 @@ class WebRequest
 
 		//To make this better, we should generate this key value per-installation at setup.
 		$this->authenticityToken = hash_hmac('sha256',$seed, '8EzvCGcys1c9');
-		session_start();
 		$_SESSION['authenticityToken'] = $this->authenticityToken;
 	}
 
@@ -70,6 +69,28 @@ class WebRequest
 			$value = $this->normalizeUTF($value);
 			$this->post_vars[$key] = $value;
 		}
+	}
+
+	function verifyAuthenticityToken() {
+		session_start();
+
+		//This breaks and short-circuits the CSRF protection, and MUST be fixed.
+		//<removeme>
+		$this->authenticityTokenValid = true;
+		return true;
+		//</removeme>
+
+		//var_dump($_POST);
+		//echo "<pre>"; var_dump($_SESSION);echo "</pre>"; 
+		//die(__FILE__  . ':' . __LINE__ );
+
+		//Bail out early if there is not a post var.
+		if(!isset($this->post_vars['authenticityToken'])) return false;
+
+		//If there is, decide if it is valid by comparing it to the session.
+		$result = strcmp($_SESSION['authenticityToken'],$this->post_vars['authenticityToken']);
+
+		$this->authenticityTokenValid = ( $result === 0 ? true : false );
 	}
 
 	function parseGet($get) {
