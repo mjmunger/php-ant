@@ -27,14 +27,10 @@ require('includes/classes/ConfigCLI.class.php');
 require('includes/classes/ConfigWeb.class.php');
 require('includes/classes/ConfigFactory.class.php');
 require('includes/classes/AppBlacklist.class.php');
+require('includes/classes/PermissionManager.class.php');
 
 /* Include composer files if present */
 if(file_exists('includes/vendor/autoload.php')) include('includes/vendor/autoload.php');
-
-// echo "Hello";
-// $ad = new \Adldap\Adldap();
-// var_dump($ad);
-// var_dump(class_exists('\Adldap\Adldap'));
 
 /* Custom Error Handler */
 /*include('error_handler.php');*/
