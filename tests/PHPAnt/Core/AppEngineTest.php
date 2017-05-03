@@ -394,7 +394,6 @@ class AppEngineTest extends TestCase
 		//Get the configs by themselves.
 		$C = getWebConfigs();
 
-		$stub = $this->createMock(SomeClass::class);
 		//Set the URI
 		$C->Server->Request->uri = $uri;
 
