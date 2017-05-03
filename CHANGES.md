@@ -10,6 +10,10 @@
 
 * Removed some deprecated directories.
 
+### Database
+
+* Updated fields to support super long, super strong tokens, and added some minor clean up on the structure.
+
 ## Commit: c2e1ca53ecd73127aa36d3033c2dc8a3fbfc0418
 
 ### Added priorities to routed actions.
