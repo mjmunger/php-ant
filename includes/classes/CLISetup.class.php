@@ -2,7 +2,7 @@
 
 class CLISetup {
 
-	private $pdo           = NULL;
+	public $pdo           = NULL;
 	private $document_root = NULL;
 
 	function __construct($document_root) {
@@ -187,6 +187,10 @@ class CLISetup {
 		$vars = [$setupInfo->adminuser->username, password_hash($setupInfo->adminuser->password, PASSWORD_DEFAULT), $setupInfo->adminuser->first, $setupInfo->adminuser->last, 1];
 		$result = $stmt->execute($vars);
 		$this->pdo->commit();
+
+		if($result == false) {
+			var_dump($stmt->errorInfo());
+		}
 
 		$username = $setupInfo->adminuser->username;
 		$password = $setupInfo->adminuser->password;

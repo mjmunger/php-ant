@@ -454,8 +454,6 @@ Class AntApp
 
         $AE = $args['AE'];
 
-        /*echo "<pre>"; print_r($args); echo "</pre>";*/
-
         /* Check to see if we need to reference the ACL */
         if(!$this->hasACL) {
             /* If ACL is not enabled, short-circuit with a return true to allow access to the app. */
@@ -807,9 +805,14 @@ Class AntApp
      * */
 
     function respond($data, $code = false) {
+
         switch($data['success']) {
             case true:
                 $responseCode = 200;
+
+                //Override on success if $code is set:
+                if($code !== false) $responseCode = $code;
+                
                 break;
 
             case false:
@@ -817,8 +820,6 @@ Class AntApp
                 break;
         }
 
-        //Override if $code is set:
-        if($code) $responseCode = $code;
 
         http_response_code($responseCode);
         header('Content-Type: application/json');
