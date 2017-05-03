@@ -923,38 +923,17 @@ Class AntApp
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-   function userCanExecute($pdo, $action, $User) {
+   function userCanExecute($PDO, $action, $User) {
 
         //Admins (users_roles_id == 1) always have access to everything.
         if($User->users_roles_id == 1 ) return true;
 
         //Check to see if this user has access to this event.
-        $sql = <<<EOQ
-SELECT 
-    *
-FROM
-    phpant.acls
-WHERE
-    users_roles_id = (SELECT 
-            users_roles_id
-        FROM
-            users
-        WHERE
-            users_id = ? and acls_event = ?)
-EOQ;
-        
-        $values = [$User->users_id, $action];
+        $ACL = new ACL($PDO, $action);
+        return $ACL->userCanExecute($User->users_id);
 
-        $stmt = $pdo->prepare($sql);
-        $result = $stmt->execute($values);
-        if($result == false) {
-            var_dump($stmt->errorInfo);
-            die(__FILE__  . ':' . __LINE__ );
-        }
-
-        if($stmt->rowCount() > 0) return true;
-
-        //Default to false.
+        //Default to false (deny access), just in case something weird happens.
         return false;
     }
+
 }
