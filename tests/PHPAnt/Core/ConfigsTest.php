@@ -21,7 +21,7 @@ class AntConfigTest extends TestCase
 
         $vars = getMockVars();
 
-        $this->assertCount(3,$vars,'The $vars array must be included and defined so it can be included from config.php!');
+        $this->assertCount(2,$vars,'The $vars array must be included and defined so it can be included from config.php!');
 
         $this->assertInternalType('string',$vars['http_host'],'The http_host must be a defined string.');
         $this->assertInternalType('string',$vars['document_root'],'The document_root must be a defined string.');
@@ -42,10 +42,11 @@ class AntConfigTest extends TestCase
         $this->assertStringStartsWith('https://', $BC->http_host);
 
         //make sure we have a non-https URL when requested.
-        $vars = getMockVars(false);
-        $BC = new PHPAnt\Core\ConfigBase($pdo,$vars);
-        $this->assertInstanceOf('PHPAnt\Core\ConfigBase', $BC);
-        $this->assertStringStartsWith('http://', $BC->http_host);
+        // This has been removed (5/3/2017) because ... why no TLS? Security is a good thing.
+        //$vars = getMockVars(false);
+        //$BC = new PHPAnt\Core\ConfigBase($pdo,$vars);
+        //$this->assertInstanceOf('PHPAnt\Core\ConfigBase', $BC);
+        //$this->assertStringStartsWith('http://', $BC->http_host);
     }
 
     /**
@@ -74,7 +75,7 @@ class AntConfigTest extends TestCase
 
         //Make sure getWebURI works
 
-        $url = $BC->getWebURI($vars['document_root'] .'/includes/libs/library/resources/thing.png');
+        $url = $BC->getWebURI($vars['document_root'] .'includes/libs/library/resources/thing.png');
         $expectedURL = $vars['http_host'] . '/includes/libs/library/resources/thing.png';
         $this->assertSame($expectedURL, $url);
     }
@@ -164,10 +165,10 @@ class AntConfigTest extends TestCase
         $this->assertStringStartsWith('https://', $CW->http_host);
 
         //make sure we have a non-https URL when requested.
-        $vars = getMockVars(false);
-        $CW = new PHPAnt\Core\ConfigBase($pdo,$vars);
-        $this->assertInstanceOf('PHPAnt\Core\ConfigBase', $CW);
-        $this->assertStringStartsWith('http://', $CW->http_host);       
+        //$vars = getMockVars(false);
+        //$CW = new PHPAnt\Core\ConfigBase($pdo,$vars);
+        //$this->assertInstanceOf('PHPAnt\Core\ConfigBase', $CW);
+        //$this->assertStringStartsWith('http://', $CW->http_host);
 
     }
 }

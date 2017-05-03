@@ -450,6 +450,27 @@ Class AntApp
         return $return;
     }
 
+    /**
+     * Returns app events as permission groups (arrays). This is a DENY, ALLOW feature. By
+     * default, if you have AntApp::hasACL enabled, and nothing in this array,
+     * access to everything will be denied.
+     * 
+     * Because absence of a definition of access will be construed as "access denied",
+     * all actions should be defined in this ACL list. Failure to define an action
+     * will result in all users being denied access to all users except sysadmins, which
+     * are exempt from ACLs.
+     * 
+     * Your app should (must) override this method in order to do anything useful with 
+     * AntApp::hasACL set to true.
+     * 
+     * @return array
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+    
+    function getACLGroups() {
+        $acl = [];
+    }
+
     function checkACL($feature,$args) {
 
         $AE = $args['AE'];
@@ -895,4 +916,25 @@ Class AntApp
             http_response_code(401);
             die("You have tried to submit a request without a valid authenticity token. Can't do that.");
     }
+
+    /**
+     * Checks the ACL table to see if this user has permissions to access a given event.
+     * This is a DENY, ALLOW feature! Not defined = no access granted.
+     * @return boolean True if user has specific access or is an Admin. False otherwise.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+   function userCanExecute($PDO, $action, $User) {
+
+        //Admins (users_roles_id == 1) always have access to everything.
+        if($User->users_roles_id == 1 ) return true;
+
+        //Check to see if this user has access to this event.
+        $ACL = new ACL($PDO, $action);
+        return $ACL->userCanExecute($User->users_id);
+
+        //Default to false (deny access), just in case something weird happens.
+        return false;
+    }
+
 }

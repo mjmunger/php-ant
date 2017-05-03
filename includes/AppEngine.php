@@ -971,6 +971,10 @@ class AppEngine {
                 //$this->runActions($action);
 
                 if($action) {
+                    //Check ACL for this action here. If fail, continue.
+                    // INSERT CODE HERE.
+
+                    //Get priority.
                     $priority = $app->routedActionPriorities[$action];
 
                     //Add this app to that action list.
