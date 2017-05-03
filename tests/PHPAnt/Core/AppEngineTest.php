@@ -455,5 +455,94 @@ class AppEngineTest extends TestCase
 	    			);
 	}
 
-			
+	public function testAppHasACL() {
+		//1. Instantiate app engine
+		//Get the configs by themselves.
+		$C = getWebConfigs();
+
+		//Set the URI
+		$C->Server->Request->uri = $uri;
+
+		//Get an instance of the AppEngine
+		$appRoot = $C->document_root . 'includes/apps/';
+
+
+		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
+		$options['appRoot'] = $appRoot;
+		$A = getMyAppEngine($options);	
+		$A->Configs = $C;
+		$A->Configs->Server->Request->uri = $uri;
+
+
+		//2. Enable the test app.
+		$appPath = $appRoot . '/ant-app-test-app/app.php';
+		$result = $A->enableApp('Test Ant App', $appPath);
+		$this->assertTrue($result['success']);
+
+		$A->reload();
+
+		//Check to make sure the actions are registered for the Test app.
+		$foundTheApp = false;
+		foreach($A->apps as $app) {
+			if($app->appName == 'Test Ant App') break;
+		}
+
+		//3. Verify the app supports ACLs.
+		$this->assertTrue($app->hasACL);
+	}	
+
+	public function testGetAppACL() {
+		//1. Instantiate app engine
+		//Get the configs by themselves.
+		$C = getWebConfigs();
+
+		//Set the URI
+		$C->Server->Request->uri = $uri;
+
+		//Get an instance of the AppEngine
+		$appRoot = $C->document_root . 'includes/apps/';
+
+
+		$options = getDefaultOptions();
+		$BL = new PHPAnt\Core\AppBlacklist();
+		$options['Blacklist'] = $BL;
+		$options['appRoot'] = $appRoot;
+		$A = getMyAppEngine($options);	
+		$A->Configs = $C;
+		$A->Configs->Server->Request->uri = $uri;
+
+
+		//2. Enable the test app.
+		$appPath = $appRoot . '/ant-app-test-app/app.php';
+		$result = $A->enableApp('Test Ant App', $appPath);
+		$this->assertTrue($result['success']);
+
+		$A->reload();
+
+		//Check to make sure the actions are registered for the Test app.
+		$foundTheApp = false;
+		foreach($A->apps as $app) {
+			if($app->appName == 'Test Ant App') break;
+		}
+
+		$aclGroups = $app->getACLGroups();
+
+		$this->assertSame('CLI Commands', $aclGroups['CLI']['name']);
+		$this->assertCount(1, $aclGroups['CLI']['group']);
+		$this->assertSame('cli-load-grammar', $aclGroups['CLI']['group'][0]);
+
+
+		$this->assertSame('App Test Events', $aclGroups['tests']['name']);
+		$expected = [ 'app-hook-test'    
+                    , 'uploader-uri-test'
+                    , 'history-uri-test' 
+                    , 'testasdf-uri-test'
+                    ];
+
+        foreach($expected as $event) {
+        	$this->assertContains($event, $aclGroups['tests']['group']);
+        }
+	}
 }

@@ -450,6 +450,27 @@ Class AntApp
         return $return;
     }
 
+    /**
+     * Returns app events as permission groups (arrays). This is a DENY, ALLOW feature. By
+     * default, if you have AntApp::hasACL enabled, and nothing in this array,
+     * access to everything will be denied.
+     * 
+     * Because absence of a definition of access will be construed as "access denied",
+     * all actions should be defined in this ACL list. Failure to define an action
+     * will result in all users being denied access to all users except sysadmins, which
+     * are exempt from ACLs.
+     * 
+     * Your app should (must) override this method in order to do anything useful with 
+     * AntApp::hasACL set to true.
+     * 
+     * @return array
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+    
+    function getACLGroups() {
+        $acl = [];
+    }
+
     function checkACL($feature,$args) {
 
         $AE = $args['AE'];
@@ -893,5 +914,47 @@ Class AntApp
     function rejectAuthenticityToken() {
             http_response_code(401);
             die("You have tried to submit a request without a valid authenticity token. Can't do that.");
+    }
+
+    /**
+     * Checks the ACL table to see if this user has permissions to access a given event.
+     * This is a DENY, ALLOW feature! Not defined = no access granted.
+     * @return boolean True if user has specific access or is an Admin. False otherwise.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+   function userCanExecute($pdo, $action, $User) {
+
+        //Admins (users_roles_id == 1) always have access to everything.
+        if($User->users_roles_id == 1 ) return true;
+
+        //Check to see if this user has access to this event.
+        $sql = <<<EOQ
+SELECT 
+    *
+FROM
+    phpant.acls
+WHERE
+    users_roles_id = (SELECT 
+            users_roles_id
+        FROM
+            users
+        WHERE
+            users_id = ? and acls_event = ?)
+EOQ;
+        
+        $values = [$User->users_id, $action];
+
+        $stmt = $pdo->prepare($sql);
+        $result = $stmt->execute($values);
+        if($result == false) {
+            var_dump($stmt->errorInfo);
+            die(__FILE__  . ':' . __LINE__ );
+        }
+
+        if($stmt->rowCount() > 0) return true;
+
+        //Default to false.
+        return false;
     }
 }
