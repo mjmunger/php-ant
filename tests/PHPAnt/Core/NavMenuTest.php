@@ -188,37 +188,56 @@ class NavMenuTest extends TestCase
 
     </div>
 </div>
+
 EOF;
 
         $this->assertSame($html,$Branch->getHTML());
     }
 
 
-//     function testMenuItemTopHTML() {
-//         $Menu = new NavMenu();
+    function testMenuItemTopHTML() {
+        $Menu = new NavMenu();
 
-//         $options         = [];
-//         $options['uri']  = '/top2/';
-//         $options['slug'] = 'top1';
+        $options         = [];
+        $options['uri']  = '/top1/';
+        $options['slug'] = 'top1';
 
-//         $Top1 = new NavMenuItem('Top1',$options);
+        $Top1 = new NavMenuItem('Top1',$options);
 
-//         $options         = [];
-//         $options['uri']  = '/top2/';
-//         $options['slug'] = 'top2';
+        $options         = [];
+        $options['uri']  = '/top2/';
+        $options['slug'] = 'top2';
 
-//         $Top2 = new NavMenuItem('Top2',$options);
+        $Top2 = new NavMenuItem('Top2',$options);
 
-//         $Menu->addMenuItem($Top1);
-//         $Menu->addMenuItem($Top2);
+        for($x = 1; $x<=3; $x++) {
+            $options= ['uri' => '/path/to/sub/' . $x];
+            $SubItem = new NavMenuItem('Sub '. $x, $options);
+            $Top1->addMenuItem($SubItem,$Top2);
+        }
 
-//         $Writer = new NavMenuWriter($Menu);
+        $Menu->addMenuItem($Top1);
+        $Menu->addMenuItem($Top2);
 
-//         $html = <<<EOF
-// <nav>
+        $Writer = new NavMenuWriter($Menu);
 
-// </nav>
-// EOF;
-//         $this->assertSame($html, $Writer->getHTML());
-//     }
+        $html = <<<EOF
+<nav>
+    <div class="w3-bar ant-nav-bar">
+<div class="w3-dropdown-hover">
+    <button class="w3-button">Top1</button>
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+<a href="/path/to/sub/1" class="w3-bar-item w3-button ant-leaf">Sub 1</a>
+<a href="/path/to/sub/2" class="w3-bar-item w3-button ant-leaf">Sub 2</a>
+<a href="/path/to/sub/3" class="w3-bar-item w3-button ant-leaf">Sub 3</a>
+
+    </div>
+</div>
+<a href="/top2/" class="w3-bar-item w3-button ant-leaf">Top2</a>
+
+    </div>
+</nav>
+EOF;
+        $this->assertSame($html, $Writer->getHTML());
+    }
 }

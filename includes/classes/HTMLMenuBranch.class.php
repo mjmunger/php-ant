@@ -19,6 +19,7 @@ class HTMLMenuBranch extends HTMLMenuNode implements MenuTree
 %s
     </div>
 </div>
+
 EOF;
 
         return sprintf($format,$buffer);

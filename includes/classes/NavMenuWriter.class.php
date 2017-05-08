@@ -18,29 +18,20 @@ class NavMenuWriter extends NavMenu
         $this->items = $Menu->items;
     }
 
-    private function traverseNodes($Node) {
-        if($Node->hasChildren) {
-            foreach($Node->getChildren() as $childNode) {
-                return $this->traverseNodes($childNode);
-            }
-        }
-
-        $HTMLNode = HTMLMenuNodeFactory::getNode($Node);
-        return $HTMLNode->getHTML();
-    }
-
     public function getHTML() {
         $buffer = "";
 
-        // foreach($this->items as $Item) {
-        //     $Node = HTMLMenuNodeFactory::getNode($Item);
-        //     $buffer .= $this->traverseNodes($Node);
-        // }
+        foreach($this->items as $Item) {
+            $Node = HTMLMenuNodeFactory::getNode($Item);
+            $buffer .= $Node->getHTML();
+        }
 
         //Wrap in the <nav> tags.
         $navTags = <<<EOF
 <nav>
+    <div class="w3-bar ant-nav-bar">
 %s
+    </div>
 </nav>
 EOF;
         $buffer = sprintf($navTags,$buffer);
