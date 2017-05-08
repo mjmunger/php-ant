@@ -11,7 +11,7 @@ namespace PHPAnt\Core;
 class NavMenuItem
 {
     public $title      = NULL;
-    public $uri        = NULL;
+    public $uri        = false;
     public $childItems = NULL;
     public $slug       = false;
 
@@ -19,11 +19,12 @@ class NavMenuItem
 
         if($options) {
             if(isset($options['uri']))  $this->uri = $options['uri' ];
-            if(isset($options['slug'])) $this->uri = $options['slug'];
+            if(isset($options['slug'])) $this->slug = $options['slug'];
         }
 
         //If the slug is not set, create a default. 
         if($this->slug == false) $this->slug = $this->slugify($title);
+        if($this->uri  == false) $this->uri  = $this->slug; //Assumes that the slug is on the root.
 
         //Setup the title.
         $this->title = $title;
@@ -33,18 +34,20 @@ class NavMenuItem
         $this->childItems = new NavMenuItemList();
     }
 
-    private function slugify($uri) {
-        $regex = [ '/ /'      => '-'
-                 , '/[^-\w]/' => ''
+    private function slugify($title) {
+        $regex = [ '/ /'       => '-'
+                 , '/[^\w-]+/' => ''
                  ];
 
+        $slug = $title;
+
         foreach($regex as $pattern => $replacement) {
-            $uri = preg_replace($pattern, $replacement, $uri);
+            $slug = preg_replace($pattern, $replacement, $slug);
         }
 
-        $uri = strtolower($uri);
+        $slug = strtolower($slug);
 
-        return $uri;
+        return $slug;
     }
 
     public function hasChildren() {
@@ -53,6 +56,10 @@ class NavMenuItem
 
     public function getChildren() {
         return $this->childItems;
+    }
+
+    public function addMenuItem(NavMenuItem $Item) {
+        $this->childItems->add($Item);
     }
 
 

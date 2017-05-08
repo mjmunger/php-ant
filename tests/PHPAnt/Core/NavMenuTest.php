@@ -5,6 +5,10 @@ $dependencies = [ 'tests/test_top.php'
                 , 'includes/classes/NavMenu.class.php'
                 , 'includes/classes/NavMenuItem.class.php'
                 , 'includes/classes/NavMenuItemList.class.php'
+                , 'includes/classes/NavMenuWriter.class.php'
+                , 'includes/classes/HTMLMenuNode.class.php'
+                , 'includes/classes/HTMLMenuLeaf.class.php'
+                , 'includes/classes/HTMLMenuNodeFactory.class.php'
                 ];
 
 foreach($dependencies as $d) {
@@ -17,7 +21,7 @@ use PHPAnt\Core\NavMenuItemList;
 //use PHPUnit\DbUnit\TestCaseTrait;
 //use \PDO;
 
-class NavMenutest extends TestCase
+class NavMenuTest extends TestCase
 {
 
     function testMenuItem() {
@@ -56,10 +60,9 @@ class NavMenutest extends TestCase
         $this->assertCount(1, $Menu->items);
 
         $options= ['uri' => '/path/to/sub/1'];
-
         $SubItem1 = new NavMenuItem('Sub1', $options);
+
         $options= ['uri' => '/path/to/sub/2'];
-        
         $SubItem2 = new NavMenuItem('Sub2', $options);
 
         $Menu->addMenuItem($SubItem1,$RootItem);
@@ -110,4 +113,112 @@ class NavMenutest extends TestCase
         $this->assertNotNull($SubMenu);
         $this->assertFalse($SubMenu);
     }
+
+    function testMenuWriterConstruct() {
+        $Menu = new NavMenu();
+        $Writer = new NavMenuWriter($Menu);
+
+        $this->assertEquals($Menu->items, $Writer->items);
+        
+    }
+
+    function testHTMLMenuNode() {
+        $Menu = new NavMenu();
+
+        $options         = [];
+        $options['uri']  = "/top1/";
+        $options['slug'] = 'top1';
+
+        $Top1 = new NavMenuItem('Top1',$options);
+
+        $Node = new HTMLMenuNode($Top1);
+
+        $this->assertSame('Top1', $Node->title);
+        $this->assertSame($options['slug'], $Node->slug);
+        $this->assertSame($options['uri'], $Node->uri);
+    }
+
+
+    function testHTMLMenuLeaf() {
+        $Menu = new NavMenu();
+
+        $options         = [];
+        $options['uri']  = "/top1/";
+        $options['slug'] = 'top1';
+
+        $Top1 = new NavMenuItem('Top1',$options);
+
+        $Node = new HTMLMenuLeaf($Top1);
+
+        $this->assertSame('Top1', $Node->title);
+        $this->assertSame($options['slug'], $Node->slug);
+        $this->assertSame($options['uri'], $Node->uri);
+
+        $html = '<a href="/top1/" class="w3-bar-item w3-button ant-leaf">Top1</a>' . PHP_EOL;
+        $this->assertSame($html,$Node->getHTML());
+    }
+
+    function testHTMLMenuBranch() {
+        $options         = [];
+        $options['uri']  = "/top1/";
+        $options['slug'] = 'top1';
+
+        $Top1 = new NavMenuItem('Top1',$options);
+
+        for($x = 1; $x<=3; $x++) {
+            $options= ['uri' => '/path/to/sub/' . $x];
+            $SubItem = new NavMenuItem('Sub '. $x, $options);
+            $Top1->addMenuItem($SubItem,$Top1);
+        }
+
+        $this->assertCount(3, $Top1->childItems);
+
+        $Branch = new HTMLMenuBranch($Top1);
+
+        $this->assertInstanceOf("PHPAnt\\Core\\HTMLMenuBranch", $Branch);
+        $this->assertCount(3, $Branch->children);
+
+        $html = <<<EOF
+<div class="w3-dropdown-hover">
+    <button class="w3-button">Top1</button>
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+<a href="/path/to/sub/1" class="w3-bar-item w3-button ant-leaf">Sub 1</a>
+<a href="/path/to/sub/2" class="w3-bar-item w3-button ant-leaf">Sub 2</a>
+<a href="/path/to/sub/3" class="w3-bar-item w3-button ant-leaf">Sub 3</a>
+
+    </div>
+</div>
+EOF;
+
+        $this->assertSame($html,$Branch->getHTML());
+    }
+
+
+//     function testMenuItemTopHTML() {
+//         $Menu = new NavMenu();
+
+//         $options         = [];
+//         $options['uri']  = '/top2/';
+//         $options['slug'] = 'top1';
+
+//         $Top1 = new NavMenuItem('Top1',$options);
+
+//         $options         = [];
+//         $options['uri']  = '/top2/';
+//         $options['slug'] = 'top2';
+
+//         $Top2 = new NavMenuItem('Top2',$options);
+
+//         $Menu->addMenuItem($Top1);
+//         $Menu->addMenuItem($Top2);
+
+//         $Writer = new NavMenuWriter($Menu);
+
+//         $html = <<<EOF
+// <nav>
+
+// </nav>
+// EOF;
+//         $this->assertSame($html, $Writer->getHTML());
+//     }
 }
