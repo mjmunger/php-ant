@@ -13,11 +13,38 @@ class NavMenuItem
     public $title      = NULL;
     public $uri        = NULL;
     public $childItems = NULL;
+    public $slug       = false;
 
-    function __construct($title, $uri = NULL) {
+    function __construct($title, $options = false) {
+
+        if($options) {
+            if(isset($options['uri']))  $this->uri = $options['uri' ];
+            if(isset($options['slug'])) $this->uri = $options['slug'];
+        }
+
+        //If the slug is not set, create a default. 
+        if($this->slug == false) $this->slug = $this->slugify($title);
+
+        //Setup the title.
         $this->title = $title;
-        $this->uri   = $uri;
+
+        //Create child items as a default NavMenuItemList();
+        //Composition association. anti-pattern? Code smell?
         $this->childItems = new NavMenuItemList();
+    }
+
+    private function slugify($uri) {
+        $regex = [ '/ /'      => '-'
+                 , '/[^-\w]/' => ''
+                 ];
+
+        foreach($regex as $pattern => $replacement) {
+            $uri = preg_replace($pattern, $replacement, $uri);
+        }
+
+        $uri = strtolower($uri);
+
+        return $uri;
     }
 
     public function hasChildren() {

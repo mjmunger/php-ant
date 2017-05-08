@@ -30,7 +30,7 @@ class NavMenu
 
         //add child items because a parent was specified.
         foreach($this->items as $Item) {
-            if($Item->title == $parent->title) {
+            if($Item->slug == $parent->slug) {
                 // echo "Adding child Item!" . PHP_EOL;
                 $Item->childItems->add($MenuItem);
                 return;
@@ -42,8 +42,8 @@ class NavMenu
         $needle = array_shift($pathArray);
 
         foreach($Items as $Item) {
-            // echo "Checking: " . $Item->title . PHP_EOL;
-            if($needle == $Item->title) {
+
+            if($needle == $Item->slug) {
 
                 //If count($pathArray) == 0 we have reached max depth. We can return regardless of other things.
                 if(count($pathArray) == 0) return $Item;

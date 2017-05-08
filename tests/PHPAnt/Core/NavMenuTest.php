@@ -24,7 +24,9 @@ class NavMenutest extends TestCase
         $title = 'Title Text';
         $uri   = '/path/to/uri/';
 
-        $Item = new NavMenuItem($title, $uri);
+        $options['uri'] = $uri;
+
+        $Item = new NavMenuItem($title, $options);
         $this->assertSame($title, $Item->title);
         $this->assertSame($uri  , $Item->uri  );
     }
@@ -32,7 +34,10 @@ class NavMenutest extends TestCase
     function testAddMenuItem() {
         $title = 'Title Text';
         $uri   = '/path/to/uri/';
-        $Item = new NavMenuItem($title, $uri);
+
+        $options['uri'] = $uri;
+
+        $Item = new NavMenuItem($title, $options);
 
         $Menu = new NavMenu();
         $Menu->addMenuItem($Item);
@@ -50,8 +55,12 @@ class NavMenutest extends TestCase
 
         $this->assertCount(1, $Menu->items);
 
-        $SubItem1 = new NavMenuItem('Sub1', '/path/to/sub/1');
-        $SubItem2 = new NavMenuItem('Sub2', '/path/to/sub/2');
+        $options= ['uri' => '/path/to/sub/1'];
+
+        $SubItem1 = new NavMenuItem('Sub1', $options);
+        $options= ['uri' => '/path/to/sub/2'];
+        
+        $SubItem2 = new NavMenuItem('Sub2', $options);
 
         $Menu->addMenuItem($SubItem1,$RootItem);
         $Menu->addMenuItem($SubItem2,$RootItem);
@@ -67,7 +76,7 @@ class NavMenutest extends TestCase
         $this->assertInstanceOf('\Traversable', $Menu->items);
         $this->assertInstanceOf('PHPAnt\Core\NavMenuItemList', $Menu->items);
 
-        $pathArray = ['Root Title'];
+        $pathArray = ['root-title'];
 
         $SubMenu = $Menu->getMenuItemByPath($pathArray);
 
@@ -75,7 +84,7 @@ class NavMenutest extends TestCase
         $this->assertSame('Root Title', $SubMenu->title);
 
         //Let's try again with deeper menus.
-        $pathArray = ['Root Title','Sub1'];
+        $pathArray = ['root-title','sub1'];
 
         $SubMenu = $Menu->getMenuItemByPath($pathArray);
 
@@ -84,12 +93,21 @@ class NavMenutest extends TestCase
         $this->assertSame('/path/to/sub/1',$SubMenu->uri);
 
         //Let's try again with other menu.
-        $pathArray = ['Root Title','Sub2'];
+        $pathArray = ['root-title','sub2'];
 
         $SubMenu = $Menu->getMenuItemByPath($pathArray);
 
         $this->assertNotNull($SubMenu);
         $this->assertSame('Sub2', $SubMenu->title);
         $this->assertSame('/path/to/sub/2',$SubMenu->uri);
+
+        //Let's look for something that doesn't exist so we can fail.
+
+        $pathArray = ['root-title','sub2','doesnotexist'];
+
+        $SubMenu = $Menu->getMenuItemByPath($pathArray);
+
+        $this->assertNotNull($SubMenu);
+        $this->assertFalse($SubMenu);
     }
 }
