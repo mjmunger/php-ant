@@ -184,12 +184,24 @@ Class AntApp
 
     var $currentRoute     = false;
 
+
+    /**
+     * An instantiation of the CommandList class used to hold CommandInvoker
+     * objects that are used to parse and execute commands in the CLI.
+     * 
+     * This is a composition association of the classes. 
+     * */
+
+    public $AppCommands   = NULL;
+
     //These two properties are stubs for use with phpunit.
     public $testProperty      = NULL;
     public $testPropertyArray = [];
 
     function __construct() {
         $this->path = __DIR__;
+
+        $this->AppCommands = new CommandList();
     }
 
     /**

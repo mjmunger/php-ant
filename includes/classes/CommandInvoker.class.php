@@ -10,11 +10,9 @@ namespace PHPAnt\Core;
 class CommandInvoker
 {
     public $criteria  = [];
-    public $Command   = NULL;
     public $callback  = NULL;
 
-    public function __construct($Command, $callback) {
-        $this->Command  = $Command;
+    public function __construct($callback) {
         $this->callback = $callback;
     }
 
@@ -22,7 +20,7 @@ class CommandInvoker
         array_push($this->criteria,$criteria);
     }
 
-    public function shouldRun() {
+    public function shouldRunOn($Command) {
 
         foreach($this->criteria as $criteria) {
             $callback      = key($criteria);
@@ -30,8 +28,8 @@ class CommandInvoker
             $pattern       = key($testArray);
             $desiredResult = $testArray[$pattern];
 
-            $result = ($this->Command->$callback($pattern) == $desiredResult);
-            
+            $result = ($Command->$callback($pattern) == $desiredResult);
+
             if($result == false) return false;
         }
 
