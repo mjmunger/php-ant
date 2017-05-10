@@ -61,6 +61,4 @@ class NavMenuItem
     public function addMenuItem(NavMenuItem $Item) {
         $this->childItems->add($Item);
     }
-
-
 }

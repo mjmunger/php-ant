@@ -240,4 +240,63 @@ EOF;
 EOF;
         $this->assertSame($html, $Writer->getHTML());
     }
+
+    /**
+     * @dataProvider providerTestBuildMenu
+     * */
+
+    function testBuildMenu($menuArray, $expectedMenu) {
+        $Menu = new NavMenu();
+        $Menu->buildMenu($menuArray);
+
+        $Writer = new NavMenuWriter($Menu);
+
+        $this->assertCount(2, $Menu->items);
+
+        $this->assertSame($expectedMenu, $Writer->getHTML());
+    }
+
+    function providerTestBuildMenu() {
+        $Menu = [ 'Foo'   => [ 'Bar' => '/path/to/bar'
+                             , 'Baz' => '/path/to/baz'
+                             ]
+                , 'Admin' => [ 'Special Menu' => '/path/to/special/menu'
+                             , 'Users'        => [ 'Add User'    => '/path/to/add/user'
+                                                 , 'Remove User' => '/path/to/remove/user'
+                                                 ]
+                             ]
+                ];
+
+        $expected = '<nav>
+    <div class="w3-bar ant-nav-bar">
+<div class="w3-dropdown-hover">
+    <button class="w3-button">Top1</button>
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+<a href="/path/to/bar" class="w3-bar-item w3-button ant-leaf">Bar</a>
+<a href="/path/to/baz" class="w3-bar-item w3-button ant-leaf">Baz</a>
+
+    </div>
+</div>
+<div class="w3-dropdown-hover">
+    <button class="w3-button">Top1</button>
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+<a href="/path/to/special/menu" class="w3-bar-item w3-button ant-leaf">Special Menu</a>
+<div class="w3-dropdown-hover">
+    <button class="w3-button">Top1</button>
+    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+<a href="/path/to/add/user" class="w3-bar-item w3-button ant-leaf">Add User</a>
+<a href="/path/to/remove/user" class="w3-bar-item w3-button ant-leaf">Remove User</a>
+
+    </div>
+</div>
+<a href="Array" class="w3-bar-item w3-button ant-leaf">Users</a>
+
+    </div>
+</div>
+
+    </div>
+</nav>';
+
+        return [[$Menu, $expected]];
+    }
 }
