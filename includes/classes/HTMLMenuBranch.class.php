@@ -14,7 +14,7 @@ class HTMLMenuBranch extends HTMLMenuNode implements MenuTree
 
         $format = <<<EOF
 <div class="w3-dropdown-hover">
-    <button class="w3-button">Top1</button>
+    <button class="w3-button">%s</button>
     <div class="w3-dropdown-content w3-bar-block w3-card-4">
 %s
     </div>
@@ -22,7 +22,7 @@ class HTMLMenuBranch extends HTMLMenuNode implements MenuTree
 
 EOF;
 
-        return sprintf($format,$buffer);
+        return sprintf($format,$this->title, $buffer);
         
     }
 }

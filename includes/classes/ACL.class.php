@@ -31,7 +31,7 @@ Class ACL
 SELECT 
     *
 FROM
-    phpant.acls
+    acls
 WHERE
     users_roles_id = (SELECT 
             users_roles_id
