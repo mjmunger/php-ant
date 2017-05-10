@@ -949,4 +949,20 @@ Class AntApp
         return false;
     }
 
+    /**
+     * Returns an array of menu items that can be included in navigation. 
+     * 
+     * By default, this returns an empty array. To allow your app to add items
+     * to a menu, you need to override this method in your app.
+     * 
+     * See the example in the ant-app-test app.
+     * 
+     * @return array An associative array of menu items.
+     * */
+
+
+    function getMenuItems() {
+        return [];
+    }
+
 }
