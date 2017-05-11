@@ -874,13 +874,22 @@ Class AntApp
         $Iterator  = new \RecursiveIteratorIterator($Directory);
         $files     = new \RegexIterator($Iterator, '/^.+\.css$/i', \RecursiveRegexIterator::GET_MATCH);
 
+        $buffer = [];
+
         foreach($files as $file) {
             $url = $args['AE']->Configs->getWebURI($file[0]);
+            array_push($buffer,$url);
+        }
+
+        $buffer = array_unique($buffer);
+        asort($buffer);
+
+        foreach($buffer as $url) {
             printf($format,$url);
         }
 
-        $url = $args['AE']->Configs->getWebURI($file[0]);
-        printf($format,$url);
+        //$url = $args['AE']->Configs->getWebURI($file[0]);
+        //printf($format,$url);
         return [ 'success' => true ];
     }
 
@@ -895,8 +904,15 @@ Class AntApp
         $Iterator  = new \RecursiveIteratorIterator($Directory);
         $files     = new \RegexIterator($Iterator, '/^.+\.js$/i', \RecursiveRegexIterator::GET_MATCH);
 
+        $buffer = [];
         foreach($files as $file) {
             $url = $args['AE']->Configs->getWebURI($file[0]);
+            array_push($buffer,$url);
+        }
+
+        asort($buffer);
+
+        foreach($buffer as $url) {
             printf($format,$url);
         }
 
@@ -914,13 +930,19 @@ Class AntApp
         $Iterator  = new \RecursiveIteratorIterator($Directory);
         $files     = new \RegexIterator($Iterator, '/^.+\.css$/i', \RecursiveRegexIterator::GET_MATCH);
 
+        $buffer = [];
+
         foreach($files as $file) {
             $url = $args['AE']->Configs->getWebURI($file[0]);
+            array_push($buffer);
+        }
+
+        asort($buffer);
+
+        foreach($buffer as $url) {
             printf($format,$url);
         }
 
-        $url = $args['AE']->Configs->getWebURI($file[0]);
-        printf($format,$url);
         return [ 'success' => true ];
     }
 
@@ -961,7 +983,7 @@ Class AntApp
      * */
 
 
-    function getMenuItems() {
+    function getMenuItems($args) {
         return [];
     }
 

@@ -8,4 +8,9 @@ class HTMLMenuLeaf extends HTMLMenuNode implements MenuTree
         $pattern = '<a href="%s" class="w3-bar-item w3-button ant-leaf">%s</a>' . PHP_EOL;
         return sprintf($pattern,$this->uri,$this->title);
     }
+
+    public function getMobileHTML() {
+        $pattern = '<a href="%s" class="w3-block w3-button ant-leaf">%s</a>' . PHP_EOL;
+        return sprintf($pattern,$this->uri,$this->title);
+    }
 }
