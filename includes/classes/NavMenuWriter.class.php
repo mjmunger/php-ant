@@ -28,7 +28,7 @@ class NavMenuWriter extends NavMenu
 
         //Wrap in the <nav> tags.
         $navTags = <<<EOF
-    <a href="/" class="w3-bar-item w3-button ant-leaf">Home</a>
+    <a href="/" class="w3-bar-item w3-button w3-hide-large w3-hide-medium ant-leaf">Home</a>
     <a href="javascript:void(0)" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="showHideMobileMenu()">&#9776;</a>
     <div class="mobile-nav">
 
