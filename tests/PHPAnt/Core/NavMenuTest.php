@@ -179,7 +179,7 @@ class NavMenuTest extends TestCase
         $this->assertCount(3, $Branch->children);
 
         $html = <<<EOF
-<div class="w3-dropdown-hover">
+<div class="w3-dropdown-hover w3-hide-small nav-top1">
     <button class="w3-button">Top1</button>
     <div class="w3-dropdown-content w3-bar-block w3-card-4">
 <a href="/path/to/sub/1" class="w3-bar-item w3-button ant-leaf">Sub 1</a>
@@ -223,8 +223,10 @@ EOF;
 
         $html = <<<EOF
 <nav>
+<!-- Desktop HTML -->
     <div class="w3-bar ant-nav-bar">
-<div class="w3-dropdown-hover">
+    <a href="/" class="w3-bar-item w3-button w3-hide-small ant-leaf">Home</a>
+<div class="w3-dropdown-hover w3-hide-small nav-top1">
     <button class="w3-button">Top1</button>
     <div class="w3-dropdown-content w3-bar-block w3-card-4">
 <a href="/path/to/sub/1" class="w3-bar-item w3-button ant-leaf">Sub 1</a>
@@ -236,6 +238,23 @@ EOF;
 <a href="/top2/" class="w3-bar-item w3-button ant-leaf">Top2</a>
 
     </div>
+<!-- /Desktop HTML -->
+<!-- Mobile HTML -->
+    <a href="/" class="w3-bar-item w3-button ant-leaf">Home</a>
+    <a href="javascript:void(0)" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="showHideMobileMenu()">&#9776;</a>
+    <div class="mobile-nav">
+
+<button class="w3-button w3-block w3-left-align mobile-nav-button" data-target="mobile-nav-top1">Top1</button>
+<div id="mobile-nav-top1" class="w3-hide">
+    <a href="/path/to/sub/1" class="w3-block w3-button ant-leaf">Sub 1</a>
+<a href="/path/to/sub/2" class="w3-block w3-button ant-leaf">Sub 2</a>
+<a href="/path/to/sub/3" class="w3-block w3-button ant-leaf">Sub 3</a>
+
+</div>
+<a href="/top2/" class="w3-block w3-button ant-leaf">Top2</a>
+
+    </div>
+<!-- /Mobile HTML -->
 </nav>
 EOF;
         $this->assertSame($html, $Writer->getHTML());
@@ -252,7 +271,7 @@ EOF;
         $Writer = new NavMenuWriter($Menu);
 
         $this->assertCount(2, $Menu->items);
-
+        
         $this->assertSame($expectedMenu, $Writer->getHTML());
     }
 
@@ -268,21 +287,23 @@ EOF;
                 ];
 
         $expected = '<nav>
+<!-- Desktop HTML -->
     <div class="w3-bar ant-nav-bar">
-<div class="w3-dropdown-hover">
-    <button class="w3-button">Top1</button>
+    <a href="/" class="w3-bar-item w3-button w3-hide-small ant-leaf">Home</a>
+<div class="w3-dropdown-hover w3-hide-small nav-foo">
+    <button class="w3-button">Foo</button>
     <div class="w3-dropdown-content w3-bar-block w3-card-4">
 <a href="/path/to/bar" class="w3-bar-item w3-button ant-leaf">Bar</a>
 <a href="/path/to/baz" class="w3-bar-item w3-button ant-leaf">Baz</a>
 
     </div>
 </div>
-<div class="w3-dropdown-hover">
-    <button class="w3-button">Top1</button>
+<div class="w3-dropdown-hover w3-hide-small nav-admin">
+    <button class="w3-button">Admin</button>
     <div class="w3-dropdown-content w3-bar-block w3-card-4">
 <a href="/path/to/special/menu" class="w3-bar-item w3-button ant-leaf">Special Menu</a>
-<div class="w3-dropdown-hover">
-    <button class="w3-button">Top1</button>
+<div class="w3-dropdown-hover w3-hide-small nav-users">
+    <button class="w3-button">Users</button>
     <div class="w3-dropdown-content w3-bar-block w3-card-4">
 <a href="/path/to/add/user" class="w3-bar-item w3-button ant-leaf">Add User</a>
 <a href="/path/to/remove/user" class="w3-bar-item w3-button ant-leaf">Remove User</a>
@@ -295,6 +316,33 @@ EOF;
 </div>
 
     </div>
+<!-- /Desktop HTML -->
+<!-- Mobile HTML -->
+    <a href="/" class="w3-bar-item w3-button ant-leaf">Home</a>
+    <a href="javascript:void(0)" class="w3-bar-item w3-button w3-right w3-hide-large w3-hide-medium" onclick="showHideMobileMenu()">&#9776;</a>
+    <div class="mobile-nav">
+
+<button class="w3-button w3-block w3-left-align mobile-nav-button" data-target="mobile-nav-foo">Foo</button>
+<div id="mobile-nav-foo" class="w3-hide">
+    <a href="/path/to/bar" class="w3-block w3-button ant-leaf">Bar</a>
+<a href="/path/to/baz" class="w3-block w3-button ant-leaf">Baz</a>
+
+</div>
+<button class="w3-button w3-block w3-left-align mobile-nav-button" data-target="mobile-nav-admin">Admin</button>
+<div id="mobile-nav-admin" class="w3-hide">
+    <a href="/path/to/special/menu" class="w3-block w3-button ant-leaf">Special Menu</a>
+<button class="w3-button w3-block w3-left-align mobile-nav-button" data-target="mobile-nav-users">Users</button>
+<div id="mobile-nav-users" class="w3-hide">
+    <a href="/path/to/add/user" class="w3-block w3-button ant-leaf">Add User</a>
+<a href="/path/to/remove/user" class="w3-block w3-button ant-leaf">Remove User</a>
+
+</div>
+<a href="Array" class="w3-block w3-button ant-leaf">Users</a>
+
+</div>
+
+    </div>
+<!-- /Mobile HTML -->
 </nav>';
 
         return [[$Menu, $expected]];
