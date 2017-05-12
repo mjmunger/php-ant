@@ -421,6 +421,9 @@ class AppEngineTest extends TestCase
 		$foundTheApp = false;
 		foreach($A->apps as $app) {
 			if($app->appName == 'Test Ant App') {
+				//disable access control. It's not needed here.
+				$app->hasACL = false;
+				
 				$foundTheApp = true;
 				$this->assertGreaterThan(0, count($app->routedActions));
 				$isPresent = false;
