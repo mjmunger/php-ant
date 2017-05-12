@@ -438,7 +438,7 @@ Class AntApp
                                 , 9
                                 );
 
-                    if(isset($Engine->current_user) {
+                    if(isset($Engine->current_user)) {
                         $Engine->log( $this->appName
                                     , sprintf("Current user data: user id: %s, user role id: %s", $Engine->current_user->users_id, $Engine->current_user->users_roles_id )
                                     , 'debug.log'
