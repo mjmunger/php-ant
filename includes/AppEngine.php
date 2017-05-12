@@ -942,8 +942,10 @@ class AppEngine {
 
         $this->log('ERROR',$message);
 
-        $this->log($context);
-        
+        foreach($context as $data) {
+            $this->log('ERROR'$data);
+        }
+
         //$message = sprintf("Error Context: %s", print_r($context,true));
         //$this->log('ERROR',$message);
     }
