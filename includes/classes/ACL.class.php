@@ -29,6 +29,9 @@ Class ACL
     }
 
     function roleCanExecute($roleId) {
+        //Sys admins have god-like powers.
+        if($roleId == 1) return true;
+        
         $sql = <<<EOQ
 SELECT 
     *
@@ -53,6 +56,9 @@ EOQ;
     }
 
     function userCanExecute($usersId) {
+        //Sys admins have god-like powers.
+        if($this->userIsAdmin($usersId)) return true;
+
         $sql = <<<EOQ
 SELECT 
     *
@@ -79,6 +85,23 @@ EOQ;
         }
 
         return ($stmt->rowCount() > 0);
+    }
+
+    private function userIsAdmin($usersId) {
+        $sql = "SELECT users_roles_id FROM users where users_id = ? LIMIT 1";
+        $values = [$usersId];
+
+        $stmt = $this->PDO->prepare($sql);
+        $result = $stmt->execute($values);
+        if($result == false) {
+            throw new Exception("PDO SQL Query failed: " . $stmt->errorInfo()[2], 1);
+            
+            var_dump($stmt->errorInfo());
+            die(__FILE__  . ':' . __LINE__ );
+        }
+
+        $row = $stmt->fetchObject();
+        return ($row->users_roles_id == 1);
     }
 
     function addPermission($roles_id) {

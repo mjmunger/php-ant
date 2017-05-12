@@ -391,6 +391,8 @@ Class AntApp
 
     public function trigger($requested_hook,$args = false)
     {
+        $Engine = $args['AE'];
+
         // short-circuit if this app should only run one time and has already won. Remember, first app wins, so control which actually fires by properly setting app priorities!
 
         if($this->runOnce && $this->hasRun) return ['success' => true ];
@@ -424,7 +426,33 @@ Class AntApp
 
                     if($this->visualTrace) $args['AE']->Configs->pageEcho(sprintf('<span class="w3-tag w3-round w3-green" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
 
-                    $result    = call_user_func(array($this,$hook['callback']),($args?$args:false));
+                    $Engine->log( $this->appName
+                                , sprintf("Calling callback (%s) for hook (%s) within app (%s)", $hook['callback'], $hook['hook'], $this->appName)
+                                , 'debug.log'
+                                , 9
+                                );
+
+                    $Engine->log( $this->appName
+                                , "State of \$Engine->current_user:" . (isset($Engine->current_user) ? "set" : "not set")
+                                , 'debug.log'
+                                , 9
+                                );
+
+                    if(isset($Engine->current_user) {
+                        $Engine->log( $this->appName
+                                    , sprintf("Current user data: user id: %s, user role id: %s", $Engine->current_user->users_id, $Engine->current_user->users_roles_id )
+                                    , 'debug.log'
+                                    , 9
+                                    );
+                    }
+
+                    $result    = call_user_func(array($this,$hook['callback']),( $args ? $args : false ));
+
+                    $Engine->log( $this->appName
+                                , "Result of that function callback execution: " . ($result['success'] ? "Successful" : "Failed")
+                                , 'debug.log'
+                                , 9
+                                );
 
                     //Increment the runcount for this action in this app.
                     $actionRunCount++;
