@@ -16,6 +16,8 @@
 
 namespace PHPAnt\Core;
 
+use \Exception;
+
 Class ACL
 {
     public $PDO      = NULL;
@@ -24,6 +26,30 @@ Class ACL
     function __construct($PDO, $action) {
         $this->PDO      = $PDO;
         $this->action   = $action;
+    }
+
+    function roleCanExecute($roleId) {
+        $sql = <<<EOQ
+SELECT 
+    *
+FROM
+    acls
+WHERE
+    users_roles_id = ? and acls_event = ?
+EOQ;
+
+        $values = [$roleId, $this->action];
+
+        $stmt = $this->PDO->prepare($sql);
+        $result = $stmt->execute($values);
+        if($result == false) {
+            var_dump($stmt->errorInfo());
+            die(__FILE__  . ':' . __LINE__ );
+        }
+
+        $return = ($stmt->rowCount() > 0);
+        return $return;
+
     }
 
     function userCanExecute($usersId) {
@@ -46,7 +72,9 @@ EOQ;
         $stmt = $this->PDO->prepare($sql);
         $result = $stmt->execute($values);
         if($result == false) {
-            var_dump($stmt->errorInfo);
+            throw new Exception("PDO SQL Query failed: " . $stmt->errorInfo()[2], 1);
+            
+            var_dump($stmt->errorInfo());
             die(__FILE__  . ':' . __LINE__ );
         }
 

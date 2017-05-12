@@ -972,7 +972,13 @@ class AppEngine {
 
                 if($action) {
                     //Check ACL for this action here. If fail, continue.
-                    // INSERT CODE HERE.
+                    if($app->hasACL && ($app->shouldRun($this,$action) == false)) {
+                        echo '<div class="w3-panel w3-red">';
+                        echo '  <h3>Danger!</h3>';
+                        echo '  <p>You do not have permissions to perform the requested action.</p>';
+                        echo '</div> ';
+                        continue;
+                    }
 
                     //Get priority.
                     $priority = $app->routedActionPriorities[$action];
@@ -1051,5 +1057,33 @@ class AppEngine {
         $results['success'] = true;
         // $results['exit']    = true;
         return $results;
+    }
+
+    /**
+     * Convenience fascade function that gives access to PDO object in a sane manner.
+     * 
+     * @return object A PDO Prepared statement object.
+     * */
+
+    public function prepare($sql) {
+        return $this->Configs->pdo->prepare($sql);
+    }
+
+    /**
+     * Convenience fascade function that returns the App Engine's PDO instance.
+     * @return object the PDO object of the App Engine.
+     * */
+
+    public function getPDO() {
+        return $this->Configs->pdo;
+    }
+
+    /**
+     * Convenience fascade function that returns the logged in user.
+     * @return object The current logged in user.
+     * */
+
+    public function getCurrentUser() {
+        return $this->current_user;
     }
 }

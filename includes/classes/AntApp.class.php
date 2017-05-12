@@ -803,6 +803,20 @@ Class AntApp
             return false;
         }
 
+        $Engine->log( $this->appName
+                    , "$this->appName " . ($this->hasACL == true ? "has" : "does not support") . " access control."
+                    );
+        //If the app does not support ACL, then return true because there is no mroe testing to be done.
+        if(!$this->hasACL) return true;
+
+        //If the current user does not have access to this hook (action), deny it.
+        $ACL = new ACL($Engine->getPDO(), $requested_hook);
+        $access = $ACL->userCanExecute($Engine->current_user->users_id);
+        if($access == false) {
+            $Engine->log($this->appName,"$this->appName will NOT run for $requested_hook because the current user does not have permissions to access it.");
+            return false;
+        }
+
         //allow the app to run by default.
         return true;
     }
@@ -969,6 +983,17 @@ Class AntApp
 
         //Default to false (deny access), just in case something weird happens.
         return false;
+    }
+
+    /**
+     * Returns an array of actions that this app allows to be controlled by
+     * user permissions.
+     * 
+     * This must be overridden by the app itself.
+     * */
+
+    function getProtectedActionsList() {
+        return [];
     }
 
     /**
