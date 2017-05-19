@@ -223,7 +223,7 @@ class AppEngine {
     }
 
     function setVisualTrace($state) {
-        $this->visualTrace = $state;
+        $this->visualTrace = ($state == 'on' ? true : false);
 
         $this->log('AppEngine',sprintf("Visual trace set to: %s",($this->visualTrace ? "on" : "off")),'AppEngine.log',1);
 
