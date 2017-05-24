@@ -223,7 +223,7 @@ class AppEngine {
     }
 
     function setVisualTrace($state) {
-        $this->visualTrace = $state;
+        $this->visualTrace = ($state == 'on' ? true : false);
 
         $this->log('AppEngine',sprintf("Visual trace set to: %s",($this->visualTrace ? "on" : "off")),'AppEngine.log',1);
 
@@ -851,9 +851,7 @@ class AppEngine {
 
             //Determine where the tests directory is for the app.
             //Link the 'tests' directory as the target for the dirname if the symlink does not already exist.
-            if(!file_exists($link)) {
-                if(!symlink($testsDir, $link)) echo "Symlink $testsDir -> $link failed";
-            }
+            if(!file_exists($link)) $this->log('AppEngine', "Symlink $testsDir -> $link failed");
         }
     }
 

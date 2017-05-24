@@ -94,11 +94,13 @@ function getMyConfigs($vars = false) {
  * @author Michael Munger <michael@highpoweredhelp.com>
  **/
 
-function getWebConfigs($vars = false) {
+function getWebConfigs($vars = false, $pdo = false) {
 
 	//Setup test.
 	$v = ($vars?$vars:getMockVars());
-	$pdo = gimmiePDO();
+	
+	if($pdo == false) $pdo = gimmiePDO();
+
 	$W = new PHPAnt\Core\ConfigWeb($pdo, $v);
 
 	$W->Server            = new PHPAnt\Core\ServerEnvironment();

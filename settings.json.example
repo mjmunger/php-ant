@@ -1,19 +1,29 @@
 {
-  "http_host": "http://phpant.local",
-  "document_root": "/var/www/",
+  "http_host": "http://app.example.com",
+  "document_root": "/var/www",
   "db": {
     "server": "localhost",
     "database": "phpant",
     "rootuser": "root",
-    "rootpass": "rootpass",
+    "rootpass": "password",
     "username": "antuser",
     "userpass": "foopass",
     "createdb": true
   },
   "adminuser": {
-  	"first":"Foo",
-  	"last":"Bar",
-  	"username":"you@yourdomain.com",
-  	"password":"barpass"
+    "first": "Foo",
+    "last": "User",
+    "username": "admin@example.com",
+    "password": "monkey1234"
+  },
+  "apps": {
+    "+Core App Manager": {
+      "hash": "d595ecf",
+      "remote": "https://github.com/mjmunger/phpant-app-manager.git"
+    },
+    "Default Grammar": {
+      "hash": "f7bd0b4",
+      "remote": "https://github.com/mjmunger/ant-app-default.git"
+    }
   }
 }

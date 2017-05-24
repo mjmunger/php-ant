@@ -423,7 +423,7 @@ Class AntApp
                  }
                 try {
 
-                    if($this->visualTrace) $args['AE']->Configs->pageEcho(sprintf('<span class="w3-tag w3-round w3-green" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
+                    if($this->visualTrace == true) $args['AE']->Configs->pageEcho(sprintf('<span class="w3-tag w3-round w3-green" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
 
                     $Engine->log( $this->appName
                                 , sprintf("Calling callback (%s) for hook (%s) within app (%s)", $hook['callback'], $hook['hook'], $this->appName)
@@ -459,7 +459,7 @@ Class AntApp
 
                 } catch (Exception $e) {
                     //Disable this app on next load, and log the exception.
-                    if($args['AE']->visualTrace) $args['AE']->Configs->pageEcho(printf('<span class="w3-tag w3-round w3-red" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
+                    if($args['AE']->visualTrace == true) $args['AE']->Configs->pageEcho(printf('<span class="w3-tag w3-round w3-red" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
                     $args['AE']->log($this->appName,$e->getMessage());
                     $args['AE']->log($this->appName,"***DISABLING THIS APP***");
                     $args['AE']->disableApp($this->appName,$args['AE']->availableApps[$this->appName]);
@@ -917,7 +917,11 @@ Class AntApp
 
         $format = '<link rel="stylesheet" type="text/css" href="%s"/>' . PHP_EOL;
 
-        $Directory = new \RecursiveDirectoryIterator($this->path . '/css/');
+        $cssDir = $this->path . '/css/';
+
+        if(!file_exists($cssDir)) return ['success' => false];
+        
+        $Directory = new \RecursiveDirectoryIterator($cssDir);
         $Iterator  = new \RecursiveIteratorIterator($Directory);
         $files     = new \RegexIterator($Iterator, '/^.+\.css$/i', \RecursiveRegexIterator::GET_MATCH);
 

@@ -20,4 +20,4 @@ php-ant.sublime-workspace
 settings.json
 ToDo.txt
 tests/test-config.php
-phpunit.xml
+phpunit.xmlupdate-web-docs.sh
