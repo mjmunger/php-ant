@@ -246,7 +246,6 @@ Class AntApp
      **/
 
     function registerAppRoutes($routes) {
-        //echo "<pre>"; var_dump($routes); echo "</pre>";  echo __FILE__ . ":" . __LINE__;
         $startSize = count($this->routedActions);
         $this->routedActions = array_merge($this->routedActions,$routes);
         return (count($this->routedActions) > $startSize);
@@ -835,10 +834,16 @@ Class AntApp
                     , "$this->appName " . ($this->hasACL == true ? "has" : "does not support") . " access control."
                     );
         //If the app does not support ACL, then return true because there is no mroe testing to be done.
-        if(!$this->hasACL) return true;
+        if($this->hasACL == false) return true;
 
         //If the current user does not have access to this hook (action), deny it.
         $ACL = new ACL($Engine->getPDO(), $requested_hook);
+
+        //Get AD Settings to prepare for ACL checks.
+        $data = json_decode( $Engine->Configs->getConfigs( [ 'ad-settings' ] )['ad-settings'], true );
+        //If this is an array, AD settings are set. Otherwise, it would be null (because no settings for AD exist).
+        if(is_array($data)) $ACL->enableADChecks();
+
         $access = $ACL->userCanExecute($Engine->current_user->users_id);
         if($access == false) {
             $Engine->log($this->appName,"$this->appName will NOT run for $requested_hook because the current user does not have permissions to access it.");
@@ -1007,6 +1012,12 @@ Class AntApp
 
         //Check to see if this user has access to this event.
         $ACL = new ACL($PDO, $action);
+
+        //Get AD Settings to prepare for ACL checks.
+        $data = json_decode( $Engine->Configs->getConfigs( [ 'ad-settings' ] )['ad-settings'], true );
+        //If this is an array, AD settings are set. Otherwise, it would be null (because no settings for AD exist).
+        if(is_array($data)) $ACL->enableADChecks();
+
         return $ACL->userCanExecute($User->users_id);
 
         //Default to false (deny access), just in case something weird happens.
