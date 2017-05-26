@@ -111,6 +111,8 @@ EOQ;
             var_dump($stmt->errorInfo());
             die(__FILE__  . ':' . __LINE__ );
         }
+        
+        $return = ($stmt->rowCount() > 0);
 
         $this->debug( [__FUNCTION__ => sprintf( "Does local user ID (%s) have permission to execute '%s'? Answer: %s"
                                             , $usersId
@@ -120,7 +122,8 @@ EOQ;
                     ]
                    );
 
-        return ($stmt->rowCount() > 0);
+        return $return;
+
     }
 
     function userSecurityGroupsCanExecute($usersId) {
@@ -189,7 +192,7 @@ EOQ;
         if($this->userSecurityGroupsCanExecute($usersId)) return true;
 
         //Default to access denied.
-        $this->log("User ID (%s) does not have any authority to execute " . $this->action);
+        $this->log(sprintf("User ID (%s) does not have any authority to execute " , $this->action));
         
         return false;
 
