@@ -912,11 +912,10 @@ Class AntApp
 
         $format = '<link rel="stylesheet" type="text/css" href="%s"/>' . PHP_EOL;
 
-        $cssDir = $this->path . '/css/';
+        $targetDir = $this->path . '/css/';
+        if(!file_exists($targetDir)) return ['success' => false];
 
-        if(!file_exists($cssDir)) return ['success' => false];
-        
-        $Directory = new \RecursiveDirectoryIterator($cssDir);
+        $Directory = new \RecursiveDirectoryIterator($targetDir);
         $Iterator  = new \RecursiveIteratorIterator($Directory);
         $files     = new \RegexIterator($Iterator, '/^.+\.css$/i', \RecursiveRegexIterator::GET_MATCH);
 
