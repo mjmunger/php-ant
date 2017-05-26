@@ -169,7 +169,7 @@ EOQ;
                            , ($return ? "belongs" : "does not belong")
                            , $this->action
                            )
-                  )
+                  );
 
         return $return;
 

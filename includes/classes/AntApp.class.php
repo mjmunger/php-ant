@@ -1008,7 +1008,7 @@ Class AntApp
      * @author Michael Munger <michael@highpoweredhelp.com>
      **/
 
-   function userCanExecute($PDO, $action, $User) {
+   function userCanExecute($PDO, $action, $User, $enableADChecks = false) {
 
         //Admins (users_roles_id == 1) always have access to everything.
         if($User->users_roles_id == 1 ) return true;
@@ -1017,9 +1017,7 @@ Class AntApp
         $ACL = new ACL($PDO, $action);
 
         //Get AD Settings to prepare for ACL checks.
-        $data = json_decode( $Engine->Configs->getConfigs( [ 'ad-settings' ] )['ad-settings'], true );
-        //If this is an array, AD settings are set. Otherwise, it would be null (because no settings for AD exist).
-        if(is_array($data)) $ACL->enableADChecks();
+        if($enableADChecks) $ACL->enableADChecks();
 
         return $ACL->userCanExecute($User->users_id);
 
