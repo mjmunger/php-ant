@@ -23,10 +23,21 @@ Class ACL
     public $PDO       = NULL;
     public $action    = NULL;
     public $adEnabled = false;
+    public $messages  = [];
+    public $debug     = [];
+
 
     function __construct($PDO, $action) {
         $this->PDO      = $PDO;
         $this->action   = $action;
+    }
+
+    private function log($message) {
+        array_push($this->messages, $message);
+    }
+
+    private function debug($message) {
+        array_push($this->debug, $message);
     }
 
     function enableADChecks() {
@@ -39,7 +50,10 @@ Class ACL
 
     function roleCanExecute($roleId) {
         //Sys admins have god-like powers.
-        if($roleId == 1) return true;
+        if($roleId == 1) {
+            $this->log("Current user is an admin. Granting god-like access.");
+            return true;
+        }
         
         $sql = <<<EOQ
 SELECT 
@@ -52,6 +66,7 @@ EOQ;
 
         $values = [$roleId, $this->action];
 
+
         $stmt = $this->PDO->prepare($sql);
         $result = $stmt->execute($values);
         if($result == false) {
@@ -60,6 +75,13 @@ EOQ;
         }
 
         $return = ($stmt->rowCount() > 0);
+        $this->debug( [__FUNCTION__ => sprintf( "Does role ID (%s) have permission to execute '%s'? Answer: %s"
+                                            , $roleId
+                                            , $this->action
+                                            , ($return ? "Yes" : "No")
+                                            )
+                    ]
+                   );
         return $return;
 
     }
@@ -89,6 +111,14 @@ EOQ;
             var_dump($stmt->errorInfo());
             die(__FILE__  . ':' . __LINE__ );
         }
+
+        $this->debug( [__FUNCTION__ => sprintf( "Does local user ID (%s) have permission to execute '%s'? Answer: %s"
+                                            , $usersId
+                                            , $this->action
+                                            , ($return ? "Yes" : "No")
+                                            )
+                    ]
+                   );
 
         return ($stmt->rowCount() > 0);
     }
@@ -124,7 +154,24 @@ EOQ;
             die(__FILE__  . ':' . __LINE__ );
         }
 
-        return ($stmt->rowCount() > 0);        
+        $return = ($stmt->rowCount() > 0);        
+
+        $this->debug( [__FUNCTION__ => sprintf( "Does user ID (%s) belong to an active directory security group that can execute '%s'? Answer: %s"
+                                            , $usersId
+                                            , $this->action
+                                            , ($return ? "Yes" : "No")
+                                            )
+                    ]
+                   );
+
+        $this->log( sprintf( "User ID (%s) %s to a security group allowed to execute action '%s'"
+                           , $usersId
+                           , ($return ? "belongs" : "does not belong")
+                           , $this->action
+                           )
+                  )
+
+        return $return;
 
     }
     function userCanExecute($usersId) {
@@ -142,6 +189,8 @@ EOQ;
         if($this->userSecurityGroupsCanExecute($usersId)) return true;
 
         //Default to access denied.
+        $this->log("User ID (%s) does not have any authority to execute " . $this->action);
+        
         return false;
 
     }
