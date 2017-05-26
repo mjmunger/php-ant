@@ -847,6 +847,14 @@ Class AntApp
         $access = $ACL->userCanExecute($Engine->current_user->users_id);
         if($access == false) {
             $Engine->log($this->appName,"$this->appName will NOT run for $requested_hook because the current user does not have permissions to access it.");
+            foreach($ACL->messages as $message) {
+                $Engine->log('ACL',$message);
+            }
+
+            foreach($ACL->debug as $message) {
+                $Engine->log('ACL',$message, 'acl.debug', 9);
+            }
+
             return false;
         }
 
@@ -1019,7 +1027,9 @@ Class AntApp
         //Get AD Settings to prepare for ACL checks.
         if($enableADChecks) $ACL->enableADChecks();
 
-        return $ACL->userCanExecute($User->users_id);
+        $return = $ACL->userCanExecute($User->users_id);
+
+        return $return;
 
         //Default to false (deny access), just in case something weird happens.
         return false;
