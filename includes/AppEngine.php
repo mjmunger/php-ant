@@ -897,7 +897,6 @@ class AppEngine {
     function log($component,$message,$file = 'AppEngine.log',$minimumVerbosity = 0, $debugPrint = false, $divAlert= false) {
         if($this->verbosity < $minimumVerbosity) return false;
 
-        //if($debugPrint) $this->Configs->debug_print($message);
 
         //if($divAlert) $this->Configs->divalert($message,$divAlert);
 
