@@ -133,12 +133,12 @@ WHERE
     users_roles_id IN (SELECT 
     users_roles_id
 FROM
-    timing.users_roles
+    users_roles
 WHERE
     users_roles_title IN (SELECT 
             user_groups_group
         FROM
-            timing.user_groups
+            user_groups
         WHERE
             users_users_id = ?)) AND acls_event = ?
 EOQ;
