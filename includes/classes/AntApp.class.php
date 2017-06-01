@@ -836,6 +836,9 @@ Class AntApp
         //If the app does not support ACL, then return true because there is no mroe testing to be done.
         if($this->hasACL == false) return true;
 
+        //If the requested action is not in the list of protected actions, allow it.
+        if($this->actionIsProtected($requested_hook) == false) return true;
+
         //If the current user does not have access to this hook (action), deny it.
         $ACL = new ACL($Engine->getPDO(), $requested_hook);
 
@@ -1009,6 +1012,11 @@ Class AntApp
             die("You have tried to submit a request without a valid authenticity token. Can't do that.");
     }
 
+    function actionIsProtected($action) {
+        $protectedActions = array_keys($this->getProtectedActionsList());
+        return in_array($action,$protectedActions);
+    }
+
     /**
      * Checks the ACL table to see if this user has permissions to access a given event.
      * This is a DENY, ALLOW feature! Not defined = no access granted.
@@ -1017,6 +1025,12 @@ Class AntApp
      **/
 
    function userCanExecute($PDO, $action, $User, $enableADChecks = false) {
+
+        //If this app does not support ACL, return true
+        if($this->hasACL == false) return true;
+
+        //If the requested action is not in the list of protected actiosn, return true;
+        if($this->actionIsProtected($action) == false) return true;
 
         //Admins (users_roles_id == 1) always have access to everything.
         if($User->users_roles_id == 1 ) return true;
