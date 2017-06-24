@@ -5,7 +5,7 @@ use PHPAnt\Core;
 $rootDir  = __DIR__ . '/';
 
 /* Get command line options */
-$options = getopt('v::d::s::x::');
+$options = getopt('v::d::s::x:');
 
 /*Default options*/
 $loader_debug = false;
