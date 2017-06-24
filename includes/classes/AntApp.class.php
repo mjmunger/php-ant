@@ -437,7 +437,7 @@ Class AntApp
                                 , 9
                                 );
 
-                    if(isset($Engine->current_user)) {
+                    if(isset($Engine->current_user->users_id)) {
                         $Engine->log( $this->appName
                                     , sprintf("Current user data: user id: %s, user role id: %s", $Engine->current_user->users_id, $Engine->current_user->users_roles_id )
                                     , 'debug.log'
@@ -467,9 +467,8 @@ Class AntApp
                     $args['AE']->reload();
                 }
 
-                if($this->verbosity > 14) {
-                    $args['AE']->Configs->debug_print($result,"RESULT");
-                }
+                if($this->verbosity > 14) $args['AE']->Configs->debug_print($result,"RESULT");
+
                 //We always return an array.
                 if(!is_array($result)) {
                     /*$this->showError(sprintf("Error! The app %s is not returning an array from the function %s. All app functions should return an array as a result: even if you are just returing array('success' => true) or array('success' => false) to indicate the success of your app acation." . PHP_EOL,$this->appName,$hook['callback']));*/
@@ -1074,6 +1073,31 @@ Class AntApp
 
     function getMenuItems($args) {
         return [];
+    }
+
+    /**
+     *
+     * Loops through CommandInvoker objects in $this->AppCommands (a
+     * CommandsList object) and executes commands as appropriate.
+     * 
+     * Commands should be added to the app using the $this->AppCommands->add() method.
+     *
+     * */
+
+    function processCommand($args) {
+        $cmd = $args['command'];
+
+        //Use the AppCommands to process the command.
+        foreach($this->AppCommands as $Invoker) {
+            $callback = $Invoker->callback;
+            if($Invoker->shouldRunOn($cmd)) $this->$callback($args);
+        }
+
+        return ['success' => true];
+    }
+
+    function loadCommands() {
+        //Do nothing. This should be overriden in the child class.
     }
 
 }
