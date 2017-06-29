@@ -38,6 +38,7 @@ if(file_exists('includes/vendor/autoload.php')) include('includes/vendor/autoloa
 /*include('error_handler.php');*/
 
 /** LOAD CONFIGURATIONS **/
+if(!isset($debugMode)) $debugMode = false;
 
 $pdo = gimmiePDO();
 if($debugMode) {
