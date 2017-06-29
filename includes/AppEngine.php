@@ -836,9 +836,17 @@ class AppEngine {
             $appDirName = end($dirParts);
 
             $targetPath = $this->Configs->document_root . '/tests/' . $namespace;
-            if(!file_exists($targetPath)) mkdir($targetPath,0744,true);
+
+            if(!file_exists($targetPath)) {
+                $this->log('AppEngine'
+                          ,sprintf("Target path (%s) does not exist", $targetPath)
+                          ,'AppEngine.log'
+                          ,10);
+                mkdir($targetPath,0744,true);
+            }
 
             $link = $targetPath . '/' . $appDirName;
+
 
             //Build the target for the symlink.
             //1. Determine the directory for the app.
@@ -851,7 +859,10 @@ class AppEngine {
 
             //Determine where the tests directory is for the app.
             //Link the 'tests' directory as the target for the dirname if the symlink does not already exist.
-            if(!file_exists($link)) $this->log('AppEngine', "Symlink $testsDir -> $link failed");
+
+            if(!file_exists($link)) {
+                if(symlink($testsDir, $link) === false) $this->log('AppEngine', "Symlink $testsDir -> $link failed");
+            }
         }
     }
 
