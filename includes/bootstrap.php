@@ -1,6 +1,8 @@
 <?php
 namespace PHPAnt\Core;
 
+use \PDO;
+
 if(!file_exists('includes/config.php')) die("You must have a config.php file configured. Try renaming / copying config.php.sample to config.php, and follow the instructions in the file");
 
 /* Require the configuration for this installation */
@@ -36,8 +38,44 @@ if(file_exists('includes/vendor/autoload.php')) include('includes/vendor/autoloa
 /*include('error_handler.php');*/
 
 /** LOAD CONFIGURATIONS **/
+if(!isset($debugMode)) $debugMode = false;
 
 $pdo = gimmiePDO();
+if($debugMode) {
+    printf("DEBUG MODE ENABLED\n");
+
+    try {
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (Exception $e) {
+        print "PDO Error: " . $e->getMessage() . PHP_EOL;
+        die("Cannot run with a database error.");
+    }
+
+    print str_pad('', 80,'=');
+    print PHP_EOL;
+    print "MySQL PDO Cnnection Information";
+    print PHP_EOL;
+    print str_pad('', 80,'=');
+    print PHP_EOL;
+
+    printf("Database Connection: OK" . PHP_EOL);
+
+    print str_pad('Server Information:', 20);
+    print $pdo->getAttribute(PDO::ATTR_SERVER_INFO) . PHP_EOL;
+
+    print str_pad('Connection Status:', 20);
+    print $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL;
+
+    print str_pad('PDO Client Version:', 20);
+    print $pdo->getAttribute(PDO::ATTR_CLIENT_VERSION) . PHP_EOL;
+
+    print str_pad('PDO Driver Name:', 20);
+    print $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . PHP_EOL;
+
+    print str_pad('PDO Error Mode:', 20);
+    print $pdo->getAttribute(PDO::ATTR_ERRMODE) . PHP_EOL;
+    print PHP_EOL;
+}
 $antConfigs = ConfigFactory::getConfigs($pdo,$vars);
 
 //Provision the server variables if we have a ConfigWeb object.
@@ -63,7 +101,7 @@ switch($antConfigs->environment) {
         $WR->setup($_SERVER);
         $WR->parsePost($_POST);
         //Verify a token if it has been given.
-        $WR->verifyAuthenticityToken();
+        #$WR->verifyAuthenticityToken();
         //Create a new one for this request.
         $WR->generateAuthenticityToken();
         $WR->parseGet($_GET);

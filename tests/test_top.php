@@ -1,4 +1,5 @@
 <?php
+$debugMode = false;
 include('tests/test-config.php');
 
 /* Set the default date and timezone, For a list of supported timezones, see: http://php.net/manual/en/timezones.php */

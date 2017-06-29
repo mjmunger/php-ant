@@ -11,6 +11,7 @@ $options = getopt('v::d::s::x:');
 $loader_debug = false;
 $safeMode     = false;
 $execute      = false;
+$debugMode    = false;
 
 /* Load bootstrap options. */
 if(sizeof($options) > 0) {
@@ -26,6 +27,7 @@ if(sizeof($options) > 0) {
         /* Allow loader debug to run */
         printf("*****DEBUG MODE***** \n");
         printf("Command line options received: \n");
+        $debugMode = true;
         var_dump($options);
         $loader_debug = true;
         if(isset($verbosity)) {
@@ -50,6 +52,7 @@ if(sizeof($options) > 0) {
 include(__DIR__ . '/includes/bootstrap.php');
 
 $C = new PHPAnt\Core\Cli($Engine);
+if($debugMode) $C->setDebugMode();
 
 // If we have given it a command from the command line, execute that and quite.
 if($execute) {
