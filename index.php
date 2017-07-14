@@ -17,9 +17,9 @@ namespace PHPAnt\Core;
  * @category     Pages
  * @author       Michael Munger <michael@highpoweredhelp.com>
  */
-
-$start    = microtime(true);
-$rootDir  = __DIR__ . '/';
+$debugMode = false;
+$start     = microtime(true);
+$rootDir   = __DIR__ . '/';
 
 include('includes/bootstrap.php');
 //$env['Authenticator'] = $Authenticator;

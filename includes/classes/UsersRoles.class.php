@@ -346,10 +346,13 @@ class UsersRoles
 
     
     function generateAbbreviation() {
-        $buffer = str_split($this->users_roles_title);
+        if(is_null($this->users_roles_title)) throw new \Exception("Cannot generate an abbreviation before you set the role title.", 1);
         
-        foreach($buffer as $a) {
-            $a = strtoupper($a);
+        $buffer = $this->users_roles_title;
+        $upperBound = strlen($buffer);
+
+        for($x=0; $x < $upperBound; $x++) {
+            $a = strtoupper($buffer[$x]);
             $query = "SELECT count(*) as usageCount FROM users_roles WHERE users_roles_role = ?";
             $stmt = $this->pdo->prepare($query);
             $result = $stmt->execute([$a]);

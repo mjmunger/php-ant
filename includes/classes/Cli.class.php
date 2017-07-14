@@ -2,6 +2,8 @@
 
 namespace PHPAnt\Core;
 
+use \PDO;
+
 /**
  * Represents the command line interface for the BFW Toolkit.
  */
@@ -700,37 +702,38 @@ Use of this CLI may void your warranty. Type: 'show warranty' for details.
 
             try {
                 $pdo = gimmiePDO();
+                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             } catch (Exception $e) {
                 print "PDO Connection failed: " . $e->getMessage() . PHP_EOL;
+                die("Cannot run with a database error.");
             }
 
-            if($pdo) {
-                print str_pad('', 80,'=');
-                print PHP_EOL;
-                print "MySQL PDO Cnnection Information";
-                print PHP_EOL;
-                print str_pad('', 80,'=');
-                print PHP_EOL;
+            print str_pad('', 80,'=');
+            print PHP_EOL;
+            print "MySQL PDO Cnnection Information";
+            print PHP_EOL;
+            print str_pad('', 80,'=');
+            print PHP_EOL;
 
-                printf("Database Connection: OK" . PHP_EOL);
+            printf("Database Connection: OK" . PHP_EOL);
 
-                print str_pad('Server Information:', 20);
-                print $pdo->getAttribute(PDO::ATTR_SERVER_INFO) . PHP_EOL;
+            print str_pad('Server Information:', 20);
+            print $pdo->getAttribute(PDO::ATTR_SERVER_INFO) . PHP_EOL;
 
-                print str_pad('Connection Status:', 20);
-                print $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL;
+            print str_pad('Connection Status:', 20);
+            print $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL;
 
-                print str_pad('PDO Client Version:', 20);
-                print $pdo->getAttribute(PDO::ATTR_CLIENT_VERSION) . PHP_EOL;
+            print str_pad('PDO Client Version:', 20);
+            print $pdo->getAttribute(PDO::ATTR_CLIENT_VERSION) . PHP_EOL;
 
-                print str_pad('PDO Driver Name:', 20);
-                print $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . PHP_EOL;
-                print PHP_EOL;
+            print str_pad('PDO Driver Name:', 20);
+            print $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . PHP_EOL;
 
-            } else {
-                //
-            }
+            print str_pad('PDO Error Mode:', 20);
+            print $pdo->getAttribute(PDO::ATTR_ERRMODE) . PHP_EOL;
+            print PHP_EOL;
         }
+
         if($this->verbosity > 0) {
             print "Verbosity: $this->verbosity\n";
         }

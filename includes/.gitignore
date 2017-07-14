@@ -5,4 +5,5 @@ cli-config.php
 rtfm/*
 composer.json
 composer.lock
-vendor/
+vendor/*
+!vendor/README.md

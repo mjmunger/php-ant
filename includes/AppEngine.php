@@ -223,7 +223,7 @@ class AppEngine {
     }
 
     function setVisualTrace($state) {
-        $this->visualTrace = $state;
+        $this->visualTrace = ($state == 'on' ? true : false);
 
         $this->log('AppEngine',sprintf("Visual trace set to: %s",($this->visualTrace ? "on" : "off")),'AppEngine.log',1);
 
@@ -836,9 +836,17 @@ class AppEngine {
             $appDirName = end($dirParts);
 
             $targetPath = $this->Configs->document_root . '/tests/' . $namespace;
-            if(!file_exists($targetPath)) mkdir($targetPath,0744,true);
+
+            if(!file_exists($targetPath)) {
+                $this->log('AppEngine'
+                          ,sprintf("Target path (%s) does not exist", $targetPath)
+                          ,'AppEngine.log'
+                          ,10);
+                mkdir($targetPath,0744,true);
+            }
 
             $link = $targetPath . '/' . $appDirName;
+
 
             //Build the target for the symlink.
             //1. Determine the directory for the app.
@@ -851,8 +859,9 @@ class AppEngine {
 
             //Determine where the tests directory is for the app.
             //Link the 'tests' directory as the target for the dirname if the symlink does not already exist.
+
             if(!file_exists($link)) {
-                if(!symlink($testsDir, $link)) echo "Symlink $testsDir -> $link failed";
+                if(symlink($testsDir, $link) === false) $this->log('AppEngine', "Symlink $testsDir -> $link failed");
             }
         }
     }
@@ -899,7 +908,6 @@ class AppEngine {
     function log($component,$message,$file = 'AppEngine.log',$minimumVerbosity = 0, $debugPrint = false, $divAlert= false) {
         if($this->verbosity < $minimumVerbosity) return false;
 
-        //if($debugPrint) $this->Configs->debug_print($message);
 
         //if($divAlert) $this->Configs->divalert($message,$divAlert);
 
@@ -942,6 +950,8 @@ class AppEngine {
 
         $this->log('ERROR',$message);
 
+        //$this->log('ERROR', print_r($context,true));
+
         //$message = sprintf("Error Context: %s", print_r($context,true));
         //$this->log('ERROR',$message);
     }
@@ -971,6 +981,16 @@ class AppEngine {
                 //$this->runActions($action);
 
                 if($action) {
+                    //Check ACL for this action here. If fail, continue.
+                    if($app->hasACL && ($app->shouldRun($this,$action) == false)) {
+                        echo '<div class="w3-panel w3-red">';
+                        echo '  <h3>Danger!</h3>';
+                        echo '  <p>You do not have permissions to perform the requested action.</p>';
+                        echo '</div> ';
+                        continue;
+                    }
+
+                    //Get priority.
                     $priority = $app->routedActionPriorities[$action];
 
                     //Add this app to that action list.
@@ -1047,5 +1067,33 @@ class AppEngine {
         $results['success'] = true;
         // $results['exit']    = true;
         return $results;
+    }
+
+    /**
+     * Convenience fascade function that gives access to PDO object in a sane manner.
+     * 
+     * @return object A PDO Prepared statement object.
+     * */
+
+    public function prepare($sql) {
+        return $this->Configs->pdo->prepare($sql);
+    }
+
+    /**
+     * Convenience fascade function that returns the App Engine's PDO instance.
+     * @return object the PDO object of the App Engine.
+     * */
+
+    public function getPDO() {
+        return $this->Configs->pdo;
+    }
+
+    /**
+     * Convenience fascade function that returns the logged in user.
+     * @return object The current logged in user.
+     * */
+
+    public function getCurrentUser() {
+        return $this->current_user;
     }
 }

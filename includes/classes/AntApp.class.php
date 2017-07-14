@@ -184,12 +184,24 @@ Class AntApp
 
     var $currentRoute     = false;
 
+
+    /**
+     * An instantiation of the CommandList class used to hold CommandInvoker
+     * objects that are used to parse and execute commands in the CLI.
+     * 
+     * This is a composition association of the classes. 
+     * */
+
+    public $AppCommands   = NULL;
+
     //These two properties are stubs for use with phpunit.
     public $testProperty      = NULL;
     public $testPropertyArray = [];
 
     function __construct() {
         $this->path = __DIR__;
+
+        $this->AppCommands = new CommandList();
     }
 
     /**
@@ -234,7 +246,6 @@ Class AntApp
      **/
 
     function registerAppRoutes($routes) {
-        //echo "<pre>"; var_dump($routes); echo "</pre>";  echo __FILE__ . ":" . __LINE__;
         $startSize = count($this->routedActions);
         $this->routedActions = array_merge($this->routedActions,$routes);
         return (count($this->routedActions) > $startSize);
@@ -379,6 +390,8 @@ Class AntApp
 
     public function trigger($requested_hook,$args = false)
     {
+        $Engine = $args['AE'];
+
         // short-circuit if this app should only run one time and has already won. Remember, first app wins, so control which actually fires by properly setting app priorities!
 
         if($this->runOnce && $this->hasRun) return ['success' => true ];
@@ -410,9 +423,35 @@ Class AntApp
                  }
                 try {
 
-                    if($this->visualTrace) $args['AE']->Configs->pageEcho(sprintf('<span class="w3-tag w3-round w3-green" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
+                    if($this->visualTrace == true) $args['AE']->Configs->pageEcho(sprintf('<span class="w3-tag w3-round w3-green" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
 
-                    $result    = call_user_func(array($this,$hook['callback']),($args?$args:false));
+                    $Engine->log( $this->appName
+                                , sprintf("Calling callback (%s) for hook (%s) within app (%s)", $hook['callback'], $hook['hook'], $this->appName)
+                                , 'debug.log'
+                                , 9
+                                );
+
+                    $Engine->log( $this->appName
+                                , "State of \$Engine->current_user:" . (isset($Engine->current_user) ? "set" : "not set")
+                                , 'debug.log'
+                                , 9
+                                );
+
+                    if(isset($Engine->current_user->users_id)) {
+                        $Engine->log( $this->appName
+                                    , sprintf("Current user data: user id: %s, user role id: %s", $Engine->current_user->users_id, $Engine->current_user->users_roles_id )
+                                    , 'debug.log'
+                                    , 9
+                                    );
+                    }
+
+                    $result    = call_user_func(array($this,$hook['callback']),( $args ? $args : false ));
+
+                    $Engine->log( $this->appName
+                                , "Result of that function callback execution: " . ($result['success'] ? "Successful" : "Failed")
+                                , 'debug.log'
+                                , 9
+                                );
 
                     //Increment the runcount for this action in this app.
                     $actionRunCount++;
@@ -420,7 +459,7 @@ Class AntApp
 
                 } catch (Exception $e) {
                     //Disable this app on next load, and log the exception.
-                    if($args['AE']->visualTrace) $args['AE']->Configs->pageEcho(printf('<span class="w3-tag w3-round w3-red" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
+                    if($args['AE']->visualTrace == true) $args['AE']->Configs->pageEcho(printf('<span class="w3-tag w3-round w3-red" style="margin:0.25em;">%s:%s</span>',$this->appName,$requested_hook));
                     $args['AE']->log($this->appName,$e->getMessage());
                     $args['AE']->log($this->appName,"***DISABLING THIS APP***");
                     $args['AE']->disableApp($this->appName,$args['AE']->availableApps[$this->appName]);
@@ -428,9 +467,8 @@ Class AntApp
                     $args['AE']->reload();
                 }
 
-                if($this->verbosity > 14) {
-                    $args['AE']->Configs->debug_print($result,"RESULT");
-                }
+                if($this->verbosity > 14) $args['AE']->Configs->debug_print($result,"RESULT");
+
                 //We always return an array.
                 if(!is_array($result)) {
                     /*$this->showError(sprintf("Error! The app %s is not returning an array from the function %s. All app functions should return an array as a result: even if you are just returing array('success' => true) or array('success' => false) to indicate the success of your app acation." . PHP_EOL,$this->appName,$hook['callback']));*/
@@ -450,11 +488,30 @@ Class AntApp
         return $return;
     }
 
+    /**
+     * Returns app events as permission groups (arrays). This is a DENY, ALLOW feature. By
+     * default, if you have AntApp::hasACL enabled, and nothing in this array,
+     * access to everything will be denied.
+     * 
+     * Because absence of a definition of access will be construed as "access denied",
+     * all actions should be defined in this ACL list. Failure to define an action
+     * will result in all users being denied access to all users except sysadmins, which
+     * are exempt from ACLs.
+     * 
+     * Your app should (must) override this method in order to do anything useful with 
+     * AntApp::hasACL set to true.
+     * 
+     * @return array
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+    
+    function getACLGroups() {
+        $acl = [];
+    }
+
     function checkACL($feature,$args) {
 
         $AE = $args['AE'];
-
-        /*echo "<pre>"; print_r($args); echo "</pre>";*/
 
         /* Check to see if we need to reference the ACL */
         if(!$this->hasACL) {
@@ -772,6 +829,37 @@ Class AntApp
             return false;
         }
 
+        $Engine->log( $this->appName
+                    , "$this->appName " . ($this->hasACL == true ? "has" : "does not support") . " access control."
+                    );
+        //If the app does not support ACL, then return true because there is no mroe testing to be done.
+        if($this->hasACL == false) return true;
+
+        //If the requested action is not in the list of protected actions, allow it.
+        if($this->actionIsProtected($requested_hook) == false) return true;
+
+        //If the current user does not have access to this hook (action), deny it.
+        $ACL = new ACL($Engine->getPDO(), $requested_hook);
+
+        //Get AD Settings to prepare for ACL checks.
+        $data = json_decode( $Engine->Configs->getConfigs( [ 'ad-settings' ] )['ad-settings'], true );
+        //If this is an array, AD settings are set. Otherwise, it would be null (because no settings for AD exist).
+        if(is_array($data)) $ACL->enableADChecks();
+
+        $access = $ACL->userCanExecute($Engine->current_user->users_id);
+        if($access == false) {
+            $Engine->log($this->appName,"$this->appName will NOT run for $requested_hook because the current user does not have permissions to access it.");
+            foreach($ACL->messages as $message) {
+                $Engine->log('ACL',$message);
+            }
+
+            foreach($ACL->debug as $message) {
+                $Engine->log('ACL',$message, 'acl.debug', 9);
+            }
+
+            return false;
+        }
+
         //allow the app to run by default.
         return true;
     }
@@ -807,9 +895,14 @@ Class AntApp
      * */
 
     function respond($data, $code = false) {
+
         switch($data['success']) {
             case true:
                 $responseCode = 200;
+
+                //Override on success if $code is set:
+                if($code !== false) $responseCode = $code;
+                
                 break;
 
             case false:
@@ -817,8 +910,6 @@ Class AntApp
                 break;
         }
 
-        //Override if $code is set:
-        if($code) $responseCode = $code;
 
         http_response_code($responseCode);
         header('Content-Type: application/json');
@@ -836,17 +927,29 @@ Class AntApp
 
         $format = '<link rel="stylesheet" type="text/css" href="%s"/>' . PHP_EOL;
 
-        $Directory = new \RecursiveDirectoryIterator($this->path . '/css/');
+        $targetDir = $this->path . '/css/';
+        if(!file_exists($targetDir)) return ['success' => false];
+
+        $Directory = new \RecursiveDirectoryIterator($targetDir);
         $Iterator  = new \RecursiveIteratorIterator($Directory);
         $files     = new \RegexIterator($Iterator, '/^.+\.css$/i', \RecursiveRegexIterator::GET_MATCH);
 
+        $buffer = [];
+
         foreach($files as $file) {
             $url = $args['AE']->Configs->getWebURI($file[0]);
+            array_push($buffer,$url);
+        }
+
+        $buffer = array_unique($buffer);
+        asort($buffer);
+
+        foreach($buffer as $url) {
             printf($format,$url);
         }
 
-        $url = $args['AE']->Configs->getWebURI($file[0]);
-        printf($format,$url);
+        //$url = $args['AE']->Configs->getWebURI($file[0]);
+        //printf($format,$url);
         return [ 'success' => true ];
     }
 
@@ -861,8 +964,15 @@ Class AntApp
         $Iterator  = new \RecursiveIteratorIterator($Directory);
         $files     = new \RegexIterator($Iterator, '/^.+\.js$/i', \RecursiveRegexIterator::GET_MATCH);
 
+        $buffer = [];
         foreach($files as $file) {
             $url = $args['AE']->Configs->getWebURI($file[0]);
+            array_push($buffer,$url);
+        }
+
+        asort($buffer);
+
+        foreach($buffer as $url) {
             printf($format,$url);
         }
 
@@ -880,13 +990,19 @@ Class AntApp
         $Iterator  = new \RecursiveIteratorIterator($Directory);
         $files     = new \RegexIterator($Iterator, '/^.+\.css$/i', \RecursiveRegexIterator::GET_MATCH);
 
+        $buffer = [];
+
         foreach($files as $file) {
             $url = $args['AE']->Configs->getWebURI($file[0]);
+            array_push($buffer);
+        }
+
+        asort($buffer);
+
+        foreach($buffer as $url) {
             printf($format,$url);
         }
 
-        $url = $args['AE']->Configs->getWebURI($file[0]);
-        printf($format,$url);
         return [ 'success' => true ];
     }
 
@@ -894,4 +1010,94 @@ Class AntApp
             http_response_code(401);
             die("You have tried to submit a request without a valid authenticity token. Can't do that.");
     }
+
+    function actionIsProtected($action) {
+        $protectedActions = array_keys($this->getProtectedActionsList());
+        return in_array($action,$protectedActions);
+    }
+
+    /**
+     * Checks the ACL table to see if this user has permissions to access a given event.
+     * This is a DENY, ALLOW feature! Not defined = no access granted.
+     * @return boolean True if user has specific access or is an Admin. False otherwise.
+     * @author Michael Munger <michael@highpoweredhelp.com>
+     **/
+
+   function userCanExecute($PDO, $action, $User, $enableADChecks = false) {
+
+        //If this app does not support ACL, return true
+        if($this->hasACL == false) return true;
+
+        //If the requested action is not in the list of protected actiosn, return true;
+        if($this->actionIsProtected($action) == false) return true;
+
+        //Admins (users_roles_id == 1) always have access to everything.
+        if($User->users_roles_id == 1 ) return true;
+
+        //Check to see if this user has access to this event.
+        $ACL = new ACL($PDO, $action);
+
+        //Get AD Settings to prepare for ACL checks.
+        if($enableADChecks) $ACL->enableADChecks();
+
+        $return = $ACL->userCanExecute($User->users_id);
+
+        return $return;
+
+        //Default to false (deny access), just in case something weird happens.
+        return false;
+    }
+
+    /**
+     * Returns an array of actions that this app allows to be controlled by
+     * user permissions.
+     * 
+     * This must be overridden by the app itself.
+     * */
+
+    function getProtectedActionsList() {
+        return [];
+    }
+
+    /**
+     * Returns an array of menu items that can be included in navigation. 
+     * 
+     * By default, this returns an empty array. To allow your app to add items
+     * to a menu, you need to override this method in your app.
+     * 
+     * See the example in the ant-app-test app.
+     * 
+     * @return array An associative array of menu items.
+     * */
+
+
+    function getMenuItems($args) {
+        return [];
+    }
+
+    /**
+     *
+     * Loops through CommandInvoker objects in $this->AppCommands (a
+     * CommandsList object) and executes commands as appropriate.
+     * 
+     * Commands should be added to the app using the $this->AppCommands->add() method.
+     *
+     * */
+
+    function processCommand($args) {
+        $cmd = $args['command'];
+
+        //Use the AppCommands to process the command.
+        foreach($this->AppCommands as $Invoker) {
+            $callback = $Invoker->callback;
+            if($Invoker->shouldRunOn($cmd)) $this->$callback($args);
+        }
+
+        return ['success' => true];
+    }
+
+    function loadCommands() {
+        //Do nothing. This should be overriden in the child class.
+    }
+
 }

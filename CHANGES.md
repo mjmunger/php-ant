@@ -1,7 +1,22 @@
-#Change Log
+# Change Log
 
-#This commit
-##Added priorities to routed actions.
+## 4/29/2017 
+
+### Test updates
+
+* Updated all tests to use DBUnit 6.0+
+
+### File System
+
+* Removed some deprecated directories.
+
+### Database
+
+* Updated fields to support super long, super strong tokens, and added some minor clean up on the structure.
+
+## Commit: c2e1ca53ecd73127aa36d3033c2dc8a3fbfc0418
+
+### Added priorities to routed actions.
 
 Routed actions now accept an optional priority argument. For backwards compatibility, the argument is optional, and any routed action declaration that does not have an explicit priority declaration will default to 50.
 
@@ -21,11 +36,11 @@ AppEngine::runRoutedActions now cycles through the apps in the following order:
 
 See in-line code documentation for this method for more information including an example array.
 
-#Previous Commits
+## Previous Commits
 
-#Commit 060a5b1bf0ca1d65cf6217fcbea5d1325f598102
+## Commit 060a5b1bf0ca1d65cf6217fcbea5d1325f598102
 
-##Codepath Analyzer
+### Codepath Analyzer
 Added the commands: apps codepath analyze [URI]. This function shows you what
 apps will respond to a given uri. This helps solve the problem of an app that
 appears to not be responding by confirmgin whether or not the regex for the
@@ -39,7 +54,7 @@ you can even use it to debug whether or not a given app or action is firing
 properly (or at all) an din the correct place. It is especially useful in
 debugging elements that are repeating on the page, whcih should not be.
 
-##App and action run limits.
+### App and action run limits.
 Added run limits to apps and actions. Apps can now be configured to run once
 (as a whole) or, individual actions can be limited to run only X number of
 times. To do that, you simplyt configure the app.json file with the name of the
@@ -57,7 +72,7 @@ which is not necessarily alphabetical, but is close.
 An example of an app.json file, which limits the number of executions of a
 given action is shown below:
 
-###Example
+#### Example
     {
         "actionRunLimit": {
             "include-admin-navigation": 1
