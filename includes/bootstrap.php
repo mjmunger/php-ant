@@ -88,8 +88,7 @@ $requiredDirectories[] = $antConfigs->getLogDir();
 $requiredDirectories[] = $antConfigs->getRunDir();
 
 foreach($requiredDirectories as $dir) {
-    if(file_exists($dir)) continue
-    mkdir($dir,0755,true);
+    if(file_exists($dir) == false) mkdir($dir,0755,true);
 }
 
 //Provision the server variables if we have a ConfigWeb object.
