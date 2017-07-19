@@ -22,3 +22,42 @@ ToDo.txt
 tests/test-config.php
 phpunit.xmlupdate-web-docs.sh
 tools
+<phpunit   
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.0/phpunit.xsd"
+         bootstrap="includes/bootstrap.php"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         cacheTokens="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         extensionsDirectory="tools/phpunit.d/"
+         forceCoversAnnotation="false"
+         mapTestClassNameToCoveredClassName="false"
+         processIsolation="false"
+         stopOnError="true"
+         stopOnFailure="true"
+         stopOnIncomplete="false"
+         stopOnSkipped="false"
+         stopOnRisky="false"
+         timeoutForSmallTests="1"
+         timeoutForMediumTests="10"
+         timeoutForLargeTests="60"
+         verbose="true">
+         <testsuite>
+            <directory suffix="Test.php">tests/</directory>
+         </testsuite>
+         <testsuite name="ImageUploader">
+            <directory suffix="Test.php">tests/Stadiumwrap/Automation/stadiumwrap-offfice-image-uploader/</directory>
+         </testsuite>
+
+         <!-- This  is a sample file. Rename this to remove .sample, and configure your database connection below.-->
+         <php>
+            <var name="DB_DSN" value="mysql:dbname=sw_automation;host=localhost" />
+            <var name="DB_USER" value="sw_automation" />
+            <var name="DB_PASSWD" value="1vJxf7rOvj2eW5Gb" />
+            <var name="DB_DBNAME" value="sw_automation" />
+         </php>
+</phpunit>
