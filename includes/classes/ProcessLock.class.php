@@ -110,76 +110,7 @@ class ProcessLock
 
         /* Attempt to get a lock. If we can get a lock, the process file is stale. If not, it is active / fresh. */
 
-        $this->running = flock($this->fh, LOCK_EX | LOCK_NB);
-    }
-
-    /**
-     * Starts the logical control
-     *
-     * This method creates the parseable runfile in the runtime directory.
-     * @return void
-     **/
-
-    public function start() {
-        /** save the process ID and the timestamp, so that we can kill the process
-         * later after we calculate out how long it has been running
-         **/
-
-        fwrite($this->fh,getmypid()."|".time());
-        $this->hasRunFile = true;
-    }
-
-    /**
-     * Deletes the run file after successfully finishing the script
-     * @return boolean
-     **/
-
-    public function stop() {
-        if(file_exists($this->runfile))
-            $killedPID = posix_kill($this->pid,SIGKILL );
-        $killedFile =  unlink($this->runfile);
-        if($killedFile && $killedPID)
-            return true;
-        else
-            return false;
-    }
-
-    /**
-     * Gets status on the process
-     * @return string
-     **/
-
-    public function getStatus() {
-        $buffer = file_get_contents($this->runfile);
-
-        //Determine how long this script has been running by getting the second
-        //value of the script and comparing it to "now"
-
-        $parts = explode("|", $buffer);
-        $startTime = sprintf("Script started at: %s",date('F j, Y, g:i a',$parts[1]));
-        $processId = sprintf("Process ID: %s",$parts[0]);
-
-        if(file_exists('/proc/'.$this->pid))
-        {
-            $status = "Process: Active";
-        } else {
-            $status = "Process: Dead";
-        }
-
-        $msg = array($startTime,$processId,$status);
-        return implode("\n", $msg);
-    }
-
-    /**
-     *
-     * Kills the process and deletes the run file allowing script to restart
-     * at the next cron interval.
-     * @return boolean
-     **/
-
-    public function restart() {
-        $this->stop();
-        $this->start();
+        $this->running = !flock($this->fh, LOCK_EX | LOCK_NB);
     }
 
     /**
