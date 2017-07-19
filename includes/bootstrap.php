@@ -78,6 +78,20 @@ if($debugMode) {
 }
 $antConfigs = ConfigFactory::getConfigs($pdo,$vars);
 
+//Create directories that we need:
+$requiredDirectories = [];
+$requiredDirectories[] = $antConfigs->getIncludesDir();
+$requiredDirectories[] = $antConfigs->getLibsDir();
+$requiredDirectories[] = $antConfigs->getAttachmentDir();
+$requiredDirectories[] = $antConfigs->getImagesDir();
+$requiredDirectories[] = $antConfigs->getLogDir();
+$requiredDirectories[] = $antConfigs->getRunDir();
+
+foreach($requiredDirectories as $dir) {
+    if(file_exists($dir)) continue
+    mkdir($dir,0755,true);
+}
+
 //Provision the server variables if we have a ConfigWeb object.
 switch($antConfigs->environment) {
     case ConfigBase::WEB:

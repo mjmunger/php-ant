@@ -110,7 +110,7 @@ class ProcessLock
 
         /* Attempt to get a lock. If we can get a lock, the process file is stale. If not, it is active / fresh. */
 
-        $this->running = flock($this->fh, LOCK_EX | LOCK_NB)
+        $this->running = flock($this->fh, LOCK_EX | LOCK_NB);
     }
 
     /**
