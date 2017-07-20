@@ -12,6 +12,9 @@ require($configPath);
 /* Make sure document_root exists */
 if(!file_exists($vars['document_root'])) die(sprintf("Document root is either not configured, or doesn't exist. Here's what I've got, does it look right to you? (document_root = %s )" . PHP_EOL , print_r($vars['document_root'],true)));
 
+//Change the working directory to the document root so all our other includes work.
+chdir($vars['document_root']);
+
 /* Require all the interfaces so we can protect our code! */
 require('interfaces.php');
 
