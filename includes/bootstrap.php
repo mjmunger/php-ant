@@ -3,7 +3,7 @@ namespace PHPAnt\Core;
 
 use \PDO;
 
-if(!file_exists('includes/config.php')) die("You must have a config.php file configured. Try renaming / copying config.php.sample to config.php, and follow the instructions in the file");
+if(!file_exists(__DIR__ . '/config.php')) die("You must have a config.php file configured. Try renaming / copying config.php.sample to config.php, and follow the instructions in the file");
 
 /* Require the configuration for this installation */
 require('includes/config.php');
