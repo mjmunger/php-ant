@@ -1,13 +1,19 @@
 <?php
 namespace PHPAnt\Core;
 
-if(!file_exists('includes/config.php')) die("You must have a config.php file configured. Try renaming / copying config.php.sample to config.php, and follow the instructions in the file");
+use \PDO;
+$configPath = __DIR__ . '/config.php';
+
+if(!file_exists($configPath)) die("You must have a config.php file configured. Try renaming / copying config.php.sample to config.php, and follow the instructions in the file");
 
 /* Require the configuration for this installation */
-require('includes/config.php');
+require($configPath);
 
 /* Make sure document_root exists */
 if(!file_exists($vars['document_root'])) die(sprintf("Document root is either not configured, or doesn't exist. Here's what I've got, does it look right to you? (document_root = %s )" . PHP_EOL , print_r($vars['document_root'],true)));
+
+//Change the working directory to the document root so all our other includes work.
+chdir($vars['document_root']);
 
 /* Require all the interfaces so we can protect our code! */
 require('interfaces.php');
@@ -27,22 +33,67 @@ require('includes/classes/ConfigCLI.class.php');
 require('includes/classes/ConfigWeb.class.php');
 require('includes/classes/ConfigFactory.class.php');
 require('includes/classes/AppBlacklist.class.php');
+require('includes/classes/PermissionManager.class.php');
 
 /* Include composer files if present */
 if(file_exists('includes/vendor/autoload.php')) include('includes/vendor/autoload.php');
-
-// echo "Hello";
-// $ad = new \Adldap\Adldap();
-// var_dump($ad);
-// var_dump(class_exists('\Adldap\Adldap'));
 
 /* Custom Error Handler */
 /*include('error_handler.php');*/
 
 /** LOAD CONFIGURATIONS **/
+if(!isset($debugMode)) $debugMode = false;
 
 $pdo = gimmiePDO();
+if($debugMode) {
+    printf("DEBUG MODE ENABLED\n");
+
+    try {
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (Exception $e) {
+        print "PDO Error: " . $e->getMessage() . PHP_EOL;
+        die("Cannot run with a database error.");
+    }
+
+    print str_pad('', 80,'=');
+    print PHP_EOL;
+    print "MySQL PDO Cnnection Information";
+    print PHP_EOL;
+    print str_pad('', 80,'=');
+    print PHP_EOL;
+
+    printf("Database Connection: OK" . PHP_EOL);
+
+    print str_pad('Server Information:', 20);
+    print $pdo->getAttribute(PDO::ATTR_SERVER_INFO) . PHP_EOL;
+
+    print str_pad('Connection Status:', 20);
+    print $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS) . PHP_EOL;
+
+    print str_pad('PDO Client Version:', 20);
+    print $pdo->getAttribute(PDO::ATTR_CLIENT_VERSION) . PHP_EOL;
+
+    print str_pad('PDO Driver Name:', 20);
+    print $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) . PHP_EOL;
+
+    print str_pad('PDO Error Mode:', 20);
+    print $pdo->getAttribute(PDO::ATTR_ERRMODE) . PHP_EOL;
+    print PHP_EOL;
+}
 $antConfigs = ConfigFactory::getConfigs($pdo,$vars);
+
+//Create directories that we need:
+$requiredDirectories = [];
+$requiredDirectories[] = $antConfigs->getIncludesDir();
+$requiredDirectories[] = $antConfigs->getLibsDir();
+$requiredDirectories[] = $antConfigs->getAttachmentDir();
+$requiredDirectories[] = $antConfigs->getImagesDir();
+$requiredDirectories[] = $antConfigs->getLogDir();
+$requiredDirectories[] = $antConfigs->getRunDir();
+
+foreach($requiredDirectories as $dir) {
+    if(file_exists($dir) == false) mkdir($dir,0755,true);
+}
 
 //Provision the server variables if we have a ConfigWeb object.
 switch($antConfigs->environment) {
@@ -67,7 +118,7 @@ switch($antConfigs->environment) {
         $WR->setup($_SERVER);
         $WR->parsePost($_POST);
         //Verify a token if it has been given.
-        $WR->verifyAuthenticityToken();
+        #$WR->verifyAuthenticityToken();
         //Create a new one for this request.
         $WR->generateAuthenticityToken();
         $WR->parseGet($_GET);

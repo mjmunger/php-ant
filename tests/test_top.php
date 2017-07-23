@@ -1,4 +1,5 @@
 <?php
+$debugMode = false;
 include('tests/test-config.php');
 
 /* Set the default date and timezone, For a list of supported timezones, see: http://php.net/manual/en/timezones.php */
@@ -94,11 +95,13 @@ function getMyConfigs($vars = false) {
  * @author Michael Munger <michael@highpoweredhelp.com>
  **/
 
-function getWebConfigs($vars = false) {
+function getWebConfigs($vars = false, $pdo = false) {
 
 	//Setup test.
 	$v = ($vars?$vars:getMockVars());
-	$pdo = gimmiePDO();
+	
+	if($pdo == false) $pdo = gimmiePDO();
+
 	$W = new PHPAnt\Core\ConfigWeb($pdo, $v);
 
 	$W->Server            = new PHPAnt\Core\ServerEnvironment();

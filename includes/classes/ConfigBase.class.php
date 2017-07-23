@@ -54,8 +54,11 @@ class ConfigBase
     }
 
     function getLogDir() {
-
         return dirname($this->document_root) . '/log/';
+    }
+
+    function getRunDir() {
+        return dirname($this->document_root) . '/run/';
     }
 
     function getDomain() {

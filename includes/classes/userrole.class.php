@@ -93,7 +93,7 @@ class UserRole extends users_roles
         
         foreach($buffer as $a) {
             $a = strtoupper($a);
-            $query = "SELECT count(*) as usageCount FROM timing.users_roles WHERE users_roles_role = ?";
+            $query = "SELECT count(*) as usageCount FROM users_roles WHERE users_roles_role = ?";
             $stmt = $this->pdo->prepare($query);
             $result = $stmt->execute([$a]);
             $row = $stmt->fetchObject();

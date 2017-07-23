@@ -73,8 +73,8 @@ class CommandTest extends TestCase
 				 ];
 		foreach($tests as $test) {
 			$C = new PHPAnt\Core\Command($test);
-			$needle = strtolower(substr($test,-4));
-			$this->assertSame($C->getLastToken(),$needle);
+			$needle = substr($test,-4);
+			$this->assertSame($needle,$C->getLastToken());
 		}		
 	}
 
@@ -98,7 +98,7 @@ class CommandTest extends TestCase
 	function testCommandIs() {
 		$line = "App Test 123\n";
 		$C = new PHPAnt\Core\Command($line);
-		$this->assertTrue($C->is('app test 123'));
+		$this->assertTrue($C->is('App Test 123'));
 	}
 
 	function testLeftStrip() {

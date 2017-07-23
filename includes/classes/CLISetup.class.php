@@ -2,7 +2,7 @@
 
 class CLISetup {
 
-	private $pdo           = NULL;
+	public $pdo           = NULL;
 	private $document_root = NULL;
 
 	function __construct($document_root) {
@@ -188,6 +188,10 @@ class CLISetup {
 		$result = $stmt->execute($vars);
 		$this->pdo->commit();
 
+		if($result == false) {
+			var_dump($stmt->errorInfo());
+		}
+
 		$username = $setupInfo->adminuser->username;
 		$password = $setupInfo->adminuser->password;
 
@@ -323,6 +327,26 @@ class CLISetup {
 		return $setupInfo;
 	}
 
+	function installApps($setupInfo) {
+
+		$appsDir = $setupInfo->document_root . '/includes/apps';
+		foreach($setupInfo->apps as $app) {
+			chdir($appsDir);
+			$cmd = sprintf('git clone %s',$app->remote);
+
+			$buffer = explode('/', $app->remote);
+			$git = end($buffer);
+			$slug = str_replace('.git', '', $git);
+			$appDir = $appsDir . '/' . $slug;
+
+			system($cmd);
+			chdir($appDir);
+
+			$cmd = sprintf('git checkout %s',$app->hash);
+			system($cmd);
+		}
+	}
+
 	/**
 	 * Runs the interactive part of the setup, and is responsible for getting user responses.
 	 * Example:
@@ -336,6 +360,7 @@ class CLISetup {
 			$buffer = file_get_contents('settings.json');
 			$setupInfo = json_decode($buffer);
 		} else {
+			echo "settings.json does not exist. Using interactive setup." . PHP_EOL;
 			$setupInfo = $this->interactiveSetup();
 		}
 
@@ -355,6 +380,8 @@ class CLISetup {
 		$this->getDefaultApps();
 
 		$this->createAdminUser($setupInfo);
+
+		$this->installApps($setupInfo);
 
 		//We're done!
 		print  "Setup complete. Use `php cli.php` to enter the CLI." . PHP_EOL;
