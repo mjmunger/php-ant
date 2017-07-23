@@ -34,9 +34,11 @@ echo "Compiling PHP for `hostname` and sending a notification to $1"
  # Sometimes, needed for Ubuntu
  apt-get install --assume-yes libjpeg8-dev libpng12-dev
  make clean
- ./buildconf
- ./configure --with-config-file-path=/usr/local/lib/ \
+./buildconf
+./configure --with-config-file-path=/usr/local/lib/ \
  --with-pear=/usr/share/php \
+ --with-imap=/usr/local/imap-2007f/ \
+ --with-imap-ssl \
  --with-bz2 \
  --with-curl \
  --with-gd \
@@ -60,10 +62,10 @@ echo "Compiling PHP for `hostname` and sending a notification to $1"
  --with-freetype-dir=/usr/include/freetype2/ \
  --with-mcrypt=/usr/src/mcrypt-2.6.8 \
  --with-jpeg-dir=/usr/lib/x86_64-linux-gnu/ \
- --with-png-dir=/usr/lib/x86_64-linux-gnu/ \
+ --with-png-dir=/usr/lib/x86_64-linux-gnu/
  
 make
-make tests
+#make tests
 make install
 
 cat body | mailx $1 -s "`hostname` PHP Compile done"

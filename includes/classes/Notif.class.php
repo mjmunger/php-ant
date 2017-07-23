@@ -142,6 +142,12 @@ class Notif {
     public $finalHeaders = NULL;
 
     /**
+     * @var string returnPath The return path for the envelop of a message. Used with Verp.
+     * */
+
+    public $returnPath = NULL;
+
+    /**
      * Instantiate a Notif object
      * Example:
      *
@@ -511,15 +517,18 @@ class Notif {
     }
 
     public function setupVerp() {
-        if($this->useVERP == false) return true;
 
         if($this->fromAddress === null) throw new Exception("You cannot setupVerp without first setting a fromAddress", 1);
-        
+
+        if($this->useVERP == false) {
+            $this->returnPath = $this->fromAddress;
+            return true;
+        }
 
         $this->verpId = $this->createVerpID();
         $buffer = explode("@", $this->fromAddress);
         $buffer[0] = $buffer[0] .= "+=" . $this->verpId;
-        $this->fromAddress = implode('@', $buffer);
+        $this->returnPath = implode('@', $buffer);
         
         return true;
     }
@@ -528,6 +537,7 @@ class Notif {
         $headers[] = 'MIME-Version: 1.0';
         $headers[] = 'Content-type: text/html; charset=iso-8859-1';
         $headers[] = "From: $this->fromName <$this->fromAddress>";
+        $headers[] = "Return-Path: $this->returnPath";
 
         if(count($this->cc) > 0) $headers[] = "Cc: " . implode('; ', $this->cc);
 
@@ -585,7 +595,9 @@ EOQ;
 
         $this->renderHeaders();
 
-        $result = mail($address, $this->subject, $this->body, $this->finalHeaders );
+        $params = ($this->useVERP ? "-f $this->returnPath" : '');
+
+        $result = mail($address, $this->subject, $this->body, $this->finalHeaders, $params);
 
         if($this->useVERP) $this->logSend($name,$address);
 
