@@ -1100,4 +1100,8 @@ Class AntApp
         //Do nothing. This should be overriden in the child class.
     }
 
+    function doNothing() {
+        //The PHP-Ant equivalent of /dev/null. Does nothing. Used to allow access to URIs.
+    }
+
 }
