@@ -7,7 +7,7 @@ $configPath = __DIR__ . '/config.php';
 if(!file_exists($configPath)) die("You must have a config.php file configured. Try renaming / copying config.php.sample to config.php, and follow the instructions in the file");
 
 /* Require the configuration for this installation */
-require($configPath);
+require_once($configPath);
 
 /* Make sure document_root exists */
 if(!file_exists($vars['document_root'])) die(sprintf("Document root is either not configured, or doesn't exist. Here's what I've got, does it look right to you? (document_root = %s )" . PHP_EOL , print_r($vars['document_root'],true)));
@@ -16,24 +16,24 @@ if(!file_exists($vars['document_root'])) die(sprintf("Document root is either no
 chdir($vars['document_root']);
 
 /* Require all the interfaces so we can protect our code! */
-require('interfaces.php');
+require_once('interfaces.php');
 
 /* Require common functions */
-require('includes/functions.php');
+require_once('includes/functions.php');
 
 check_schema();
-/* These are hard required because they are bootstrapping classes */
-require('includes/classes/ServerEnvironment.class.php');
-require('includes/classes/SSLEnvironment.class.php');
-require('includes/classes/HTTPEnvironment.class.php');
-require('includes/classes/Execution.class.php');
-require('includes/classes/WebRequest.class.php');
-require('includes/classes/ConfigBase.class.php');
-require('includes/classes/ConfigCLI.class.php');
-require('includes/classes/ConfigWeb.class.php');
-require('includes/classes/ConfigFactory.class.php');
-require('includes/classes/AppBlacklist.class.php');
-require('includes/classes/PermissionManager.class.php');
+/* These are hard require_onced because they are bootstrapping classes */
+require_once('includes/classes/ServerEnvironment.class.php');
+require_once('includes/classes/SSLEnvironment.class.php');
+require_once('includes/classes/HTTPEnvironment.class.php');
+require_once('includes/classes/Execution.class.php');
+require_once('includes/classes/WebRequest.class.php');
+require_once('includes/classes/ConfigBase.class.php');
+require_once('includes/classes/ConfigCLI.class.php');
+require_once('includes/classes/ConfigWeb.class.php');
+require_once('includes/classes/ConfigFactory.class.php');
+require_once('includes/classes/AppBlacklist.class.php');
+require_once('includes/classes/PermissionManager.class.php');
 
 /* Include composer files if present */
 if(file_exists('includes/vendor/autoload.php')) include('includes/vendor/autoload.php');
@@ -198,7 +198,7 @@ if(isset($loader_debug))  $options['loader_debug']  = $loader_debug;
 $options['permissionManager']                       = new PermissionManager();
 $options['AppBlacklist']                            = new AppBlacklist();
 
-require('AppEngine.php');
+require_once('AppEngine.php');
 
 $Engine = new AppEngine($antConfigs,$options);
 

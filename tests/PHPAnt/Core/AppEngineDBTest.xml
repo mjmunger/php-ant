@@ -63,84 +63,84 @@
 		<field name="api_keys_key">dpzavyngfhgzbawbuhsxvbrgtshncmxgywhtuvzac</field>
 		<field name="api_keys_info">asdfasdf</field>
 		<field name="api_keys_enabled">N</field>
-		<field name="api_keys_generated">2016-02-29 04:20:10</field>
+		<field name="api_keys_generated">2016-02-29 14:20:10</field>
 	</row>
 	<row>
 		<field name="api_keys_id">10</field>
 		<field name="api_keys_key">tqvrvqtupfwdnmruhvngfzcerpwtxfmrwfervykhe</field>
 		<field name="api_keys_info">Test key</field>
 		<field name="api_keys_enabled">N</field>
-		<field name="api_keys_generated">2016-02-29 04:34:59</field>
+		<field name="api_keys_generated">2016-02-29 14:34:59</field>
 	</row>
 	<row>
 		<field name="api_keys_id">11</field>
 		<field name="api_keys_key">refehfrywbwadpcnhrhvntrtwqhsptmcyshgyyeva</field>
 		<field name="api_keys_info">asdf</field>
 		<field name="api_keys_enabled">N</field>
-		<field name="api_keys_generated">2016-02-29 04:59:09</field>
+		<field name="api_keys_generated">2016-02-29 14:59:09</field>
 	</row>
 	<row>
 		<field name="api_keys_id">12</field>
 		<field name="api_keys_key">bxaseqebkeuqahagfvvwtwzfqfzyqhxseygkppnxt</field>
 		<field name="api_keys_info">1234</field>
 		<field name="api_keys_enabled">N</field>
-		<field name="api_keys_generated">2016-02-29 05:00:48</field>
+		<field name="api_keys_generated">2016-02-29 15:00:48</field>
 	</row>
 	<row>
 		<field name="api_keys_id">13</field>
 		<field name="api_keys_key">hfzfdghfxzxvnxpdnycexynfunnntwdaccffmrpgq</field>
 		<field name="api_keys_info">1234</field>
 		<field name="api_keys_enabled">N</field>
-		<field name="api_keys_generated">2016-02-29 05:01:06</field>
+		<field name="api_keys_generated">2016-02-29 15:01:06</field>
 	</row>
 	<row>
 		<field name="api_keys_id">14</field>
 		<field name="api_keys_key">fctczwgwnbsgxevvdunmqtwwtxwsxxvcznfzhqvvr</field>
 		<field name="api_keys_info">asdf123</field>
 		<field name="api_keys_enabled">N</field>
-		<field name="api_keys_generated">2016-02-29 05:01:41</field>
+		<field name="api_keys_generated">2016-02-29 15:01:41</field>
 	</row>
 	<row>
 		<field name="api_keys_id">15</field>
 		<field name="api_keys_key">kvthubxvqwpmsucceyzctctbsnrfmtwwnqdfsaaew</field>
 		<field name="api_keys_info">asdf123</field>
 		<field name="api_keys_enabled">N</field>
-		<field name="api_keys_generated">2016-02-29 05:02:01</field>
+		<field name="api_keys_generated">2016-02-29 15:02:01</field>
 	</row>
 	<row>
 		<field name="api_keys_id">16</field>
 		<field name="api_keys_key">vhmrrrqzpnhsyacfuaayfksrvqtsvwarenfvcvvrg</field>
 		<field name="api_keys_info">Dev</field>
 		<field name="api_keys_enabled">Y</field>
-		<field name="api_keys_generated">2016-02-29 05:02:51</field>
+		<field name="api_keys_generated">2016-02-29 15:02:51</field>
 	</row>
 	<row>
 		<field name="api_keys_id">17</field>
 		<field name="api_keys_key">zpfdymmfywzepfzugrzdrxvmcacddwgdkpggztpxq</field>
 		<field name="api_keys_info">Foo App</field>
 		<field name="api_keys_enabled">N</field>
-		<field name="api_keys_generated">2016-02-29 05:03:18</field>
+		<field name="api_keys_generated">2016-02-29 15:03:18</field>
 	</row>
 	<row>
 		<field name="api_keys_id">18</field>
 		<field name="api_keys_key">cgmckutavuhbdqhmkwgekqhrdxhqyadagqctgwtcq</field>
 		<field name="api_keys_info">Bar App</field>
 		<field name="api_keys_enabled">Y</field>
-		<field name="api_keys_generated">2016-02-29 05:11:01</field>
+		<field name="api_keys_generated">2016-02-29 15:11:01</field>
 	</row>
 	<row>
 		<field name="api_keys_id">19</field>
 		<field name="api_keys_key">mgsekgfttwtanbqfeqthcybsrzrxqbdzhweucmmvf</field>
 		<field name="api_keys_info">Some User</field>
 		<field name="api_keys_enabled">Y</field>
-		<field name="api_keys_generated">2016-02-29 05:14:47</field>
+		<field name="api_keys_generated">2016-02-29 15:14:47</field>
 	</row>
 	<row>
 		<field name="api_keys_id">20</field>
 		<field name="api_keys_key">gentxyezqtxuuafgkhhmrdawgmstarvgwfaueeuuy</field>
 		<field name="api_keys_info">Something else</field>
 		<field name="api_keys_enabled">Y</field>
-		<field name="api_keys_generated">2016-03-01 02:17:32</field>
+		<field name="api_keys_generated">2016-03-01 12:17:32</field>
 	</row>
 	</table_data>
 	<table_data name="users">
@@ -257,11 +257,33 @@
 	</table_data>
 	<table_data name="logs">
 	</table_data>
+	<table_data name="settings">
+	<row>
+		<field name="settings_id">1</field>
+		<field name="settings_key">enabledAppsList</field>
+		<field name="settings_value">{&quot;+Core App Manager&quot;:&quot;\/home\/michael\/php\/php-ant\/includes\/apps\/phpant-app-manager\/app.php&quot;,&quot;Default Grammar&quot;:&quot;\/home\/michael\/php\/php-ant\/includes\/apps\/ant-app-default\/app.php&quot;,&quot;Test Ant App&quot;:&quot;\/home\/michael\/php\/php-ant\/includes\/apps\/ant-app-test-app\/app.php&quot;}</field>
+	</row>
+	<row>
+		<field name="settings_id">2</field>
+		<field name="settings_key">signing-key</field>
+		<field name="settings_value">/home/michael/php/php-ant/private.key</field>
+	</row>
+	<row>
+		<field name="settings_id">3</field>
+		<field name="settings_key">BlacklistDisabled</field>
+		<field name="settings_value">1</field>
+	</row>
+	<row>
+		<field name="settings_id">4</field>
+		<field name="settings_key">visualTrace</field>
+		<field name="settings_value">off</field>
+	</row>
+	</table_data>
 	<table_data name="user_tokens">
 	<row>
 		<field name="user_tokens_id">1</field>
 		<field name="user_tokens_token">463f4b5ff3885ebc0d33ee2c5ec732d2af69f6152cefd4becbffb7bf74cd9ac8</field>
-		<field name="user_tokens_expiry">2018-05-04 03:24:14</field>
+		<field name="user_tokens_expiry">2018-05-04 11:24:14</field>
 		<field name="user_tokens_user_agent" xsi:nil="true" />
 		<field name="users_id">1</field>
 		<field name="users_roles_id">1</field>
@@ -269,7 +291,7 @@
 	<row>
 		<field name="user_tokens_id">2</field>
 		<field name="user_tokens_token">d6cbec51334a8054a1ef46508bf92badce119bd7fb6441bcb434ebc91f212f9d</field>
-		<field name="user_tokens_expiry">2017-05-03 03:24:14</field>
+		<field name="user_tokens_expiry">2017-05-03 11:24:14</field>
 		<field name="user_tokens_user_agent" xsi:nil="true" />
 		<field name="users_id">2</field>
 		<field name="users_roles_id">1</field>
@@ -277,7 +299,7 @@
 	<row>
 		<field name="user_tokens_id">3</field>
 		<field name="user_tokens_token">d48c3659bdf66e2eccce42f4111c95e8505ed3da2706c740890f62daf3f2a213</field>
-		<field name="user_tokens_expiry">2018-05-04 03:24:14</field>
+		<field name="user_tokens_expiry">2018-05-04 11:24:14</field>
 		<field name="user_tokens_user_agent" xsi:nil="true" />
 		<field name="users_id">3</field>
 		<field name="users_roles_id">1</field>
@@ -285,7 +307,7 @@
 	<row>
 		<field name="user_tokens_id">4</field>
 		<field name="user_tokens_token">309e228a3c7d252f0939d8d0517d04d9b9f874bab4eec4c4218f952edd4d85d9</field>
-		<field name="user_tokens_expiry">2018-05-04 03:24:14</field>
+		<field name="user_tokens_expiry">2018-05-04 11:24:14</field>
 		<field name="user_tokens_user_agent" xsi:nil="true" />
 		<field name="users_id">4</field>
 		<field name="users_roles_id">1</field>
@@ -293,7 +315,7 @@
 	<row>
 		<field name="user_tokens_id">5</field>
 		<field name="user_tokens_token">e1261474304406f7a14844227fe4c74261544c2427b5b765ce6225f076879827</field>
-		<field name="user_tokens_expiry">2018-05-04 03:24:14</field>
+		<field name="user_tokens_expiry">2018-05-04 11:24:14</field>
 		<field name="user_tokens_user_agent" xsi:nil="true" />
 		<field name="users_id">5</field>
 		<field name="users_roles_id">1</field>
@@ -301,7 +323,7 @@
 	<row>
 		<field name="user_tokens_id">6</field>
 		<field name="user_tokens_token">97577059f6d16ea6503739151273b18934916c74873a3f020e749e2c25892cb6</field>
-		<field name="user_tokens_expiry">2017-05-04 03:24:14</field>
+		<field name="user_tokens_expiry">2017-05-04 11:24:14</field>
 		<field name="user_tokens_user_agent" xsi:nil="true" />
 		<field name="users_id">6</field>
 		<field name="users_roles_id">1</field>

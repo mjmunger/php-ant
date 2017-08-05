@@ -169,4 +169,3 @@ interface AppInterface {
     function setVerbosity($int);
     function canReload();
 }
-?>

@@ -18,7 +18,6 @@ class SQLParserTest extends TestCase
         foreach($SQLParser->commands as $command) {
             $this->assertFalse(stristr($command,"#"));
         }
-        var_dump($SQLParser->commands);
     }
 
     public function testRemoveBlankLines() {

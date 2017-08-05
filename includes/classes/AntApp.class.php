@@ -1028,7 +1028,7 @@ Class AntApp
         //If this app does not support ACL, return true
         if($this->hasACL == false) return true;
 
-        //If the requested action is not in the list of protected actiosn, return true;
+        //If the requested action is not in the list of protected actions, return true;
         if($this->actionIsProtected($action) == false) return true;
 
         //Admins (users_roles_id == 1) always have access to everything.

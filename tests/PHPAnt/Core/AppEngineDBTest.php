@@ -69,39 +69,38 @@ class AppEngineDBTest extends TestCase
 		$A->Configs = $C;
 		$A->Configs->Server->Request->uri = $uri;
 
-
-		//2. Enable the test app.
-		$appPath = $appRoot . '/ant-app-test-app/app.php';
-		$result = $A->enableApp('Test Ant App', $appPath);
-		$this->assertTrue($result['success']);
-
-		$A->reload();
-
 		//Check to make sure the actions are registered for the Test app.
 		$foundTheApp = false;
-		foreach($A->apps as $app) {
-			if($app->appName == 'Test Ant App') break;
+		foreach($A->apps as $App) {
+			if($App->appName == 'Test Ant App') {
+			    $foundTheApp = true;
+			    break;
+            }
 		}
 
-		$this->assertSame($expected, $app->userCanExecute(self::$pdo, $action,$User));
+		$this->assertTrue($foundTheApp, 'I was not able to find the app "Test Ant App"! It is not enabled in the test data set?');
+
+		$this->assertTrue($App->hasACL);
+
+		$this->assertSame($expected, $App->userCanExecute(self::$pdo, $action, $User));
 
 	}
 
 	public function providerTestUserACL() {
 
-		return  [ [ 1 , 'non-existent-event', true  ] //Admin user, has rights to everything.
-				, [ 3 , 'cli-load-grammar'  , false ] //standard user, no rights defined.
-				, [ 3 , 'app-hook-test'     , false ] //standard user, no rights defined.
-				, [ 2 , 'app-hook-test'     , false ] //CLI user, with defined rights for cli-load-grammar, but no others.
-				, [ 2 , 'uploader-uri-test' , false ] //CLI user, with defined rights for cli-load-grammar, but no others.
-				, [ 2 , 'history-uri-test'  , false ] //CLI user, with defined rights for cli-load-grammar, but no others.
-				, [ 2 , 'testasdf-uri-test' , false ] //CLI user, with defined rights for cli-load-grammar, but no others.
-				, [ 2 , 'cli-load-grammar'  , true  ] //CLI user, with defined rights for cli-load-grammar, but no others.
-				, [ 4 , 'app-hook-test'     , true  ] //Test user group, with defined rights for everything except cli-load-grammar.
-				, [ 4 , 'uploader-uri-test' , true  ] //Test user group, with defined rights for everything except cli-load-grammar.
-				, [ 4 , 'history-uri-test'  , true  ] //Test user group, with defined rights for everything except cli-load-grammar.
-				, [ 4 , 'testasdf-uri-test' , true  ] //Test user group, with defined rights for everything except cli-load-grammar.
-				, [ 4 , 'cli-load-grammar'  , false ] //Test user group, with defined rights for everything except cli-load-grammar.
+		return  [ [ 1 , 'non-existent-event' , true  ] //Admin user, has rights to everything.
+				, [ 6 , 'cli-load-grammar'   , false ] //standard user, no rights defined, protected action
+				, [ 6 , 'unprotected-action' , true  ] //standard user, no rights defined, unprotected action.
+				, [ 2 , 'app-hook-test'      , false ] //CLI user, with defined rights for cli-load-grammar, but no others. Protected action.
+				, [ 2 , 'uploader-uri-test'  , false ] //CLI user, with defined rights for cli-load-grammar, but no others. Protected action.
+				, [ 2 , 'history-uri-test'   , true  ] //CLI user, with defined rights for cli-load-grammar, but no others. unprotected action.
+				, [ 2 , 'testasdf-uri-test'  , true  ] //CLI user, with defined rights for cli-load-grammar, but no others, unprotected action.
+				, [ 2 , 'cli-load-grammar'   , true  ] //CLI user, with defined rights for cli-load-grammar, but no others.
+				, [ 4 , 'app-hook-test'      , true  ] //Test user group, with defined rights for everything except cli-load-grammar.
+				, [ 4 , 'uploader-uri-test'  , true  ] //Test user group, with defined rights for everything except cli-load-grammar.
+				, [ 4 , 'history-uri-test'   , true  ] //Test user group, with defined rights for everything except cli-load-grammar.
+				, [ 4 , 'testasdf-uri-test'  , true  ] //Test user group, with defined rights for everything except cli-load-grammar.
+				, [ 4 , 'cli-load-grammar'   , false ] //Test user group, with defined rights for everything except cli-load-grammar.
 				];
 	}
 
