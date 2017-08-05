@@ -1096,4 +1096,14 @@ class AppEngine {
     public function getCurrentUser() {
         return $this->current_user;
     }
+
+    /**
+     * Convenience fascade function that returns the post variables.
+     * @return array POST array.
+     **/
+
+    public function getPost() {
+        return $this->Configs->Server->Request->post_vars;
+    }
+
 }

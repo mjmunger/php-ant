@@ -29,6 +29,7 @@ class WebRequest
 	public $authenticityTokenValid  = false;
 
 	function setup($server) {
+		session_start();
 		if(isset($server['REQUEST_SCHEME']))     $this->scheme      = $server['REQUEST_SCHEME'];
 
 		if(isset($server['REQUEST_METHOD']))     $this->method      = $server['REQUEST_METHOD'];
@@ -72,7 +73,6 @@ class WebRequest
 	}
 
 	function verifyAuthenticityToken() {
-		session_start();
 
 		//This breaks and short-circuits the CSRF protection, and MUST be fixed.
 		//<removeme>
