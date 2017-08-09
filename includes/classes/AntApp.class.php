@@ -16,6 +16,9 @@
 
 namespace PHPAnt\Core;
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
 Class AntApp
 {
 
@@ -198,7 +201,14 @@ Class AntApp
     public $testProperty      = NULL;
     public $testPropertyArray = [];
 
-    function __construct() {
+    /**
+     * The monolog logger object used for logging events and information in this app.
+     * @var log
+     */
+
+    public $Logger        = NULL;
+
+    function __construct($Engine) {
         $this->path = __DIR__;
 
         $this->AppCommands = new CommandList();
@@ -274,7 +284,10 @@ Class AntApp
         if(count($this->uriRegistry) == 0) return true;
 
         foreach($this->uriRegistry as $regex) {
-            if(preg_match($regex, $uri)) {
+
+            $this->Log("Regex: " . $regex, 10);
+
+            if(preg_match($regex, $uri) || $regex == "ALL") {
                 $this->currentRoute = $regex;
                 return true;
             }
@@ -691,8 +704,12 @@ Class AntApp
         return ['success' => true];
     }
 
-    public function Log($message,$minimumVerbosity = 10) {
-        if($this->verbosity >= $minimumVerbosity) echo $message . PHP_EOL;
+    public function Log($message, $minimumVerbosity = 10) {
+
+        if(is_null($this->Logger)) return true;
+
+        //Log Debug
+        if($this->verbosity >= $minimumVerbosity) $this->Logger->debug($message);
     }
 
     /**
@@ -832,7 +849,7 @@ Class AntApp
         $Engine->log( $this->appName
                     , "$this->appName " . ($this->hasACL == true ? "has" : "does not support") . " access control."
                     );
-        //If the app does not support ACL, then return true because there is no mroe testing to be done.
+        //If the app does not support ACL, then return true because there is no more testing to be done.
         if($this->hasACL == false) return true;
 
         //If the requested action is not in the list of protected actions, allow it.
@@ -959,7 +976,7 @@ Class AntApp
 
         $targetPath = $this->path . '/js/footer/';
         if(!file_exists($targetPath)) return ['success' => true];
-        
+
         $Directory = new \RecursiveDirectoryIterator($this->path . '/js/footer/');
         $Iterator  = new \RecursiveIteratorIterator($Directory);
         $files     = new \RegexIterator($Iterator, '/^.+\.js$/i', \RecursiveRegexIterator::GET_MATCH);
@@ -981,20 +998,22 @@ Class AntApp
 
     function injectHeaderJS($args) {
 
-        $format = '<link rel="stylesheet" type="text/css" href="%s"/>' . PHP_EOL;
+
+        $format = '<script src="%s"></script>' . PHP_EOL;
         $targetPath = $this->path . '/js/header/';
 
         if(!file_exists($targetPath)) return ['success' => true];
 
-        $Directory = new \RecursiveDirectoryIterator($targetPath);
+        $Directory = new \RecursiveDirectoryIterator($this->path . '/js/header/');
         $Iterator  = new \RecursiveIteratorIterator($Directory);
-        $files     = new \RegexIterator($Iterator, '/^.+\.css$/i', \RecursiveRegexIterator::GET_MATCH);
+        $files     = new \RegexIterator($Iterator, '/^.+\.js$/i', \RecursiveRegexIterator::GET_MATCH);
+
 
         $buffer = [];
 
         foreach($files as $file) {
             $url = $args['AE']->Configs->getWebURI($file[0]);
-            array_push($buffer);
+            array_push($buffer,$url);
         }
 
         asort($buffer);

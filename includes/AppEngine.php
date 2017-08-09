@@ -218,7 +218,8 @@ class AppEngine {
         $this->Configs->setVerbosity($int);
 
         foreach($this->apps as $app) {
-            $app->verbosity = $this->verbosity;
+            if($this->verbosity > 9) $this->log('AppEngine', sprintf("Setting verbosity for app %s to %s",$app->appName, $this->verbosity), 'AppEngine.log',9);
+            $app->setVerbosity($this->verbosity);
         }
     }
 
@@ -734,6 +735,8 @@ class AppEngine {
 
                     $app = new $appClass($this);
 
+                    $app->setVerbosity($this->verbosity);
+
                     //Remove the file from the blacklist because there was not a fatal error.
                     $this->AppBlacklist->removeFromBlacklist($path);
 
@@ -1099,11 +1102,19 @@ class AppEngine {
 
     /**
      * Convenience fascade function that returns the post variables.
-     * @return array POST array.
+     * @param  string $param A string that represents a variable that *should* exist in the post parameters.
+     * @return mixed. If $param is passed, and that variable exists, it will return the value of the variable.
+     *         If it does not exist, it will return false.
+     *         If no parameter is passed, it will return the entire post_vars array.
      **/
 
-    public function getPost() {
-        return $this->Configs->Server->Request->post_vars;
+    public function getPost($param = false) {
+
+        if($param == false) return $this->Configs->Server->Request->post_vars;
+
+        if(isset($this->Configs->Server->Request->post_vars) == false) return false;
+
+        return $this->Configs->Server->Request->post_vars[$param];
     }
 
 }
