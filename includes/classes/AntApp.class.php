@@ -211,6 +211,11 @@ Class AntApp
     function __construct($Engine) {
         $this->path = __DIR__;
 
+        $log = new Logger('name');
+        $log->pushHandler(new StreamHandler($Engine->getLogDir() . '/default.warning.log', Logger::WARNING));
+        $log->pushHandler(new StreamHandler($Engine->getLogDir() . '/default.debug.log', Logger::DEBUG));
+        $log->pushHandler(new StreamHandler($Engine->getLogDir() . '/default.error.log', Logger::ERROR));
+
         $this->AppCommands = new CommandList();
     }
 
