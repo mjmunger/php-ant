@@ -578,7 +578,7 @@ Class AntApp
      **/
 
     public function setVerbosity($int) {
-        $this->Logger->debug("Setting verbosity to: " . $int);
+//        $this->Logger->debug("Setting verbosity to: " . $int);
         $this->verbosity = $int;
     }
 
