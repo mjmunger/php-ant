@@ -285,10 +285,9 @@ Class AntApp
 
         foreach($this->uriRegistry as $regex) {
 
-            //Allow an action to run on all app URIs
-            if( $regex = "ALL" ) return true;
+            $this->Log("Regex: " . $regex, 10);
 
-            if(preg_match($regex, $uri)) {
+            if(preg_match($regex, $uri) || $regex == "ALL") {
                 $this->currentRoute = $regex;
                 return true;
             }
@@ -708,8 +707,10 @@ Class AntApp
 
     public function Log($message, $minimumVerbosity = 10) {
 
+        if(is_null($this->Logger)) return true;
+
         //Log Debug
-        if($this->verbosity >= $minimumVerbosity) $this->log->debug($message);
+        if($this->verbosity >= $minimumVerbosity) $this->Logger->debug($message);
     }
 
     /**
@@ -849,7 +850,7 @@ Class AntApp
         $Engine->log( $this->appName
                     , "$this->appName " . ($this->hasACL == true ? "has" : "does not support") . " access control."
                     );
-        //If the app does not support ACL, then return true because there is no mroe testing to be done.
+        //If the app does not support ACL, then return true because there is no more testing to be done.
         if($this->hasACL == false) return true;
 
         //If the requested action is not in the list of protected actions, allow it.
@@ -998,7 +999,6 @@ Class AntApp
 
     function injectHeaderJS($args) {
 
-        die(__FILE__  . ":" . __LINE__);
 
         $format = '<script src="%s"></script>' . PHP_EOL;
         $targetPath = $this->path . '/js/header/';
@@ -1013,7 +1013,7 @@ Class AntApp
 
         foreach($files as $file) {
             $url = $args['AE']->Configs->getWebURI($file[0]);
-            array_push($buffer);
+            array_push($buffer,$url);
         }
 
         asort($buffer);

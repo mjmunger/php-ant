@@ -22,3 +22,4 @@ ToDo.txt
 tests/test-config.php
 phpunit.xmlupdate-web-docs.sh
 tools
+.idea
