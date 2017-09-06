@@ -216,6 +216,8 @@ Class AntApp
         $log->pushHandler(new StreamHandler($Engine->getLogDir() . '/default.debug.log', Logger::DEBUG));
         $log->pushHandler(new StreamHandler($Engine->getLogDir() . '/default.error.log', Logger::ERROR));
 
+        $this->Logger = $log;
+
         $this->AppCommands = new CommandList();
     }
 
