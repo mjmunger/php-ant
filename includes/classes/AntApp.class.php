@@ -16,6 +16,9 @@
 
 namespace PHPAnt\Core;
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
 Class AntApp
 {
 
@@ -198,7 +201,14 @@ Class AntApp
     public $testProperty      = NULL;
     public $testPropertyArray = [];
 
-    function __construct() {
+    /**
+     * The monolog logger object used for logging events and information in this app.
+     * @var log
+     */
+
+    public $Logger        = NULL;
+
+    function __construct($Engine) {
         $this->path = __DIR__;
 
         $this->AppCommands = new CommandList();
@@ -274,6 +284,10 @@ Class AntApp
         if(count($this->uriRegistry) == 0) return true;
 
         foreach($this->uriRegistry as $regex) {
+
+            //Allow an action to run on all app URIs
+            if( $regex = "ALL" ) return true;
+
             if(preg_match($regex, $uri)) {
                 $this->currentRoute = $regex;
                 return true;
@@ -558,6 +572,7 @@ Class AntApp
      **/
 
     public function setVerbosity($int) {
+        $this->Logger->debug("Setting verbosity to: " . $int);
         $this->verbosity = $int;
     }
 
@@ -691,8 +706,10 @@ Class AntApp
         return ['success' => true];
     }
 
-    public function Log($message,$minimumVerbosity = 10) {
-        if($this->verbosity >= $minimumVerbosity) echo $message . PHP_EOL;
+    public function Log($message, $minimumVerbosity = 10) {
+
+        //Log Debug
+        if($this->verbosity >= $minimumVerbosity) $this->log->debug($message);
     }
 
     /**
@@ -959,7 +976,7 @@ Class AntApp
 
         $targetPath = $this->path . '/js/footer/';
         if(!file_exists($targetPath)) return ['success' => true];
-        
+
         $Directory = new \RecursiveDirectoryIterator($this->path . '/js/footer/');
         $Iterator  = new \RecursiveIteratorIterator($Directory);
         $files     = new \RegexIterator($Iterator, '/^.+\.js$/i', \RecursiveRegexIterator::GET_MATCH);
@@ -981,14 +998,16 @@ Class AntApp
 
     function injectHeaderJS($args) {
 
-        $format = '<link rel="stylesheet" type="text/css" href="%s"/>' . PHP_EOL;
+        die(__FILE__  . ":" . __LINE__);
+
+        $format = '<script src="%s"></script>' . PHP_EOL;
         $targetPath = $this->path . '/js/header/';
 
         if(!file_exists($targetPath)) return ['success' => true];
 
-        $Directory = new \RecursiveDirectoryIterator($targetPath);
+        $Directory = new \RecursiveDirectoryIterator($this->path . '/js/header/');
         $Iterator  = new \RecursiveIteratorIterator($Directory);
-        $files     = new \RegexIterator($Iterator, '/^.+\.css$/i', \RecursiveRegexIterator::GET_MATCH);
+        $files     = new \RegexIterator($Iterator, '/^.+\.js$/i', \RecursiveRegexIterator::GET_MATCH);
 
         $buffer = [];
 

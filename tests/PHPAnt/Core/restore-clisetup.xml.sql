@@ -38,6 +38,32 @@ LOCK TABLES `Version` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `users_roles`
+--
+
+DROP TABLE IF EXISTS `users_roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users_roles` (
+  `users_roles_id` int(11) NOT NULL AUTO_INCREMENT,
+  `users_roles_title` varchar(45) DEFAULT NULL,
+  `users_roles_role` varchar(1) DEFAULT 'U' COMMENT 'A - Administrator\nU - Standard User',
+  PRIMARY KEY (`users_roles_id`),
+  UNIQUE KEY `users_roles_role_UNIQUE` (`users_roles_role`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users_roles`
+--
+
+LOCK TABLES `users_roles` WRITE;
+/*!40000 ALTER TABLE `users_roles` DISABLE KEYS */;
+INSERT INTO `users_roles` VALUES (1,'Admin','A'),(2,'User','U'),(3,'CLI Users','C'),(4,'Test Users','T'),(5,'AddRoleTest','D');
+/*!40000 ALTER TABLE `users_roles` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `acls`
 --
 
@@ -89,6 +115,45 @@ LOCK TABLES `api_keys` WRITE;
 /*!40000 ALTER TABLE `api_keys` DISABLE KEYS */;
 INSERT INTO `api_keys` VALUES (9,'dpzavyngfhgzbawbuhsxvbrgtshncmxgywhtuvzac','asdfasdf','N','2016-02-29 19:20:10'),(10,'tqvrvqtupfwdnmruhvngfzcerpwtxfmrwfervykhe','Test key','N','2016-02-29 19:34:59'),(11,'refehfrywbwadpcnhrhvntrtwqhsptmcyshgyyeva','asdf','N','2016-02-29 19:59:09'),(12,'bxaseqebkeuqahagfvvwtwzfqfzyqhxseygkppnxt','1234','N','2016-02-29 20:00:48'),(13,'hfzfdghfxzxvnxpdnycexynfunnntwdaccffmrpgq','1234','N','2016-02-29 20:01:06'),(14,'fctczwgwnbsgxevvdunmqtwwtxwsxxvcznfzhqvvr','asdf123','N','2016-02-29 20:01:41'),(15,'kvthubxvqwpmsucceyzctctbsnrfmtwwnqdfsaaew','asdf123','N','2016-02-29 20:02:01'),(16,'vhmrrrqzpnhsyacfuaayfksrvqtsvwarenfvcvvrg','Dev','Y','2016-02-29 20:02:51'),(17,'zpfdymmfywzepfzugrzdrxvmcacddwgdkpggztpxq','Foo App','N','2016-02-29 20:03:18'),(18,'cgmckutavuhbdqhmkwgekqhrdxhqyadagqctgwtcq','Bar App','Y','2016-02-29 20:11:01'),(19,'mgsekgfttwtanbqfeqthcybsrzrxqbdzhweucmmvf','Some User','Y','2016-02-29 20:14:47'),(20,'gentxyezqtxuuafgkhhmrdawgmstarvgwfaueeuuy','Something else','Y','2016-03-01 17:17:32');
 /*!40000 ALTER TABLE `api_keys` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `users_id` int(11) NOT NULL AUTO_INCREMENT,
+  `users_email` varchar(255) DEFAULT NULL,
+  `users_password` varchar(60) DEFAULT NULL,
+  `users_first` varchar(45) DEFAULT NULL,
+  `users_last` varchar(45) DEFAULT NULL,
+  `users_setup` varchar(1) DEFAULT 'N',
+  `users_nonce` varchar(32) DEFAULT NULL,
+  `users_token` varchar(65) DEFAULT NULL,
+  `users_active` varchar(1) DEFAULT 'Y',
+  `users_last_login` int(11) DEFAULT NULL,
+  `users_mobile_token` varchar(8) DEFAULT NULL COMMENT 'The token for mobile. This allows a user to log in via the browser AND their mobile phone.',
+  `users_public_key` text COMMENT 'Holds the RSA or PGP public key for hashing.',
+  `users_owner_id` int(11) DEFAULT NULL,
+  `users_timezone` varchar(100) DEFAULT NULL,
+  `users_roles_id` int(11) NOT NULL,
+  `users_guid` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`users_id`,`users_roles_id`),
+  KEY `fk_users_users_roles_idx` (`users_roles_id`),
+  CONSTRAINT `fk_users_1` FOREIGN KEY (`users_roles_id`) REFERENCES `users_roles` (`users_roles_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -202,71 +267,6 @@ LOCK TABLES `user_tokens` WRITE;
 /*!40000 ALTER TABLE `user_tokens` DISABLE KEYS */;
 /*!40000 ALTER TABLE `user_tokens` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `users`
---
-
-DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `users` (
-  `users_id` int(11) NOT NULL AUTO_INCREMENT,
-  `users_email` varchar(255) DEFAULT NULL,
-  `users_password` varchar(60) DEFAULT NULL,
-  `users_first` varchar(45) DEFAULT NULL,
-  `users_last` varchar(45) DEFAULT NULL,
-  `users_setup` varchar(1) DEFAULT 'N',
-  `users_nonce` varchar(32) DEFAULT NULL,
-  `users_token` varchar(65) DEFAULT NULL,
-  `users_active` varchar(1) DEFAULT 'Y',
-  `users_last_login` int(11) DEFAULT NULL,
-  `users_mobile_token` varchar(8) DEFAULT NULL COMMENT 'The token for mobile. This allows a user to log in via the browser AND their mobile phone.',
-  `users_public_key` text COMMENT 'Holds the RSA or PGP public key for hashing.',
-  `users_owner_id` int(11) DEFAULT NULL,
-  `users_timezone` varchar(100) DEFAULT NULL,
-  `users_roles_id` int(11) NOT NULL,
-  `users_guid` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`users_id`,`users_roles_id`),
-  KEY `fk_users_users_roles_idx` (`users_roles_id`),
-  CONSTRAINT `fk_users_1` FOREIGN KEY (`users_roles_id`) REFERENCES `users_roles` (`users_roles_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `users`
---
-
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `users_roles`
---
-
-DROP TABLE IF EXISTS `users_roles`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `users_roles` (
-  `users_roles_id` int(11) NOT NULL AUTO_INCREMENT,
-  `users_roles_title` varchar(45) DEFAULT NULL,
-  `users_roles_role` varchar(1) DEFAULT 'U' COMMENT 'A - Administrator\nU - Standard User',
-  PRIMARY KEY (`users_roles_id`),
-  UNIQUE KEY `users_roles_role_UNIQUE` (`users_roles_role`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `users_roles`
---
-
-LOCK TABLES `users_roles` WRITE;
-/*!40000 ALTER TABLE `users_roles` DISABLE KEYS */;
-INSERT INTO `users_roles` VALUES (1,'Admin','A'),(2,'User','U'),(3,'CLI Users','C'),(4,'Test Users','T'),(5,'AddRoleTest','D');
-/*!40000 ALTER TABLE `users_roles` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -277,4 +277,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-09-05 15:33:48
+-- Dump completed on 2017-09-05 15:34:17

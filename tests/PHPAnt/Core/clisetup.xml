@@ -1,0 +1,157 @@
+<?xml version="1.0"?>
+<mysqldump xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<database name="phpant">
+	<table_data name="Version">
+	</table_data>
+	<table_data name="users_roles">
+	<row>
+		<field name="users_roles_id">1</field>
+		<field name="users_roles_title">Admin</field>
+		<field name="users_roles_role">A</field>
+	</row>
+	<row>
+		<field name="users_roles_id">2</field>
+		<field name="users_roles_title">User</field>
+		<field name="users_roles_role">U</field>
+	</row>
+	<row>
+		<field name="users_roles_id">3</field>
+		<field name="users_roles_title">CLI Users</field>
+		<field name="users_roles_role">C</field>
+	</row>
+	<row>
+		<field name="users_roles_id">4</field>
+		<field name="users_roles_title">Test Users</field>
+		<field name="users_roles_role">T</field>
+	</row>
+	<row>
+		<field name="users_roles_id">5</field>
+		<field name="users_roles_title">AddRoleTest</field>
+		<field name="users_roles_role">D</field>
+	</row>
+	</table_data>
+	<table_data name="acls">
+	<row>
+		<field name="acls_id">1</field>
+		<field name="users_roles_id">3</field>
+		<field name="acls_event">cli-load-grammar</field>
+	</row>
+	<row>
+		<field name="acls_id">2</field>
+		<field name="users_roles_id">4</field>
+		<field name="acls_event">app-hook-test</field>
+	</row>
+	<row>
+		<field name="acls_id">3</field>
+		<field name="users_roles_id">4</field>
+		<field name="acls_event">uploader-uri-test</field>
+	</row>
+	<row>
+		<field name="acls_id">4</field>
+		<field name="users_roles_id">4</field>
+		<field name="acls_event">history-uri-test</field>
+	</row>
+	<row>
+		<field name="acls_id">5</field>
+		<field name="users_roles_id">4</field>
+		<field name="acls_event">testasdf-uri-test</field>
+	</row>
+	</table_data>
+	<table_data name="api_keys">
+	<row>
+		<field name="api_keys_id">9</field>
+		<field name="api_keys_key">dpzavyngfhgzbawbuhsxvbrgtshncmxgywhtuvzac</field>
+		<field name="api_keys_info">asdfasdf</field>
+		<field name="api_keys_enabled">N</field>
+		<field name="api_keys_generated">2016-02-29 19:20:10</field>
+	</row>
+	<row>
+		<field name="api_keys_id">10</field>
+		<field name="api_keys_key">tqvrvqtupfwdnmruhvngfzcerpwtxfmrwfervykhe</field>
+		<field name="api_keys_info">Test key</field>
+		<field name="api_keys_enabled">N</field>
+		<field name="api_keys_generated">2016-02-29 19:34:59</field>
+	</row>
+	<row>
+		<field name="api_keys_id">11</field>
+		<field name="api_keys_key">refehfrywbwadpcnhrhvntrtwqhsptmcyshgyyeva</field>
+		<field name="api_keys_info">asdf</field>
+		<field name="api_keys_enabled">N</field>
+		<field name="api_keys_generated">2016-02-29 19:59:09</field>
+	</row>
+	<row>
+		<field name="api_keys_id">12</field>
+		<field name="api_keys_key">bxaseqebkeuqahagfvvwtwzfqfzyqhxseygkppnxt</field>
+		<field name="api_keys_info">1234</field>
+		<field name="api_keys_enabled">N</field>
+		<field name="api_keys_generated">2016-02-29 20:00:48</field>
+	</row>
+	<row>
+		<field name="api_keys_id">13</field>
+		<field name="api_keys_key">hfzfdghfxzxvnxpdnycexynfunnntwdaccffmrpgq</field>
+		<field name="api_keys_info">1234</field>
+		<field name="api_keys_enabled">N</field>
+		<field name="api_keys_generated">2016-02-29 20:01:06</field>
+	</row>
+	<row>
+		<field name="api_keys_id">14</field>
+		<field name="api_keys_key">fctczwgwnbsgxevvdunmqtwwtxwsxxvcznfzhqvvr</field>
+		<field name="api_keys_info">asdf123</field>
+		<field name="api_keys_enabled">N</field>
+		<field name="api_keys_generated">2016-02-29 20:01:41</field>
+	</row>
+	<row>
+		<field name="api_keys_id">15</field>
+		<field name="api_keys_key">kvthubxvqwpmsucceyzctctbsnrfmtwwnqdfsaaew</field>
+		<field name="api_keys_info">asdf123</field>
+		<field name="api_keys_enabled">N</field>
+		<field name="api_keys_generated">2016-02-29 20:02:01</field>
+	</row>
+	<row>
+		<field name="api_keys_id">16</field>
+		<field name="api_keys_key">vhmrrrqzpnhsyacfuaayfksrvqtsvwarenfvcvvrg</field>
+		<field name="api_keys_info">Dev</field>
+		<field name="api_keys_enabled">Y</field>
+		<field name="api_keys_generated">2016-02-29 20:02:51</field>
+	</row>
+	<row>
+		<field name="api_keys_id">17</field>
+		<field name="api_keys_key">zpfdymmfywzepfzugrzdrxvmcacddwgdkpggztpxq</field>
+		<field name="api_keys_info">Foo App</field>
+		<field name="api_keys_enabled">N</field>
+		<field name="api_keys_generated">2016-02-29 20:03:18</field>
+	</row>
+	<row>
+		<field name="api_keys_id">18</field>
+		<field name="api_keys_key">cgmckutavuhbdqhmkwgekqhrdxhqyadagqctgwtcq</field>
+		<field name="api_keys_info">Bar App</field>
+		<field name="api_keys_enabled">Y</field>
+		<field name="api_keys_generated">2016-02-29 20:11:01</field>
+	</row>
+	<row>
+		<field name="api_keys_id">19</field>
+		<field name="api_keys_key">mgsekgfttwtanbqfeqthcybsrzrxqbdzhweucmmvf</field>
+		<field name="api_keys_info">Some User</field>
+		<field name="api_keys_enabled">Y</field>
+		<field name="api_keys_generated">2016-02-29 20:14:47</field>
+	</row>
+	<row>
+		<field name="api_keys_id">20</field>
+		<field name="api_keys_key">gentxyezqtxuuafgkhhmrdawgmstarvgwfaueeuuy</field>
+		<field name="api_keys_info">Something else</field>
+		<field name="api_keys_enabled">Y</field>
+		<field name="api_keys_generated">2016-03-01 17:17:32</field>
+	</row>
+	</table_data>
+	<table_data name="users">
+	</table_data>
+	<table_data name="email_log">
+	</table_data>
+	<table_data name="logs">
+	</table_data>
+	<table_data name="settings">
+	</table_data>
+	<table_data name="user_tokens">
+	</table_data>
+</database>
+</mysqldump>

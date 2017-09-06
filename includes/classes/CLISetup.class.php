@@ -9,7 +9,7 @@ class CLISetup {
 		$this->document_root = $document_root;
 	}
 
-	function createConfig($http_host, $document_root, $sampleConfig = 'sample.config.php', $targetConfig = 'config.php') {
+/*	function createConfig($http_host, $document_root, $sampleConfig = 'sample.config.php', $targetConfig = 'config.php') {
 		
 		//create web config.
 		$buffer = file_get_contents($sampleConfig);
@@ -32,7 +32,7 @@ class CLISetup {
 		foreach($configs as $sample => $target) {
 			$this->createConfig($http_host, $document_root, $sample, $target);
 		}
-	}
+	}*/
 
 	/**
 	 * Creates a database, but requires root to do so.
@@ -50,7 +50,7 @@ class CLISetup {
 	 * @author Michael Munger <michael@highpoweredhelp.com>
 	 **/
 
-	function createDB($setupInfo, $skel = 'setup/skel.sql') {
+/*	function createDB($setupInfo, $skel = 'setup/skel.sql') {
     	$dsn = "mysql:host=" . $setupInfo->db->server;
     	$pdo = null;
 
@@ -117,8 +117,8 @@ class CLISetup {
     	$this->pdo = $pdo;
 	    return true;
 
-	}
-
+	}*/
+/*
 	function saveDBConnectionInfo($username,$password,$database,$server, $sampleConfig = 'includes/sample-mysql-credentials.php', $targetConfig = 'includes/mysql-credentials.php') {
 
 		$fields = [ '%USER%'     => $username
@@ -137,9 +137,9 @@ class CLISetup {
 		$fh = fopen($targetConfig,'w');
 		fwrite($fh,$buffer);
 		fclose($fh);
-	}
+	}*/
 
-	function createDirs() {
+/*	function createDirs() {
 		$dirs = ['includes/apps'
 				,'includes/libs'
 				,'attachments'
@@ -147,9 +147,9 @@ class CLISetup {
 		foreach($dirs as $dir) {
 			if(!file_exists($dir)) mkdir($dir);
 		}
-	}
+	}*/
 
-	function getDefaultApps() {
+/*	function getDefaultApps() {
 		chdir('includes/apps');
 
 		$defaultRepos = [ 'https://github.com/mjmunger/ant-app-test-app.git'
@@ -163,9 +163,9 @@ class CLISetup {
 			print "Running: $cmd" . PHP_EOL;
 			passthru($cmd);
 		}
-	}
+	}*/
 
-	function createAdminUser($setupInfo) {
+	/*function createAdminUser($setupInfo) {
 
 		$sql = "INSERT INTO `users`
 				(`users_email`,
@@ -196,7 +196,7 @@ class CLISetup {
 		$password = $setupInfo->adminuser->password;
 
 		echo ($result ? "Adminsitrative user set to $username with a password of $password" . PHP_EOL : "Could not create administrative user!");
-	}
+	}*/
 
 	function interactiveSetup() {
 		$setupInfo = [];
@@ -327,7 +327,7 @@ class CLISetup {
 		return $setupInfo;
 	}
 
-	function installApps($setupInfo) {
+/*	function installApps($setupInfo) {
 
 		$appsDir = $setupInfo->document_root . '/includes/apps';
 		foreach($setupInfo->apps as $app) {
@@ -345,7 +345,7 @@ class CLISetup {
 			$cmd = sprintf('git checkout %s',$app->hash);
 			system($cmd);
 		}
-	}
+	}*/
 
 	/**
 	 * Runs the interactive part of the setup, and is responsible for getting user responses.
