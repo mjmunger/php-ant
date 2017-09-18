@@ -4,13 +4,13 @@ namespace PHPAnt\Setup;
 
 class SetupConfigsFactory {
 
-    public static function getSetupConfigs($interactive) {
+    public static function getSetupConfigs($interactive, $baseDir) {
         switch ($interactive) {
             case true:
-                return new InteractiveConfigs();
+                return new InteractiveConfigs($baseDir);
                 break;
             case false:
-                return new JSONConfigs();
+                return new JSONConfigs($baseDir);
                 break;
         }
     }

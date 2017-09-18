@@ -42,7 +42,7 @@ $userInteractiveSetup = ( file_exists('settings.json') ? false : true);
 
 echo ($userInteractiveSetup ? "Settings file does not exist. Starting interactive setup" : "Settings file exists. Doing unattended setup");
 
-$SetupConfigs = SetupConfigsFactory::getSetupConfigs($userInteractiveSetup);
+$SetupConfigs = SetupConfigsFactory::getSetupConfigs($userInteractiveSetup, __DIR__);
 $SetupConfigs->loadConfig(__DIR__ . '/settings.json');
 $Installer = new Installer($SetupConfigs);
 

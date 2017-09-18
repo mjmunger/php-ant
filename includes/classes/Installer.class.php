@@ -9,9 +9,11 @@ use \Exception;
 class Installer {
     public $Configs = null;
     public $pdo     = null;
+    public $baseDir = null;
 
     public function __construct($Configs) {
         $this->Configs = $Configs->configs;
+        $this->baseDir = $Configs->baseDir;
     }
 
     public function install() {
@@ -199,7 +201,13 @@ class Installer {
     }
 
     public function getDefaultApps() {
-        chdir('includes/apps');
+
+        $appsDir = $this->baseDir . '/includes/apps';
+
+        printf("Checking for the existence of $appsDir");
+
+        if(file_exists($appsDir) === false) mkdir($appsDir);
+        chdir($appsDir);
 
         $defaultRepos = [ 'https://github.com/mjmunger/ant-app-test-app.git'
             , 'https://github.com/mjmunger/ant-app-default.git'
@@ -216,7 +224,12 @@ class Installer {
 
     function installApps() {
 
-        $appsDir = $this->Configs->document_root . '/includes/apps';
+        $appsDir = $this->baseDir . '/includes/apps';
+
+        printf("Apps directory: $appsDir" . PHP_EOL);
+        
+        if(file_exists($appsDir) === false) mkdir($appsDir);
+
         foreach($this->Configs->apps as $app) {
             chdir($appsDir);
             $cmd = sprintf('git clone %s',$app->remote);
