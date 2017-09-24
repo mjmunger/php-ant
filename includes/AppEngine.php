@@ -863,7 +863,7 @@ class AppEngine {
             //Determine where the tests directory is for the app.
             //Link the 'tests' directory as the target for the dirname if the symlink does not already exist.
 
-            if(!file_exists($link)) {
+            if(is_link($link) == false) {
                 if(symlink($testsDir, $link) === false) $this->log('AppEngine', "Symlink $testsDir -> $link failed");
             }
         }

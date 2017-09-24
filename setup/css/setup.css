@@ -1,0 +1,15 @@
+.setup-card {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2rem;
+    margin-bottom:2rem;
+}
+
+.wrong {
+    background-color: pink;
+}
+
+#error-list p {
+    color:red;
+}

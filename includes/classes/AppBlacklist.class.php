@@ -35,6 +35,7 @@ class AppBlacklist
 	}
 
 	function save() {
+	    return true;
 		if($this->disabled) return true;
 		$fp = fopen($this->blacklistPath,'w');
 		fwrite($fp,implode(PHP_EOL, $this->blacklist));
@@ -42,6 +43,7 @@ class AppBlacklist
 	}
 
 	function clear() {
+	    return true;
 		if($this->disabled) return true;
 		$fp = fopen($this->blacklistPath,'w');
 		ftruncate($fp,0);

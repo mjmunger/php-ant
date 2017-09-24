@@ -37,6 +37,11 @@ class Installer {
 
         $pdo = new PDO($dsn,$this->Configs->db->rootuser, $this->Configs->db->rootpass);
 
+        $sql = "DROP DATABASE IF EXISTS " . $this->Configs->db->database;
+        $stmt = $pdo->prepare($sql);
+        $result = $stmt->execute();
+        if($result == false) throw new Exception(sprintf("Database creation error (%s) %s",$stmt->errorInfo()[1], $stmt->errorInfo()[2]));
+
         $sql = "CREATE DATABASE " . $this->Configs->db->database;
 
         $stmt = $pdo->prepare($sql);
@@ -240,6 +245,9 @@ class Installer {
             $appDir = $appsDir . '/' . $slug;
 
             system($cmd);
+
+            if($app->hash == null) continue;
+
             chdir($appDir);
 
             $cmd = sprintf('git checkout %s',$app->hash);

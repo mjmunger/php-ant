@@ -3,14 +3,22 @@ namespace PHPAnt\Core;
 
 use \PDO;
 
-function bootstrap()
-{
-    $configPath = __DIR__ . '/config.php';
+/**
+ * Checks to see if php-ant is installed, and if not, launches the GUI installer page.
+ */
 
-    if (!file_exists($configPath)) {
-        //Launch the installer.
-        return false;
-    }
+function check_installation($configPath) {
+
+    //If this exists, it's setup.
+    if (file_exists($configPath)) return true;
+
+    include('setup/setup_gui.php');
+    return false;
+
+}
+
+function bootstrap($configPath)
+{
 
     /* Require the configuration for this installation */
     require_once($configPath);
@@ -272,4 +280,6 @@ function bootstrap()
     return $Engine;
 }
 
-$Engine = bootstrap();
+$configPath = __DIR__ . '/config.php';
+
+if (check_installation($configPath) === true) $Engine = bootstrap($configPath);

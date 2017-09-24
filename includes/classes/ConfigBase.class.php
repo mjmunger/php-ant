@@ -54,11 +54,11 @@ class ConfigBase
     }
 
     function getLogDir() {
-        return dirname($this->document_root) . '/log/';
+        return '/var/log/php-ant/';
     }
 
     function getRunDir() {
-        return dirname($this->document_root) . '/run/';
+        return '/var/run/php-ant/';
     }
 
     function getDomain() {
