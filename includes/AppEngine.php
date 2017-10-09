@@ -871,6 +871,10 @@ class AppEngine {
 
     function reload() {
         $this->log('AppEngine','Reloading');
+
+        $this->availableApps = [];
+        $this->loadApps();
+
         //Reload and reactivate the apps.
         $this->getEnabledApps();
         $this->activateApps();
