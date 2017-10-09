@@ -1,6 +1,6 @@
 {
   "http_host": "http://app.example.com",
-  "document_root": "/var/www",
+  "document_root": "/var/www/",
   "db": {
     "server": "localhost",
     "database": "phpant",
