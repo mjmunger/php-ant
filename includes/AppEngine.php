@@ -858,12 +858,16 @@ class AppEngine {
             //2. If the tests directory does not exist, create it.
             $testsDir = $appDir . '/tests';
 
-            if(!file_exists($testsDir)) throw new \Exception("All apps must have unit tests. The current app $name does not have a tests/ directory in the app directory $appDir", 1);
+            if(!file_exists($testsDir)) {
+                $message = "All apps must have unit tests. The current app $name does not have a tests/ directory in the app directory $appDir";
+                $this->log('AppEngine', $message, 'AppEngine.log', 0);
+                echo $message;
+            }
 
             //Determine where the tests directory is for the app.
             //Link the 'tests' directory as the target for the dirname if the symlink does not already exist.
 
-            if(is_link($link) == false) {
+            if(is_link($link) == false && file_exists($testsDir)) {
                 if(symlink($testsDir, $link) === false) $this->log('AppEngine', "Symlink $testsDir -> $link failed");
             }
         }
