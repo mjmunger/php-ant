@@ -20,6 +20,7 @@ namespace PHPAnt\Core;
 $debugMode = false;
 $start     = microtime(true);
 $rootDir   = __DIR__ . '/';
+$Engine    = null;
 
 include('includes/bootstrap.php');
 //$env['Authenticator'] = $Authenticator;

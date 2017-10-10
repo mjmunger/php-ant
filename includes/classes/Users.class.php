@@ -171,6 +171,8 @@ class Users
     }
 
     function load_me() {
+        if($this->users_id == false) return false;
+        
         $sql        = "SELECT * FROM `users` WHERE `users_id` = ? LIMIT 1";
         $stmt       = $this->pdo->prepare($sql);
         $values     = [$this->users_id];
