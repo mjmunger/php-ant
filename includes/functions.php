@@ -301,7 +301,7 @@ function get_json_error_msg($error) {
  * @return string Human readable time elapsed.
  **/
 
-function getAgoTime($diff, $future = false) {
+function getAgoTime(DateInterval $diff, $future = false) {
 	$return = '';
 
 	if($diff->y > 0) {

@@ -1121,4 +1121,8 @@ class AppEngine {
         return $this->Configs->Server->Request->post_vars[$param];
     }
 
+    public function getURI() {
+        return $this->Configs->Server->Request->uri;
+    }
+
 }
