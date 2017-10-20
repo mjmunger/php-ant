@@ -306,7 +306,7 @@ function getAgoTime(DateInterval $diff, $future = false) {
 
 	if($diff->y > 0) {
 
-		$return = $diff->y . ' years';
+		$return = $diff->y . ' year';
 
 		if($diff->y > 1) {
 			$return .= "s";

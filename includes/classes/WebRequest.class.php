@@ -158,18 +158,11 @@ class WebRequest
 				break;
 			case 'application/x-www-form-urlencoded':
 				try {
-					$keypairs = explode("&", $buffer);
 
-					$array = [];
-					foreach($keypairs as $x) {
-						$parts = explode("=", $x);
-						$key = $parts[0];
-						$value = $parts[1];
-						$array[$key] = $value;
-					}
-					
+				    $array = [];
+                    $array = parse_str($this->put_raw,$array);
 					$this->put_vars = $array;
-				
+
 				} catch (Exception $e) {
 					//pass
 				}
