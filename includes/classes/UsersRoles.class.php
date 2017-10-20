@@ -144,6 +144,9 @@ class UsersRoles
     }
 
     function load_me() {
+        
+        if($this->users_roles_id == false) return false;
+
         $sql        = "SELECT * FROM `users_roles` WHERE `users_roles_id` = ? LIMIT 1";
         $stmt       = $this->pdo->prepare($sql);
         $values     = [$this->users_roles_id];
