@@ -16,8 +16,19 @@ class CommandInvoker
         $this->callback = $callback;
     }
 
+    //Should eventually be made private, but left public for backwards compatibility.
     public function addCriteria($criteria) {
         array_push($this->criteria,$criteria);
+    }
+
+    public function is($commandString) {
+        $criteria = ['is' => [$commandString => true]];
+        $this->addCriteria($criteria);
+    }
+
+    public function startsWith($commandString) {
+        $criteria = ['startsWith' => [$commandString => true]];
+        $this->addCriteria($criteria);
     }
 
     public function shouldRunOn($Command) {
