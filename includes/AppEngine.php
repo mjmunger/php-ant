@@ -53,15 +53,22 @@ class AppEngine {
     *      which are both extended from ConfigBase.
     **/
 
-    var $Configs          = NULL;
+    var $Configs           = NULL;
 
-    var $current_user     = NULL;
-    var $sortHook         = NULL;
-    var $safeMode         = false;
-    var $appRoot          = NULL;
-    var $activatedApps    = [];
-    var $disableApps      = false;
-    var $AppBlacklist     = NULL;
+    var $current_user      = NULL;
+
+    /**
+     * @var string Holds either 'user' or 'api' as the authorization type.
+     */
+
+    var $authorizationType = NULL;
+
+    var $sortHook          = NULL;
+    var $safeMode          = false;
+    var $appRoot           = NULL;
+    var $activatedApps     = [];
+    var $disableApps       = false;
+    var $AppBlacklist      = NULL;
 
     /**
      * Instantiates and sets up the App Engine.
