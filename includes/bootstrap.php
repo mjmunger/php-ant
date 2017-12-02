@@ -267,6 +267,8 @@ function bootstrap($configPath)
 
     //If we authorized a user, store it here.
     if ($results) $Engine->current_user = (isset($results['current_user']) ? $results['current_user'] : false);
+    // Store the authorization type here for "public" use
+    $Engine->authorizationType - $results['auth-type'];
 
     if ($Engine->current_user) $Engine->current_user->load();
 
