@@ -282,6 +282,6 @@ function bootstrap($configPath)
     return $Engine;
 }
 
-$configPath = __DIR__ . '/config.php';
+$configPath = dirname(__DIR__) . '/config/config.php';
 
 if (check_installation($configPath) === true) $Engine = bootstrap($configPath);
