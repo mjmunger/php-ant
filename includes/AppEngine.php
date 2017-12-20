@@ -500,6 +500,8 @@ class AppEngine {
 
     /**
      * Retrieves app actions, hooks, and priorities from the app file.
+     *
+     * If this changes, you must also update ant-signer.
      * Example:
      *
      * <code>
