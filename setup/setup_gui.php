@@ -150,16 +150,16 @@
                 <h3>Administrative user information</h3>
 
                 <label>Admin User's First Name</label>
-                <input class="w3-input w3-border" type="text" name="adminfirst" id="adminfirst">
+                <input class="w3-input w3-border" type="text" name="adminfirst" id="adminfirst" >
 
                 <label>Admin User's Last Name</label>
                 <input class="w3-input w3-border" type="text" name="adminlast" id="adminlast">
 
                 <label>Admin User (email address is best)</label>
-                <input class="w3-input w3-border" type="text" name="adminuser" id="adminuser">
+                <input class="w3-input w3-border" type="text" name="adminuser" id="adminuser" value="<?= getenv('PHPANT_ADMIN_USER') ?>">
 
                 <label>Admin User Password</label>
-                <input class="w3-input w3-border" type="text" name="adminpass" id="adminpass">
+                <input class="w3-input w3-border" type="text" name="adminpass" id="adminpass" ">
 
                 <input type="hidden" name="nonce" id="nonce" value="<?php echo $nonce; ?>">
 
@@ -177,10 +177,16 @@
 <script>
     // self executing function here
     (function() {
-        let elem = document.getElementById('adminpass');
-        let password = generatePassword();
 
-        elem.value = password;
+        let elem = document.getElementById('weburl');
+        elem.value = document.location;
+
+        console.log(elem);
+
+        elem = document.getElementById('adminpass');
+        let envpass = "<?= getenv('PHPANT_ADMIN_PASS') ?>";
+
+        elem.value = (envpass.length > 0 ? envpass : generatePassword());
 
         let webroot = document.getElementById('webroot');
         webroot.onfocus = function() {
