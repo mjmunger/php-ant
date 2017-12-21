@@ -147,7 +147,7 @@ class Installer {
 
     public function saveDatabaseCredentials() {
 
-        $sampleConfig = 'config/sample-mysql-credentials.php';
+        $sampleConfig = 'setup/sample-mysql-credentials.php';
         $targetConfig = 'config/mysql-credentials.php';
 
         $fields = [ '%USER%'     => $this->Configs->db->username
@@ -188,8 +188,8 @@ class Installer {
     public function saveConfigs() {
         $success = true;
 
-        $configs = [ 'config/sample.config.php'     => 'config/config.php'
-                   , 'config/sample-cli-config.php' => 'config/cli-config.php'
+        $configs = [ 'setup/sample.config.php'     => 'config/config.php'
+                   , 'setup/sample-cli-config.php' => 'config/cli-config.php'
         ];
 
         foreach($configs as $sample => $target) {
