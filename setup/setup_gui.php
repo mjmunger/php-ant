@@ -124,26 +124,26 @@
                 <h3>Database connection information</h3>
 
                 <label>Database Server</label>
-                <input class="w3-input w3-border" name="server" id="server" type="text" " value="<?php echo getenv('PHPANT_DB_HOST'); ?>">
+                <input class="w3-input w3-border" name="server" id="server" type="text" " value="<?php echo getenv('PHPANT_DB_HOST'); ?>"/>
 
                 <label>Root Password</label>
-                <input class="w3-input w3-border" name="rootpass" id="rootpass" type="text" value="<?php echo getenv('PHPANT_DB_ROOTPW'); ?>">
+                <input class="w3-input w3-border" name="rootpass" id="rootpass" type="text" value="<?php echo getenv('PHPANT_DB_ROOTPW'); ?>"/>
 
                 <label>Database Name</label>
-                <input class="w3-input w3-border" name="database" id="database" type="text" value="<?php echo getenv('PHPANT_DB_NAME'); ?>">
+                <input class="w3-input w3-border" name="database" id="database" type="text" value="<?php echo getenv('PHPANT_DB_NAME'); ?>"/>
 
                 <label>Database Username</label>
-                <input class="w3-input w3-border" name="username" id="username" type="text" value="<?php echo getenv('PHPANT_DB_USER'); ?>">
+                <input class="w3-input w3-border" name="username" id="username" type="text" value="<?php echo getenv('PHPANT_DB_USER'); ?>"/>
 
                 <label>Database Password</label>
-                <input class="w3-input w3-border" name="password" id="password" type="text" value="<?php echo getenv('PHPANT_DB_PASS'); ?>">
+                <input class="w3-input w3-border" name="password" id="password" type="text" value="<?php echo getenv('PHPANT_DB_PASS'); ?>"/>
 
                 <h3>Website information</h3>
                 <label>Website URL</label>
                 <input class="w3-input w3-border" type="text" id="weburl" name="weburl" placeholder="https://example.org">
 
                 <label>Website Document Root </label>
-                <input class="w3-input w3-border" type="text" id="webroot" name="webroot" placeholder="https://example.org" value="<?php echo dirname(__DIR__) . '/'; ?>">
+                <input class="w3-input w3-border" type="text" id="webroot" name="webroot" placeholder="https://example.org" value="<?php echo dirname(__DIR__) . '/'; ?>"/>
                 <div class="w3-small w3-red" id="nochangewebroot" style="display:none">Don't change this unless you know what you're doing!</div>
 
 
@@ -156,12 +156,12 @@
                 <input class="w3-input w3-border" type="text" name="adminlast" id="adminlast">
 
                 <label>Admin User (email address is best)</label>
-                <input class="w3-input w3-border" type="text" name="adminuser" id="adminuser" value="<?= getenv('PHPANT_ADMIN_USER') ?>">
+                <input class="w3-input w3-border" type="text" name="adminuser" id="adminuser" value="<?= getenv('PHPANT_ADMIN_USER') ?>"/>
 
                 <label>Admin User Password</label>
                 <input class="w3-input w3-border" type="text" name="adminpass" id="adminpass" ">
 
-                <input type="hidden" name="nonce" id="nonce" value="<?php echo $nonce; ?>">
+                <input type="hidden" name="nonce" id="nonce" value="<?php echo $nonce; ?>"/>
 
                 <div id="error-list">
 
