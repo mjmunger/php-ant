@@ -19,7 +19,8 @@ function check_installation($configPath) {
 
 function bootstrap($configPath)
 {
-
+    $vars = [];
+    
     /* Require the configuration for this installation */
     require_once($configPath);
 
@@ -268,7 +269,7 @@ function bootstrap($configPath)
     //If we authorized a user, store it here.
     if ($results) $Engine->current_user = (isset($results['current_user']) ? $results['current_user'] : false);
     // Store the authorization type here for "public" use
-    $Engine->authorizationType - $results['auth-type'];
+    $Engine->authorizationType = (isset($results['auth-type']) ? $results['auth-type'] : "Unknown");
 
     if ($Engine->current_user) $Engine->current_user->load();
 
