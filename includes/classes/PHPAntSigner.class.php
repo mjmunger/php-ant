@@ -203,7 +203,7 @@ class PHPAntSigner
 
     function derivePublicKey($pathToPrivateKey) {
         $secretKey = base64_decode(file_get_contents($pathToPrivateKey));
-        $publicKey = \Sodium\crypto_sign_publickey_from_secretkey($secretKey);
+        $publicKey = sodium_crypto_sign_publickey_from_secretkey($secretKey);
         return $publicKey;
     }
 
@@ -288,7 +288,7 @@ class PHPAntSigner
         $manifestPath          = $this->appPath . '/manifest.xml';
         $manifestSignaturePath = $this->appPath . '/manifest.sig';
         $message = file_get_contents($manifestPath);
-        $signed_msg = \Sodium\crypto_sign_detached(
+        $signed_msg = sodium_crypto_sign_detached(
             $message,
             base64_decode(file_get_contents($privateKeyPath))
         );
@@ -314,7 +314,7 @@ class PHPAntSigner
         $signature = base64_decode(file_get_contents($manifestSignaturePath));
 
         //Compare the signature the the actual manifest file
-        if (\Sodium\crypto_sign_verify_detached($signature, $message, $publicKey )) {
+        if (sodium_crypto_sign_verify_detached($signature, $message, $publicKey )) {
             return true;
         } else {
             //echo "Invalid signature detected! ($manifestSignaturePath)" . PHP_EOL;
@@ -360,12 +360,12 @@ class PHPAntSigner
      **/
 
     function genKeys($instructions = false) {
-        $bob_seed = \Sodium\randombytes_buf(\Sodium\CRYPTO_SIGN_SEEDBYTES);
-        $bob_sign_kp = \Sodium\crypto_sign_seed_keypair($bob_seed);
+        $bob_seed = random_bytes(SODIUM_CRYPTO_SIGN_SEEDBYTES);
+        $bob_sign_kp = sodium_crypto_sign_seed_keypair($bob_seed);
 
         // Split the key for the crypto_sign API for ease of use
-        $bob_sign_secretkey = \Sodium\crypto_sign_secretkey($bob_sign_kp);
-        $bob_sign_publickey = \Sodium\crypto_sign_publickey($bob_sign_kp);        
+        $bob_sign_secretkey = sodium_crypto_sign_secretkey($bob_sign_kp);
+        $bob_sign_publickey = sodium_crypto_sign_publickey($bob_sign_kp);        
         $public             = base64_encode($bob_sign_publickey);
         $private            = base64_encode($bob_sign_secretkey);
         $publicKeyPath      = $this->AE->Configs->document_root . 'public.key';
