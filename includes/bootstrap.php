@@ -190,7 +190,8 @@ function bootstrap($configPath)
      * 2. Provide additional constants or functions specific to your project.
      **/
 
-    if (file_exists('../local/application_local.php')) include('../local/application_local.php');
+    $localFile = dirname(__DIR__) . '/local/application_local.php';
+    if (file_exists($localFile)) include($localFile);
 
     /* This file handles all the plugins and their associated capabilities. This
     /* is PURPOSELY placed after functions and the autoloaders so those classes
